@@ -19,11 +19,56 @@ from hyperglass.exceptions.public import InputInvalid, QueryTypeNotFound, QueryL
 from hyperglass.exceptions.private import InputValidationError
 
 # Local
+from ..directive import Directive
 from ..config.devices import Device
 
 QueryLocation = Annotated[str, StringConstraints(strict=True, min_length=1, strip_whitespace=True)]
 QueryTarget = Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
 QueryType = Annotated[str, StringConstraints(strict=True, min_length=1, strip_whitespace=True)]
+
+
+def resolve_directive_by_name(
+    *, devices: t.Iterable[Device], device: Device, directive_id: str
+) -> t.Optional[Directive]:
+    """Resolve a vendor-specific directive id to `device`'s equivalent directive.
+
+    Builtin directives are vendor-specific by `id` but share a `name` across
+    platforms, so a multi-vendor location selection sends one vendor's id to every
+    selected device. Match on that shared name.
+
+    An unstructured device carries two directives with the same name, the plain
+    builtin and its table-output variant, so name alone is ambiguous. Pick the one
+    the device's own `structured_output` flag selected when its directive list was
+    built: the table variant when structured, the plain builtin otherwise. Every
+    structured-output plugin gates on that same device flag, so the requester's
+    variant carries no signal here.
+    """
+    source: t.Optional[Directive] = None
+
+    for candidate_device in devices:
+        for directive in candidate_device.directives:
+            if directive.id == directive_id:
+                source = directive
+                break
+        if source is not None:
+            break
+
+    if source is None:
+        return None
+
+    candidates = [d for d in device.directives if d.name == source.name]
+
+    if not candidates:
+        return None
+
+    # The plain builtin declares `table_output`; the table variant leaves it unset.
+    wants_table = bool(getattr(device, "structured_output", False))
+
+    for candidate in candidates:
+        if (candidate.table_output is None) == wants_table:
+            return candidate
+
+    return candidates[0]
 
 
 class SimpleQuery(BaseModel):
@@ -64,9 +109,24 @@ class Query(BaseModel):
         query_directives = self.device.directives.matching(self.query_type)
 
         if len(query_directives) < 1:
-            raise QueryTypeNotFound(query_type=self.query_type)
+            # Builtin directives are vendor-specific by `id` but share a `name` across
+            # platforms, so a multi-vendor location selection sends one vendor's id to
+            # every selected device. Resolve this device's equivalent by that name.
+            fallback = resolve_directive_by_name(
+                devices=self._state.devices,
+                device=self.device,
+                directive_id=self.query_type,
+            )
 
-        self.directive = query_directives[0]
+            if fallback is None:
+                raise QueryTypeNotFound(query_type=self.query_type)
+
+            self.directive = fallback
+            # Re-point `query_type` at the directive that actually runs, so the cache
+            # key, the logs and the query summary name a directive this device has.
+            self.query_type = fallback.id
+        else:
+            self.directive = query_directives[0]
 
         self._input_plugin_manager = InputPluginManager()
         self.query_target = self.directive.normalize_target(self.query_target)

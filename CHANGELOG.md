@@ -2,11 +2,26 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.2.1**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.2.2**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 3.2.2 - 2026-09-17
+
+This patch release restores shared query types when selecting locations that use different device vendors.
+
+### Fixed
+
+- Intersected multi-location query types by their shared display name instead of vendor-specific directive identifiers.
+- Resolved a selected directive to each target device's equivalent vendor-specific directive before running the query.
+- Selected the plain or table-output directive variant from the target device's structured-output setting.
+- Updated the effective query type after cross-vendor resolution so cache keys, logs and query summaries identify the directive that ran.
+
+### Changed
+
+- Documented multi-location query behaviour and updated the Python package, runtime metadata, UI package, upgrade guide and issue templates to `3.2.2`.
 
 ## 3.2.1 - 2026-08-28
 
