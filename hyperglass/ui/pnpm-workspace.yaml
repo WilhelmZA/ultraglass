@@ -10,6 +10,8 @@ allowBuilds:
 #   ua-parser-js   >=0.7.36  (ReDoS CVEs in older 0.7.x)
 #   @babel/runtime, @babel/helpers  pinned to a patched release
 #   browserslist  >=4.28.7   (CVE-2026-73088, CVE-2026-73089)
+#   source-map-js >=1.2.2    (CVE-2026-93749, DoS via malformed indexed source maps;
+#                             transitive floor under postcss@8.5.18, which accepts ^1.2.0)
 overrides:
   ua-parser-js: '^0.7.36'
   '@babel/runtime': '7.26.10'
@@ -18,5 +20,6 @@ overrides:
   nanoid: '3.3.18'
   postcss: '8.5.18'
   sharp: '0.35.4'
+  source-map-js: '>=1.2.2'
 packages:
   - .
