@@ -12,6 +12,11 @@ allowBuilds:
 #   browserslist  >=4.28.7   (CVE-2026-73088, CVE-2026-73089)
 #   source-map-js >=1.2.2    (CVE-2026-93749, DoS via malformed indexed source maps;
 #                             transitive floor under postcss@8.5.18, which accepts ^1.2.0)
+#   sharp         >=0.35.5   (GHSA-wq5f-xc86-pv6w, fixed 0.35.5). The build script stays
+#                             skipped above (allowBuilds: sharp: false) since the static
+#                             export build does not use next/image; bumping the pinned
+#                             version keeps the installed package metadata current even
+#                             though the native binding is never built here.
 overrides:
   ua-parser-js: '^0.7.36'
   '@babel/runtime': '7.26.10'
@@ -19,7 +24,7 @@ overrides:
   browserslist: '>=4.28.7'
   nanoid: '3.3.18'
   postcss: '8.5.18'
-  sharp: '0.35.4'
+  sharp: '>=0.35.5'
   source-map-js: '>=1.2.2'
 packages:
   - .
