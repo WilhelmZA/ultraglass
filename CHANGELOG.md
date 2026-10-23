@@ -8,6 +8,12 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Security
+
+- Update Next.js from 15.5.24 to 15.5.28 for GHSA-2464-fhr4-w9xw and CVE-2026-94482. Production uses static export on Alpine musl, not the affected glibc image optimizer or a Server Actions server. Keep the dependency patched without adding scanner waivers.
+
 ## 3.2.2 - 2026-09-17
 
 This patch release restores shared query types when selecting locations that use different device vendors.
