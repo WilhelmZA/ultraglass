@@ -8,6 +8,18 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.3.1 - 2026-10-27
+
+This patch keeps MikroTik community queries anchored and correctly escapes the RouterOS regex anchors, replacing the superseded substring form so community matching stays exact.
+
+### Fixed
+
+- Keep MikroTik AS-path and community queries anchored and escape the `$` regex anchor as RouterOS requires, so community matches stay exact (#31).
+
+### Changed
+
+- Updated the Python package, runtime metadata, UI package, upgrade guide and issue templates to 3.3.1.
+
 ## 3.3.0 - 2026-10-27
 
 This release hardens built-in BGP command construction against injection and fixes BGP, ping and traceroute queries across FRR, BIRD, OpenBGPD, MikroTik and Arista, each validated against a device holding a full table. It also adds standard structured traceroute parsing for more platforms and opt-in structured output for Huawei.
