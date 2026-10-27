@@ -22,16 +22,9 @@ class ZTracerouteIpEnrichment(OutputPlugin):
     """Enrich structured traceroute output with IP enrichment ASN/organization data and reverse DNS."""
 
     _hyperglass_builtin: bool = PrivateAttr(True)
-    platforms: t.Sequence[str] = (
-        "mikrotik_routeros",
-        "mikrotik_switchos",
-        "mikrotik",
-        "cisco_ios",
-        "juniper_junos",
-        "huawei",
-        "huawei_vrpv8",
-    )
-    directives: t.Sequence[str] = ("traceroute", "MikroTik_Traceroute")
+    # Common plugins select by output model, not platform or directive ID.
+    platforms: t.Sequence[str] = ()
+    directives: t.Sequence[str] = ()
     common: bool = True
 
     def _reverse_dns_lookup(self, ip: str) -> t.Optional[str]:

@@ -8,11 +8,37 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.3.0 - 2026-10-27
+
+This release hardens built-in BGP command construction against injection and fixes BGP, ping and traceroute queries across FRR, BIRD, OpenBGPD, MikroTik and Arista, each validated against a device holding a full table. It also adds standard structured traceroute parsing for more platforms and opt-in structured output for Huawei.
 
 ### Security
 
 - Update Next.js from 15.5.24 to 15.5.28 for GHSA-2464-fhr4-w9xw and CVE-2026-94482. Production uses static export on Alpine musl, not the affected glibc image optimizer or a Server Actions server. Keep the dependency patched without adding scanner waivers.
+- Reject command syntax in built-in BGP targets and shell-quote complete Linux command arguments after substitution (#28).
+
+### Fixed
+
+- Restore prompt-based Netmiko reads outside MikroTik and for MikroTik BGP scans, bound reads by `request_timeout`, and disconnect after failures (#19, #31).
+- Report recognized device command errors as warnings before parsing (#30).
+- Translate common BIRD AS-path expressions into path masks. Unsupported expressions now return an input error (#34).
+- Translate common OpenBGPD AS-path forms into `source-as`, `peer-as`, or `as` selectors, as required by the mixed-vendor validation in #23.
+- Use RouterOS 7 BGP attribute names for MikroTik AS-path and community queries, with escaped regex anchors (#31).
+- Parse EOS AS-path and community results that omit `routeDetail` (#32).
+- Enter EOS enable mode before queries. Configure `driver_config.secret` when the device requires an enable password (#33).
+- Use unprivileged UDP traceroute on FRR (#21).
+- Replace deprecated UTC timestamp calls in the EOS and FRR parsers and query timestamps (#27).
+- Remove unused platform and directive declarations from common enrichment plugins (#24).
+
+### Added
+
+- Add standard numbered traceroute parsing for EOS, Junos, Cisco, Nokia and Linux CLI formats. Unrecognized formats retain their original text. Additional platforms require explicit `structured_output: true`; hardware validation remains tracked in #35.
+- Allow Huawei VRPv8 structured BGP output with explicit `structured_output: true` (#20). Huawei VRP already defaults to structured output; set `structured_output: false` to retain text output. Real VRP captures remain required.
+- Add isolated in-memory Redis backend test fixtures, captured EOS fixtures, and a repeatable mixed-vendor API validation script (#26, #25, #23).
+
+### Changed
+
+- Updated the Python package, runtime metadata, UI package, upgrade guide and issue templates to 3.3.0.
 
 ## 3.2.2 - 2026-09-17
 

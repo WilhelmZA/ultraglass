@@ -1,6 +1,6 @@
 org_name: Ultraglass Lab
 site_title: Ultraglass Lab
-request_timeout: 90
+request_timeout: 300
 logging:
   directory: /etc/hyperglass/logs
   samples:

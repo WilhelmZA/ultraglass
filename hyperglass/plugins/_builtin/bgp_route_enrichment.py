@@ -20,18 +20,9 @@ class ZBgpRouteEnrichment(OutputPlugin):
     """Enrich structured BGP route output with ASN organization data."""
 
     _hyperglass_builtin: bool = PrivateAttr(True)
-    platforms: t.Sequence[str] = (
-        "mikrotik_routeros",
-        "mikrotik_switchos",
-        "mikrotik",
-        "cisco_ios",
-        "juniper_junos",
-        "huawei",
-        "huawei_vrpv8",
-        "arista_eos",
-        "bird",
-    )
-    directives: t.Sequence[str] = ("bgp_route", "MikroTik_BGPRoute")
+    # Common plugins select by output model, not platform or directive ID.
+    platforms: t.Sequence[str] = ()
+    directives: t.Sequence[str] = ()
     common: bool = True
 
     def process(self, *, output: "OutputDataModel", query: "Query") -> "OutputDataModel":

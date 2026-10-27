@@ -4,7 +4,7 @@
 from datetime import datetime
 
 __name__ = "hyperglass"
-__version__ = "3.2.2"
+__version__ = "3.3.0"
 __author__ = "Matt Love"
 __copyright__ = f"Copyright {datetime.now().year} Matthew Love"
 __license__ = "BSD 3-Clause Clear License"
@@ -33,6 +33,19 @@ SUPPORTED_STRUCTURED_OUTPUT = (
     "huawei",
     "mikrotik_routeros",
     "mikrotik_switchos",
+)
+
+# Additional parsers remain opt-in so existing text deployments keep their defaults.
+OPT_IN_STRUCTURED_OUTPUT = (
+    "huawei_vrpv8",
+    "cisco_ios",
+    "cisco_xr",
+    "cisco_nxos",
+    "nokia_sros",
+    "bird",
+    "openbgpd",
+    "vyos",
+    "tnsr",
 )
 
 CONFIG_EXTENSIONS = ("py", "yaml", "yml", "json", "toml")

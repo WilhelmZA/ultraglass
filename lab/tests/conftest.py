@@ -45,7 +45,7 @@ def running_devices():
     return {d for d in known if d.replace("lab-", "") in up}
 
 
-def query(device, query_type, target, timeout=120):
+def query(device, query_type, target, timeout=320):
     """POST one query; return (level, output)."""
     body = json.dumps(
         {"queryLocation": device, "queryTarget": target, "queryType": query_type}

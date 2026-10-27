@@ -55,7 +55,7 @@ class BGPSTRRoutePluginHuawei(OutputPlugin):
     """Coerce a Huawei route table in text format to a standard BGP Table structure."""
 
     _hyperglass_builtin: bool = PrivateAttr(True)
-    platforms: Sequence[str] = ("huawei",)
+    platforms: Sequence[str] = ("huawei", "huawei_vrpv8")
     directives: Sequence[str] = (
         "__hyperglass_huawei_bgp_route_table__",
         "__hyperglass_huawei_bgp_aspath_table__",

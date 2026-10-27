@@ -13,6 +13,7 @@ from netmiko import (  # type: ignore
     NetMikoTimeoutException,
     NetMikoAuthenticationException,
 )
+from netmiko.exceptions import ReadTimeout
 
 # Project
 from hyperglass.log import log
@@ -35,6 +36,23 @@ netmiko_device_send_args = {
 }
 
 
+def collect_commands(connection, platform: str, queries, timeout: int) -> tuple:
+    """Read each command fully and always release the SSH session."""
+    try:
+        if platform == "arista_eos":
+            connection.enable()
+        responses = []
+        for query in queries:
+            # RouterOS BGP scans can be silent for a minute before the first row.
+            timing = platform in netmiko_device_send_args and not query.startswith("routing route ")
+            send = connection.send_command_timing if timing else connection.send_command
+            args = netmiko_device_send_args[platform] if timing else {}
+            responses.append(send(query, read_timeout=timeout, **args))
+        return tuple(responses)
+    finally:
+        connection.disconnect()
+
+
 class NetmikoConnection(SSHConnection):
     """Handle a device connection via Netmiko."""
 
@@ -54,8 +72,6 @@ class NetmikoConnection(SSHConnection):
         _log.debug("Connecting to device")
 
         global_args = netmiko_device_globals.get(self.device.platform, {})
-
-        send_args = netmiko_device_send_args.get(self.device.platform, {})
 
         driver_kwargs = {
             "host": host or self.device._target,
@@ -88,23 +104,16 @@ class NetmikoConnection(SSHConnection):
 
         # Run blocking netmiko operations in thread executor to prevent blocking the event loop
         import asyncio
-        import functools
 
         def _netmiko_connect():
             """Execute blocking netmiko operations in a separate thread."""
             try:
                 nm_connect_direct = ConnectHandler(**driver_kwargs)
+                return collect_commands(
+                    nm_connect_direct, self.device.platform, self.query, params.request_timeout
+                )
 
-                responses = ()
-
-                for query in self.query:
-                    raw = nm_connect_direct.send_command_timing(query, **send_args)
-                    responses += (raw,)
-
-                nm_connect_direct.disconnect()
-                return responses
-
-            except NetMikoTimeoutException as scrape_error:
+            except (NetMikoTimeoutException, ReadTimeout) as scrape_error:
                 raise DeviceTimeout(error=scrape_error, device=self.device) from scrape_error
 
             except NetMikoAuthenticationException as auth_error:

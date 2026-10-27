@@ -44,7 +44,23 @@ OpenBGPD_BGPASPath = BuiltinDirective(
     name="BGP AS Path",
     rules=[
         RuleWithPattern(
-            condition="*",
+            condition=r"^_?[0-9]+\$$",
+            action="permit",
+            commands=[
+                "bgpctl show rib inet source-as {target}",
+                "bgpctl show rib inet6 source-as {target}",
+            ],
+        ),
+        RuleWithPattern(
+            condition=r"^\^[0-9]+_$",
+            action="permit",
+            commands=[
+                "bgpctl show rib inet peer-as {target}",
+                "bgpctl show rib inet6 peer-as {target}",
+            ],
+        ),
+        RuleWithPattern(
+            condition=r"^(?:[0-9]+|_[0-9]+_)$",
             action="permit",
             commands=[
                 "bgpctl show rib inet as {target}",
@@ -52,7 +68,7 @@ OpenBGPD_BGPASPath = BuiltinDirective(
             ],
         )
     ],
-    field=Text(description="AS Path Regular Expression"),
+    field=Text(description="ASN, _ASN_, _ASN$, or ^ASN_"),
     platforms=PLATFORMS,
 )
 

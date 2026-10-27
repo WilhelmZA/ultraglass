@@ -22,7 +22,7 @@ Ultraglass is maintained as a fork of hyperglass. Contributions are welcome when
 
 ## Local checks
 
-The backend tests require Redis on `localhost:6379`:
+The backend tests use an isolated in-memory Redis fixture. Install the development dependencies, including `fakeredis[lua]`, before running them:
 
 ```shell
 pytest hyperglass --ignore hyperglass/plugins/external

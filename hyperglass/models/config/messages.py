@@ -80,6 +80,11 @@ class Messages(HyperglassModel):
         title="No Output",
         description="Displayed when hyperglass can connect to a device and execute a query, but the response is empty.",
     )
+    device_command_error: str = Field(
+        "The query command failed on {device_name}.",
+        title="Device Command Error",
+        description="Displayed when a device rejects a command or denies permission to run it.",
+    )
 
     def has(self, attr: str) -> bool:
         """Determine if message type exists in Messages model."""
