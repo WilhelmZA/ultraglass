@@ -6,18 +6,23 @@ import concurrent.futures
 import json
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
 
 def query(api, device, directive, target, timeout=330):
+    """Run one HTTP query and retain its status, response, and duration."""
+    endpoint = urllib.parse.urlsplit(api)
+    if endpoint.scheme not in ("http", "https") or not endpoint.netloc:
+        raise ValueError("The API URL must use HTTP or HTTPS")
     body = {"queryLocation": device, "queryType": directive, "queryTarget": target}
-    request = urllib.request.Request(
+    request = urllib.request.Request(  # noqa: S310 - Scheme validated above.
         f"{api}/query", json.dumps(body).encode(), {"Content-Type": "application/json"}
     )
     started = time.monotonic()
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
             status, result = response.status, json.load(response)
     except urllib.error.HTTPError as error:
         status, result = error.code, json.load(error)
@@ -48,6 +53,7 @@ def cases(devices):
 
 
 def main():
+    """Run the selected device matrix and save its evidence."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--api", default="http://127.0.0.1:8002/api")
     parser.add_argument("--output", type=Path, required=True)
@@ -77,7 +83,8 @@ def main():
         else:
             shape = f"text bytes={len(str(output or ''))}"
         print(
-            f"{device} {directive} {target!r}: {'PASS' if passed else 'FAIL'} {result['seconds']}s {shape}",
+            f"{device} {directive} {target!r}: {'PASS' if passed else 'FAIL'} "
+            f"{result['seconds']}s {shape}",
             flush=True,
         )
         return result
