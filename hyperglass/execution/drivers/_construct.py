@@ -234,12 +234,23 @@ class Formatter:
         return f"({','.join(parts)})"
 
     def _mikrotik_bgp_pattern(self, target: str) -> str:
-        """Translate ASN boundaries and escape RouterOS string interpolation."""
+        """Build a RouterOS ``where ~`` regex for an AS-path or community query.
+
+        AS-path: translate the Cisco ``_`` boundary to a RouterOS element
+        boundary and keep the user's ``^``/``$`` anchors, each escaped as ``\\$``
+        so the console passes a literal ``$`` to the regex engine. A bare ``$``
+        is read as console variable interpolation and a doubled ``\\\\$`` as an
+        escaped backslash; both fail the command with a syntax error.
+
+        Community: match as a substring with dots escaped. Anchoring the match
+        with ``(^|,)...(,|$)`` is exact but makes RouterOS scan a full table far
+        too slowly (>300s versus ~60s for the substring), so keep the
+        long-standing substring behaviour. The target is already constrained to
+        a safe charset by ``BuiltinDirective.validate_target``.
+        """
         if self.query_type == "bgp_aspath":
-            target = target.replace("_", "(^|[ ,]|$)")
-        else:
-            target = "(^|,)" + target.replace(".", r"\.") + "(,|$)"
-        return target.replace("\\", "\\\\").replace("$", r"\$")
+            return target.replace("_", "(^|[ ,]|$)").replace("$", r"\$")
+        return target.replace(".", r"\.")
 
     def _openbgpd_bgp_aspath(self, target: str) -> str:
         """Extract the ASN after a directive rule selects the matching AS operator."""
