@@ -168,11 +168,14 @@ structured:
     - **FRRouting**: Parses Unix-style traceroute output with load balancing and multi-path support
     - **Huawei VRP**: Parses Unix-style traceroute output
     - **MikroTik RouterOS/SwitchOS**: Parses multi-table format with statistics
+    - **EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, TNSR**: Parses standard numbered CLI output, retaining unfamiliar formats as text. EOS, BIRD, OpenBGPD, and VyOS have captured lab fixtures. Remaining hardware formats require validation.
     
     When IP enrichment is enabled, traceroute hops are enhanced with ASN numbers, organization names, country codes, prefixes, and IXP detection.
 </Callout>
 
 #### Complete Structured Traceroute Setup
+
+Set `structured_output: true` on BIRD, OpenBGPD, VyOS, TNSR, Cisco, and Nokia devices to enable the additional parser. Their existing text-output defaults remain in place. Huawei VRPv8 also requires this explicit setting for structured BGP and traceroute output. Huawei VRP defaults to structured output; set `structured_output: false` to retain text output.
 
 ```yaml filename="config.yaml" copy {2-12}
 structured:
