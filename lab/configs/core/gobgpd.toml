@@ -1,0 +1,111 @@
+# Core router. Holds the injected full table and sends it to every device under test.
+# Devices: frr 10.250.1.1, bird 10.250.2.1, openbgpd 10.250.3.1, mikrotik 10.250.4.1.
+
+[global.config]
+  as = 65000
+  router-id = "10.250.0.1"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.1.1"
+    peer-as = 65001
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:1::1"
+    peer-as = 65001
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.2.1"
+    peer-as = 65002
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:2::1"
+    peer-as = 65002
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.3.1"
+    peer-as = 65003
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:3::1"
+    peer-as = 65003
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.4.1"
+    peer-as = 65004
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:4::1"
+    peer-as = 65004
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.5.1"
+    peer-as = 65005
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:5::1"
+    peer-as = 65005
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.6.1"
+    peer-as = 65006
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:6::1"
+    peer-as = 65006
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.7.1"
+    peer-as = 65007
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:7::1"
+    peer-as = 65007
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"

@@ -1,0 +1,106 @@
+# Ultraglass multi-vendor lab
+
+A containerlab topology for testing ultraglass against every supported platform, with a real full BGP table. A GoBGP core sends the table (RIPE RIS rrc19, NAPAfrica Johannesburg) to each device under test over eBGP. Ultraglass queries each device over the management network.
+
+## Requirements
+
+- Docker, and containerlab 0.82 or newer (`containerlab version`)
+- Passwordless sudo for `containerlab deploy`
+- About 8 GB RAM for the Linux devices; more per added VM-based vendor
+
+## Layout
+
+- `ultraglass-lab.clab.yml` — the topology
+- `images/` — Dockerfiles: `core` (GoBGP), `frr`, `bird`, `openbgpd`
+- `configs/` — per-device config, plus `ultraglass/` (config.yaml, devices.yaml)
+- `scripts/` — `build-images.sh`, `fetch-table.sh`, `inject-table.sh`, `silent-hop.sh`, `smoke-test.py`
+- `data/` — the downloaded table dump (git-ignored)
+
+## First-time setup
+
+```sh
+./scripts/build-images.sh          # core, frr, bird, openbgpd, ultraglass:dev
+./scripts/fetch-table.sh           # download rrc19 full table into data/
+```
+
+MikroTik and Arista images are built separately (see their sections below). Juniper and the other VM vendors need their own images too.
+
+## Start and stop
+
+```sh
+./lab-up.sh                        # whole lab (all vendors), injects the table
+./lab-up.sh frr                    # ONE device only: core + redis + ultraglass + frr
+./lab-down.sh                      # stop and remove everything (built images are kept)
+./lab-status.sh                    # containers + BGP session state
+```
+
+`lab-up.sh` is safe to run after a reboot. GoBGP keeps the table in memory, so it is injected fresh on every start. The single-device form (`./lab-up.sh <name>`, one of frr, bird, openbgpd, mikrotik, arista, vyos) starts only that device plus the core, so it runs on far less RAM than the full lab.
+
+Low-RAM machines can also cap the table size:
+
+```sh
+PREFIXES=50000 ./lab-up.sh frr     # inject 50k prefixes per family instead of the full ~1.1M
+```
+
+Ultraglass UI: http://127.0.0.1:8001. Query a device by name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista. Run `./scripts/smoke-test.py` for every query type against every running device.
+
+## Devices
+
+| Node | Platform | Mgmt IP | Login | Notes |
+|---|---|---|---|---|
+| core | GoBGP | 192.168.250.10 | — | full table source, lab gateway |
+| frr | frr | 192.168.250.11 | lg / lg | structured output |
+| bird | bird | 192.168.250.12 | root / lg | birdc needs root socket |
+| openbgpd | openbgpd | 192.168.250.13 | root / lg | bgpctl needs root socket |
+| mikrotik | mikrotik_routeros | 192.168.250.14 | admin / admin | CHR 7.16.2, full table, eBGP to core |
+| ultraglass | — | 192.168.250.2 | — | this repo's image, port 8001 |
+| redis | — | 192.168.250.3 | — | cache only, no persistence |
+
+Arista, Juniper, Cisco, Huawei and Nokia are not built here: their images are VM-based or licensed. Add each as a `vr-*` node once its image is in place, give it a `10.250.N.1/31` link to a new `core:ethN` with a matching GoBGP neighbor, and uncomment its entry in `configs/ultraglass/devices.yaml`.
+
+### MikroTik CHR — build notes (three traps)
+
+The CHR image is a vrnetlab build. Use **RouterOS 7.16.2, not 7.25**: 7.25 forces a full ANSI interactive console (it loops cursor-position and terminal-identify queries after login) that netmiko cannot drive, so every query fails with `ReadTimeout`. 7.16.2 is on vrnetlab's tested list and netmiko drives it cleanly. This is a CHR console regression, not an ultraglass bug — production RouterOS devices work.
+
+```sh
+git clone https://github.com/srl-labs/vrnetlab
+# download chr-7.16.2.vmdk from mikrotik.com/download
+# assemble a build context with routeros/docker/{Dockerfile,launch.py}, common/{healthcheck.py,vrnetlab.py} and the vmdk
+# then: docker build --build-arg IMAGE=chr-7.16.2.vmdk --build-arg VERSION=7.16.2 -t vrnetlab/mikrotik_routeros:7.16.2 <ctx>
+```
+
+Patch `launch.py` before building:
+
+1. `ram=256` → `ram=2048`. 256 MB cannot hold a full table.
+2. Add `b"CHR Login"` to the login `expect()` list (and an `elif ridx == 2:` branch that sends `admin+ct` on `wait="CHR Login: "`). Newer CHR prints `CHR Login:`, which the stock script does not match, so bootstrap loops forever. Harmless on 7.16.2, needed if you ever move to a build that prints it.
+
+The `mikrotik` node, its `core:eth4` / `10.250.4.1` link, and `configs/mikrotik/config.auto.rsc` are already in the topology. The config uses RouterOS 7.16.2 BGP syntax (`as=`/`router-id`/`local.address` on the connection, no instance — the instance model is 7.20+). On some boots `config.auto.rsc` applies only partially; if the data-plane address or BGP session is missing, re-apply it over SSH (`admin`/`admin`).
+
+## The table feed
+
+`inject-table.sh` loads the best path per prefix with next hop rewritten to the core's own link address, so every route resolves. Expect about 1.09M IPv4 and 261k IPv6 routes on each device. Re-run `fetch-table.sh` for a fresher dump; set `COLLECTOR=rrc00` for a larger table.
+
+## Reproducing issue #19 (traceroute truncation)
+
+`./scripts/silent-hop.sh on` makes the core drop ICMP time-exceeded, so hops go silent and the 2 s read timeout can cut traceroute output short. `off` restores it.
+
+## Capturing parser fixtures
+
+`configs/ultraglass/config.yaml` enables `logging.samples`, so every query appends the raw device output and the parsed result to `configs/ultraglass/logs/`. Use these to build parser regression fixtures (issue #25).
+
+## Test suite
+
+`tests/` holds a pytest integration suite that queries every feature of each running device and asserts the result shape. Bring a device up first, then run the matching tests:
+
+```sh
+./lab-up.sh frr
+python3 -m pytest tests/ -k frr -v     # tests for devices that are not running are skipped
+```
+
+Each case is one (device, query). Known, filed bugs are marked xfail with their issue number, so the suite stays green until a fix lands, then flags the xpass. Dataplane queries (ping, traceroute) are tested IPv4 only, because the lab core has no IPv6 egress. The 30 cases cover bgp_route, bgp_aspath, bgp_community, ping and traceroute (v4 and v6 where relevant) across FRR, BIRD, OpenBGPD, MikroTik and Arista.
+
+## Tear down
+
+```sh
+./lab-down.sh
+```

@@ -1,0 +1,12 @@
+set interfaces ge-0/0/0 unit 0 family inet address 10.250.6.1/31
+set interfaces ge-0/0/0 unit 0 family inet6 address fd00:250:6::1/127
+set routing-options autonomous-system 65006
+set routing-options router-id 10.250.6.1
+set routing-options static route 0.0.0.0/0 next-hop 10.250.6.0
+set routing-options rib inet6.0 static route ::/0 next-hop fd00:250:6::
+set protocols bgp group core type external
+set protocols bgp group core peer-as 65000
+set protocols bgp group core neighbor 10.250.6.0 family inet unicast
+set protocols bgp group corev6 type external
+set protocols bgp group corev6 peer-as 65000
+set protocols bgp group corev6 neighbor fd00:250:6:: family inet6 unicast

@@ -47,3 +47,6 @@ coverage.xml
 *.rdb
 *.py[cod]
 .ipynb*
+
+# Local containerlab lab and its downloaded table dump
+lab/

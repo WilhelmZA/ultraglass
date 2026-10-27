@@ -1,0 +1,16 @@
+org_name: Ultraglass Lab
+site_title: Ultraglass Lab
+request_timeout: 90
+logging:
+  directory: /etc/hyperglass/logs
+  samples:
+    enable: true
+structured:
+  communities:
+    mode: deny
+    items: []
+  rpki:
+    mode: external
+  ip_enrichment:
+    enrich_traceroute: true
+    enrich_bgproute: true

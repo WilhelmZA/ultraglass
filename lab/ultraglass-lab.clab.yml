@@ -1,0 +1,122 @@
+# Ultraglass multi-vendor lab. A GoBGP core sends a real full table (RIPE RIS
+# rrc19, NAPAfrica Johannesburg) to every device under test. Ultraglass queries
+# each device over the management network.
+name: ultraglass
+
+mgmt:
+  network: ultraglass-mgmt
+  ipv4-subnet: 192.168.250.0/24
+  ipv6-subnet: fd00:250:ffff::/64
+
+topology:
+  nodes:
+    core:
+      kind: linux
+      image: ultraglass-lab/core:latest
+      mgmt-ipv4: 192.168.250.10
+      binds:
+        - configs/core/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro
+        - data:/data:ro
+      exec:
+        - ip addr add 10.250.1.0/31 dev eth1
+        - ip addr add fd00:250:1::/127 dev eth1
+        - ip addr add 10.250.2.0/31 dev eth2
+        - ip addr add fd00:250:2::/127 dev eth2
+        - ip addr add 10.250.3.0/31 dev eth3
+        - ip addr add fd00:250:3::/127 dev eth3
+        - ip addr add 10.250.4.0/31 dev eth4
+        - ip addr add fd00:250:4::/127 dev eth4
+        - ip addr add 10.250.5.0/31 dev eth5
+        - ip addr add fd00:250:5::/127 dev eth5
+        - ip addr add 10.250.6.0/31 dev eth6
+        - ip addr add fd00:250:6::/127 dev eth6
+        - ip addr add 10.250.7.0/31 dev eth7
+        - ip addr add fd00:250:7::/127 dev eth7
+
+    frr:
+      kind: linux
+      image: ultraglass-lab/frr:latest
+      mgmt-ipv4: 192.168.250.11
+      binds:
+        - configs/frr/frr.conf:/etc/frr/frr.conf
+        - configs/frr/vtysh.conf:/etc/frr/vtysh.conf
+      exec:
+        - ip addr add 10.250.1.1/31 dev eth1
+        - ip addr add fd00:250:1::1/127 dev eth1
+        # All non-management traffic goes to the core; eth0 keeps the management subnet.
+        - ip route replace default via 10.250.1.0 dev eth1
+        - "ip -6 route replace default via fd00:250:1:: dev eth1"
+
+    bird:
+      kind: linux
+      image: ultraglass-lab/bird:latest
+      mgmt-ipv4: 192.168.250.12
+      binds:
+        - configs/bird/bird.conf:/etc/bird.conf:ro
+      exec:
+        - ip addr add 10.250.2.1/31 dev eth1
+        - ip addr add fd00:250:2::1/127 dev eth1
+        # All non-management traffic goes to the core; eth0 keeps the management subnet.
+        - ip route replace default via 10.250.2.0 dev eth1
+        - "ip -6 route replace default via fd00:250:2:: dev eth1"
+
+    openbgpd:
+      kind: linux
+      image: ultraglass-lab/openbgpd:latest
+      mgmt-ipv4: 192.168.250.13
+      binds:
+        - configs/openbgpd/bgpd.conf:/etc/bgpd.conf:ro
+      exec:
+        - ip addr add 10.250.3.1/31 dev eth1
+        - ip addr add fd00:250:3::1/127 dev eth1
+        # All non-management traffic goes to the core; eth0 keeps the management subnet.
+        - ip route replace default via 10.250.3.0 dev eth1
+        - "ip -6 route replace default via fd00:250:3:: dev eth1"
+
+    mikrotik:
+      kind: mikrotik_ros
+      image: vrnetlab/mikrotik_routeros:7.16.2
+      mgmt-ipv4: 192.168.250.14
+      startup-config: configs/mikrotik/config.auto.rsc
+
+    vyos:
+      kind: vyosnetworks_vyos
+      image: vyos:latest
+      mgmt-ipv4: 192.168.250.15
+      startup-config: configs/vyos/config.boot
+
+    arista:
+      kind: arista_ceos
+      image: ceos:4.36.3M
+      mgmt-ipv4: 192.168.250.17
+      startup-config: configs/arista/ceos.cfg
+
+    redis:
+      kind: linux
+      image: redis:7-alpine
+      mgmt-ipv4: 192.168.250.3
+      cmd: redis-server --save "" --appendonly no
+
+    ultraglass:
+      kind: linux
+      image: ultraglass-lab/ultraglass:dev
+      mgmt-ipv4: 192.168.250.2
+      env:
+        HYPERGLASS_APP_PATH: /etc/hyperglass
+        HYPERGLASS_HOST: 0.0.0.0
+        HYPERGLASS_PORT: "8001"
+        HYPERGLASS_REDIS_HOST: 192.168.250.3
+        HYPERGLASS_DISABLE_UI: "false"
+        HYPERGLASS_CONTAINER: "true"
+      binds:
+        - configs/ultraglass:/etc/hyperglass
+      ports:
+        - 127.0.0.1:8001:8001
+
+  links:
+    - endpoints: ["core:eth1", "frr:eth1"]
+    - endpoints: ["core:eth2", "bird:eth1"]
+    - endpoints: ["core:eth3", "openbgpd:eth1"]
+    - endpoints: ["core:eth4", "mikrotik:eth1"]
+    - endpoints: ["core:eth5", "vyos:eth1"]
+    - endpoints: ["core:eth7", "arista:eth1"]

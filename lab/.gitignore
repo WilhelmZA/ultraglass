@@ -1,0 +1,7 @@
+data/
+clab-*/
+configs/ultraglass/logs/
+configs/ultraglass/static/
+configs/ultraglass/.ui/
+*.vmdk
+*.zip
