@@ -44,6 +44,8 @@ PREFIXES=50000 ./lab-up.sh frr     # inject 50k prefixes per family instead of t
 
 Ultraglass UI: http://127.0.0.1:8001. Query a device by name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista. Run `./scripts/smoke-test.py` for every query type against every running device.
 
+Run `python3 scripts/verify-issues.py --api http://127.0.0.1:8001/api --output /path/to/evidence lab-arista lab-frr lab-bird lab-mikrotik` to check mixed-vendor directive resolution and rejected command-injection inputs. The script retains complete API responses in `results.json`. Keep `logging.samples.enable` enabled to capture device output. Run against an isolated test instance when comparing code versions so cached results cannot mask a regression.
+
 ## Devices
 
 | Node | Platform | Mgmt IP | Login | Notes |
