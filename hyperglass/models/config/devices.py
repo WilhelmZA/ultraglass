@@ -19,6 +19,7 @@ from hyperglass.constants import (
     DRIVER_MAP,
     SCRAPE_HELPERS,
     LINUX_PLATFORMS,
+    OPT_IN_STRUCTURED_OUTPUT,
     SUPPORTED_STRUCTURED_OUTPUT,
 )
 from hyperglass.exceptions.private import ConfigError, UnsupportedDevice
@@ -245,7 +246,10 @@ class Device(HyperglassModelWithId, extra="allow"):
         """Validate structured output is supported on the device & set a default."""
 
         if value is True:
-            if info.data.get("platform") not in SUPPORTED_STRUCTURED_OUTPUT:
+            if info.data.get("platform") not in (
+                *SUPPORTED_STRUCTURED_OUTPUT,
+                *OPT_IN_STRUCTURED_OUTPUT,
+            ):
                 raise ConfigError(
                     "The 'structured_output' field is set to 'true' on device '{d}' with "
                     "platform '{p}', which does not support structured output",
@@ -357,9 +361,9 @@ class Devices(MultiModel, model=Device, unique_by="id"):
                         "group": group,
                         "id": device.id,
                         "name": device.name,
-                        "avatar": f"/images/{device.avatar.name}"
-                        if device.avatar is not None
-                        else None,
+                        "avatar": (
+                            f"/images/{device.avatar.name}" if device.avatar is not None else None
+                        ),
                         "description": device.description,
                         "directives": [d.frontend() for d in device.directives],
                     }

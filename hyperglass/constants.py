@@ -35,6 +35,19 @@ SUPPORTED_STRUCTURED_OUTPUT = (
     "mikrotik_switchos",
 )
 
+# Additional parsers remain opt-in so existing text deployments keep their defaults.
+OPT_IN_STRUCTURED_OUTPUT = (
+    "huawei_vrpv8",
+    "cisco_ios",
+    "cisco_xr",
+    "cisco_nxos",
+    "nokia_sros",
+    "bird",
+    "openbgpd",
+    "vyos",
+    "tnsr",
+)
+
 CONFIG_EXTENSIONS = ("py", "yaml", "yml", "json", "toml")
 
 STATUS_CODE_MAP = {"warning": 400, "error": 400, "danger": 500}
