@@ -8,7 +8,9 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.3.0 - 2026-10-27
+
+This release hardens built-in BGP command construction against injection and fixes BGP, ping and traceroute queries across FRR, BIRD, OpenBGPD, MikroTik and Arista, each validated against a device holding a full table. It also adds standard structured traceroute parsing for more platforms and opt-in structured output for Huawei.
 
 ### Security
 
@@ -33,6 +35,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Add standard numbered traceroute parsing for EOS, Junos, Cisco, Nokia and Linux CLI formats. Unrecognized formats retain their original text. Additional platforms require explicit `structured_output: true`; hardware validation remains tracked in #35.
 - Allow Huawei VRPv8 structured BGP output with explicit `structured_output: true` (#20). Huawei VRP already defaults to structured output; set `structured_output: false` to retain text output. Real VRP captures remain required.
 - Add isolated in-memory Redis backend test fixtures, captured EOS fixtures, and a repeatable mixed-vendor API validation script (#26, #25, #23).
+
+### Changed
+
+- Updated the Python package, runtime metadata, UI package, upgrade guide and issue templates to 3.3.0.
 
 ## 3.2.2 - 2026-09-17
 
