@@ -2,10 +2,10 @@
 
 # Standard Library
 import typing as t
-from datetime import datetime
+from datetime import UTC, datetime
 
 # Third Party
-from pydantic import ConfigDict
+from pydantic import Field, ConfigDict
 
 # Project
 from hyperglass.log import log
@@ -79,10 +79,10 @@ class AristaRoutePath(_AristaBase):
     weight: int
     peer_entry: AristaPeerEntry
     reason_not_bestpath: str
-    timestamp: int = int(datetime.utcnow().timestamp())
+    timestamp: int = Field(default_factory=lambda: int(datetime.now(UTC).timestamp()))
     next_hop: str
     route_type: AristaRouteType
-    route_detail: t.Optional[AristaRouteDetail]
+    route_detail: t.Optional[AristaRouteDetail] = None
 
 
 class AristaRouteEntry(_AristaBase):
@@ -105,7 +105,7 @@ class AristaBGPTable(_AristaBase):
 
     @staticmethod
     def _get_route_age(timestamp: int) -> int:
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         now_timestamp = int(now.timestamp())
         return now_timestamp - timestamp
 

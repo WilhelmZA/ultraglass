@@ -4,7 +4,7 @@
 import typing as t
 import hashlib
 import secrets
-from datetime import datetime
+from datetime import UTC, datetime
 
 # Third Party
 from pydantic import BaseModel, ConfigDict, field_validator, StringConstraints
@@ -101,7 +101,7 @@ class Query(BaseModel):
         """Initialize the query with a UTC timestamp at initialization time."""
         super().__init__(**data)
         self._kwargs = data
-        self.timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        self.timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
         state = use_state()
         self._state = state

@@ -2,7 +2,7 @@
 
 # Standard Library
 import typing as t
-from datetime import datetime
+from datetime import UTC, datetime
 
 # Third Party
 from pydantic import ConfigDict, model_validator
@@ -88,8 +88,8 @@ class FRRBGPTable(_FRRBase):
 
         routes = []
         for route in self.paths:
-            now = datetime.utcnow().timestamp()
-            then = datetime.utcfromtimestamp(route.last_update).timestamp()
+            now = datetime.now(UTC).timestamp()
+            then = route.last_update
             age = int(now - then)
             routes.append(
                 {
