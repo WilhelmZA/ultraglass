@@ -206,3 +206,7 @@ class ResponseEmpty(PublicHyperglassError, template="no_output"):
         }
 
         super().__init__(**kwargs)
+
+
+class DeviceCommandError(PublicHyperglassError, template="device_command_error"):
+    """Raised when a device rejects a query command."""
