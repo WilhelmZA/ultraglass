@@ -52,8 +52,7 @@ Mikrotik_BGPASPath = BuiltinDirective(
             condition="*",
             action="permit",
             commands=[
-                "ip route print where bgp-as-path={target}",
-                "ipv6 route print where bgp-as-path={target}",
+                'routing route print detail without-paging where bgp and bgp.as-path~"{target}"',
             ],
         )
     ],
@@ -71,8 +70,7 @@ Mikrotik_BGPCommunity = BuiltinDirective(
             condition="*",
             action="permit",
             commands=[
-                "ip route print where bgp-communities={target}",
-                "ipv6 route print where bgp-communities={target}",
+                'routing route print detail without-paging where bgp and bgp.communities~"{target}"',
             ],
         )
     ],
@@ -149,7 +147,7 @@ MikrotikBGPASPathTable = BuiltinDirective(
             condition="*",
             action="permit",
             commands=[
-                "routing route print detail without-paging where bgp-as-path~{target}",
+                'routing route print detail without-paging where bgp and bgp.as-path~"{target}"',
             ],
         )
     ],
@@ -165,7 +163,7 @@ MikrotikBGPCommunityTable = BuiltinDirective(
             condition="*",
             action="permit",
             commands=[
-                "routing route print detail without-paging where bgp-communities~{target}",
+                'routing route print detail without-paging where bgp and bgp.communities~"{target}"',
             ],
         )
     ],

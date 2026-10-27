@@ -7,6 +7,7 @@ hyperglass API modules.
 
 # Standard Library
 import re
+import shlex
 import json as _json
 import typing as t
 import ipaddress
@@ -48,6 +49,10 @@ class Construct:
         self.device = device
         self.target = self.query.query_target
         self.directive = query.directive
+
+        # Recheck built-ins at the execution boundary, including transformed input.
+        if self.directive._hyperglass_builtin:
+            self.directive.validate_target(self.query.query_target)
 
         # Set transport method based on NOS type
         self.transport = "scrape"
@@ -110,6 +115,15 @@ class Construct:
         except ValueError:
             pass
 
+        if self.directive._hyperglass_builtin and self.device.platform in (
+            "bird",
+            "frr",
+            "openbgpd",
+        ):
+            # Split the trusted template first. Quote complete arguments after substitution.
+            return shlex.join(
+                arg.format(target=self.target, mask=mask, **attrs) for arg in shlex.split(command)
+            )
         return command.format(target=self.target, mask=mask, **attrs)
 
     def queries(self):
@@ -137,7 +151,7 @@ class Formatter:
         """Initialize target formatting."""
         self.query = query
         self.platform = query.device.platform
-        self.query_type = query.query_type
+        self.query_type = getattr(query.directive, "query_kind", query.query_type)
 
     def __enter__(self):
         """Get the relevant formatter."""
@@ -158,6 +172,11 @@ class Formatter:
                 return self._with_formatter(self._bird_bgp_aspath)
             if self.query_type == "bgp_community":
                 return self._with_formatter(self._bird_bgp_community)
+        if self.platform in ("mikrotik_routeros", "mikrotik_switchos"):
+            if self.query_type in ("bgp_aspath", "bgp_community"):
+                return self._with_formatter(self._mikrotik_bgp_pattern)
+        if self.platform == "openbgpd" and self.query_type == "bgp_aspath":
+            return self._with_formatter(self._openbgpd_bgp_aspath)
         return self._with_formatter(self._default)
 
     def _default(self, target: str) -> str:
@@ -167,7 +186,7 @@ class Formatter:
     def _with_formatter(self, formatter: t.Callable[[str], str]) -> FormatterCallback:
         result: FormatterCallback
         if isinstance(self.query.query_target, t.List):
-            result = lambda s: [formatter(i) for i in s]
+            return lambda s: [formatter(i) for i in s] if isinstance(s, list) else formatter(s)
         result = lambda s: formatter(s)
         return result
 
@@ -195,33 +214,36 @@ class Formatter:
         return query
 
     def _bird_bgp_aspath(self, target: str) -> str:
-        """Convert from Cisco AS_PATH format to BIRD format."""
-
-        # Extract ASNs from query target string
-        asns = re.findall(r"\d+", target)
-        was_modified = False
-
-        if bool(re.match(r"^\_", target)):
-            # Replace `_65000` with `.* 65000`
+        """Translate common Cisco ASN sequences without silently changing other regexes."""
+        if not re.fullmatch(r"[\^_]?[0-9]+(?:_[0-9]+)*[_$]?", target):
+            raise InputInvalid(target=target, error="BIRD supports ASN sequences with ^, $, and _")
+        asns = re.findall(r"[0-9]+", target)
+        if any(int(asn) > 0xFFFFFFFF for asn in asns):
+            raise InputInvalid(target=target, error="ASN exceeds 32 bits")
+        if not target.startswith("^"):
             asns.insert(0, "*")
-            was_modified = True
-
-        if bool(re.match(r".*(\_)$", target)):
-            # Replace `65000_` with `65000 .*`
+        if not target.endswith("$"):
             asns.append("*")
-            was_modified = True
-
-        asns.insert(0, "[=")
-        asns.append("=]")
-
-        result = " ".join(asns)
-
-        if was_modified:
-            log.bind(original=target, modified=result).debug("Modified target")
-
-        return result
+        return "[= " + " ".join(asns) + " =]"
 
     def _bird_bgp_community(self, target: str) -> str:
         """Convert from standard community format to BIRD format."""
+        if not re.fullmatch(r"[0-9]+:[0-9]+", target):
+            raise InputInvalid(target=target, error="BIRD requires a standard ASN:value community")
         parts = target.split(":")
         return f"({','.join(parts)})"
+
+    def _mikrotik_bgp_pattern(self, target: str) -> str:
+        """Translate ASN boundaries and escape RouterOS string interpolation."""
+        if self.query_type == "bgp_aspath":
+            target = target.replace("_", "(^|[ ,]|$)")
+        else:
+            target = "(^|,)" + target.replace(".", r"\.") + "(,|$)"
+        return target.replace("\\", "\\\\").replace("$", r"\$")
+
+    def _openbgpd_bgp_aspath(self, target: str) -> str:
+        """Extract the ASN after a directive rule selects the matching AS operator."""
+        asn = target.strip("_^$")
+        if not asn.isdecimal() or int(asn) > 0xFFFFFFFF:
+            raise InputInvalid(target=target, error="OpenBGPD requires a 32-bit ASN")
+        return asn
