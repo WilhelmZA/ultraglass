@@ -19,6 +19,7 @@ Each configured device may have the following parameters:
 | `directives`        | List of Strings |               | Enable referenced directives configured in the [directives config file](/configuration/directives.mdx).                                    |
 | `driver`            | String          | netmiko       | Specify which driver to use for this device. Currently, only `netmiko` is supported.                                                       |
 | `driver_config`     | Mapping         |               | Mapping/dict of options to pass to the connection driver.                                                                                  |
+| `disable_paging`    | Boolean         | True          | Send the driver's paging and terminal width commands, such as `terminal length 0`, after login. Set to `false` when a login policy rejects them; directives must then disable paging themselves, for example with `\| no-more`. |
 | `attrs`             | Mapping         |               | Mapping/dict of variables, as referenced in configured directives.                                                                         |
 | `credential`        | Mapping         |               | Mapping/dict of a [credential configuration](/configuration/devices/credentials.mdx).                                                      |
 | `http`              | Mapping         |               | Mapping/dict of [HTTP client options](/configuration/devices/http-device.mdx), if this device is connected via HTTP.                       |

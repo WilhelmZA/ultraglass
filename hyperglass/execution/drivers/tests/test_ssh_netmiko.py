@@ -10,6 +10,8 @@ from hyperglass.execution.drivers import ssh_netmiko
 from hyperglass.execution.drivers._common import Connection, command_error
 from hyperglass.exceptions.public import DeviceCommandError, DeviceTimeout
 
+PARAMS = SimpleNamespace(request_timeout=90, logging=SimpleNamespace(session_log=False))
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
@@ -25,6 +27,7 @@ async def test_driver_reads_to_prompt_except_mikrotik(monkeypatch, platform):
         port=22,
         credential=SimpleNamespace(username="lg", _method="key", key="/test/lab-key"),
         driver_config={},
+        disable_paging=True,
         get_device_type=lambda: platform,
     )
     driver.query = ["traceroute 192.0.2.1"]
@@ -32,7 +35,7 @@ async def test_driver_reads_to_prompt_except_mikrotik(monkeypatch, platform):
     session.send_command.return_value = "first hop\nlast hop"
     session.send_command_timing.return_value = "MikroTik output"
     monkeypatch.setattr(ssh_netmiko, "ConnectHandler", Mock(return_value=session))
-    monkeypatch.setattr(ssh_netmiko, "use_state", lambda _: SimpleNamespace(request_timeout=90))
+    monkeypatch.setattr(ssh_netmiko, "use_state", lambda _: PARAMS)
     result = await driver.collect()
     if platform == "mikrotik_routeros":
         session.send_command.assert_not_called()
@@ -97,3 +100,39 @@ def test_mikrotik_bgp_scan_waits_for_prompt():
     )
     session.send_command.assert_called_once_with(command, read_timeout=300)
     session.send_command_timing.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_session_log_and_skipped_paging(monkeypatch, tmp_path):
+    driver = object.__new__(ssh_netmiko.NetmikoConnection)
+    driver.device = SimpleNamespace(
+        id="lab_ios",
+        name="lab-ios",
+        platform="cisco_ios",
+        proxy=None,
+        _target="127.0.0.1",
+        port=22,
+        credential=SimpleNamespace(username="lg", _method="key", key="/test/lab-key"),
+        driver_config={},
+        disable_paging=False,
+        get_device_type=lambda: "cisco_ios",
+    )
+    driver.query = ["show ip bgp 192.0.2.1 | no-more"]
+    session = Mock()
+    session.send_command.return_value = "route"
+    handler = Mock(return_value=session)
+    params = SimpleNamespace(
+        request_timeout=90, logging=SimpleNamespace(session_log=True, directory=tmp_path)
+    )
+    monkeypatch.setattr(ssh_netmiko, "ConnectHandler", handler)
+    monkeypatch.setattr(ssh_netmiko, "use_state", lambda _: params)
+
+    assert await driver.collect() == ("route",)
+
+    kwargs = handler.call_args.kwargs
+    assert kwargs["auto_connect"] is False
+    assert kwargs["session_log_file_mode"] == "append"
+    assert kwargs["session_log"].startswith(str(tmp_path / "lab_ios-"))
+    session._open.assert_called_once()
+    assert session.disable_paging() == ""
+    assert session.set_terminal_width() == ""

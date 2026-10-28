@@ -7,6 +7,7 @@ Console, file, HTTP, and/or syslog logging configuration.
 | `directory` | String | /tmp          | Path to directory where logs will be created.   |
 | `format`    | String | text          | Log text format, must be `text` or `json`.      |
 | `max_size`  | String | 50MB          | Maximum log file size before being overwritten. |
+| `session_log` | Boolean | false | Write every SSH session, with each command and its output, to `<directory>/<device id>-<YYYYMMDD>.log`. Netmiko redacts the device password and secret. |
 
 ### Syslog
 

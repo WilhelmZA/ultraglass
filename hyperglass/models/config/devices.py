@@ -69,6 +69,9 @@ class Device(HyperglassModelWithId, extra="allow"):
     directives: Directives = Directives()
     driver: t.Optional[SupportedDriver] = None
     driver_config: t.Dict[str, t.Any] = {}
+    # Set to false when a login policy rejects the driver's paging and terminal
+    # width commands. Directives must then disable paging themselves.
+    disable_paging: bool = True
     attrs: t.Dict[str, str] = {}
 
     def __init__(self, **kw) -> None:
