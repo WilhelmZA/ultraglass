@@ -87,7 +87,8 @@ class FRRPath(_FRRBase):
         if "aggregatorAs" in values:
             new["aggregatorAs"] = parse_asn(values["aggregatorAs"]) or 0
         community = values.get("community", {"list": []})
-        new["community"] = community["list"]
+        large_community = values.get("largeCommunity", {"list": []})
+        new["community"] = [*community["list"], *large_community["list"]]
         if "lastUpdate" in values:
             new["lastUpdate"] = values["lastUpdate"]["epoch"]
         bestpath = values.get("bestpath", {})
