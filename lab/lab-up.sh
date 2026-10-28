@@ -2,7 +2,7 @@
 # Start the lab and load the table. Safe after a reboot.
 #
 #   ./lab-up.sh                 whole lab (all vendors, needs the most RAM)
-#   ./lab-up.sh frr             just one device: core + redis + ultraglass + frr
+#   ./lab-up.sh frr             just one device: core + redis + both ultraglass + frr
 #   ./lab-up.sh mikrotik        devices: frr bird openbgpd mikrotik arista vyos huawei
 #   PREFIXES=50000 ./lab-up.sh frr   cap the table for low-RAM machines
 #
@@ -12,6 +12,9 @@
 set -e
 cd "$(dirname "$0")"
 DEV="${1:-}"
+
+# Ultraglass refuses to start without its (git-ignored) log directory.
+mkdir -p configs/ultraglass/logs configs/ultraglass-text/logs
 
 if [ ! -e data/bview ]; then
     echo "No table dump at data/bview. Run scripts/fetch-table.sh first." >&2
@@ -24,7 +27,7 @@ if [ -n "$DEV" ]; then
         *) echo "Unknown device '$DEV'. Pick one of: frr bird openbgpd mikrotik arista vyos huawei" >&2; exit 1 ;;
     esac
     echo "Starting single device: $DEV (plus core, redis, ultraglass)"
-    sudo containerlab deploy -t ultraglass-lab.clab.yml --node-filter "core,redis,ultraglass,$DEV"
+    sudo containerlab deploy -t ultraglass-lab.clab.yml --node-filter "core,redis,ultraglass,ultraglass-text,$DEV"
 else
     echo "Starting the whole lab"
     sudo containerlab deploy -t ultraglass-lab.clab.yml
@@ -78,5 +81,5 @@ if docker inspect clab-ultraglass-huawei >/dev/null 2>&1; then
 fi
 
 echo
-echo "Lab up. Ultraglass UI: http://127.0.0.1:8001"
+echo "Lab up. Ultraglass structured: http://127.0.0.1:8001  text: http://127.0.0.1:8002"
 echo "Query a device by its name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei"

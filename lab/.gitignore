@@ -3,5 +3,9 @@ clab-*/
 configs/ultraglass/logs/
 configs/ultraglass/static/
 configs/ultraglass/.ui/
+configs/ultraglass-text/logs/
+configs/ultraglass-text/static/
+configs/ultraglass-text/.ui/
+configs/ultraglass-text/plugins/
 *.vmdk
 *.zip

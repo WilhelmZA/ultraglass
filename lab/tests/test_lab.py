@@ -48,7 +48,7 @@ MATRIX = {
         ("__hyperglass_bird_bgp_aspath__", "bgp_aspath", ASPATH, "text", 34),
         ("__hyperglass_bird_bgp_community__", "bgp_community", COMMUNITY, "text", None),
         ("__hyperglass_bird_ping__", "ping_v4", V4, "text", None),
-        ("__hyperglass_bird_traceroute__", "traceroute_v4", V4, "text", None),
+        ("__hyperglass_bird_traceroute__", "traceroute_v4", V4, "structured", None),
     ],
     "lab-openbgpd": [
         ("__hyperglass_openbgpd_bgp_route__", "bgp_route_v4", V4, "text", None),
@@ -56,7 +56,7 @@ MATRIX = {
         ("__hyperglass_openbgpd_bgp_aspath__", "bgp_aspath", ASPATH, "text", None),
         ("__hyperglass_openbgpd_bgp_community__", "bgp_community", COMMUNITY, "text", None),
         ("__hyperglass_openbgpd_ping__", "ping_v4", V4, "text", None),
-        ("__hyperglass_openbgpd_traceroute__", "traceroute_v4", V4, "text", None),
+        ("__hyperglass_openbgpd_traceroute__", "traceroute_v4", V4, "structured", None),
     ],
     "lab-mikrotik": [
         ("__hyperglass_mikrotik_bgp_route_table__", "bgp_route_v4", V4, "structured", None),
@@ -72,7 +72,7 @@ MATRIX = {
         ("__hyperglass_vyos_bgp_aspath__", "bgp_aspath", ASPATH, "text", None),
         ("__hyperglass_vyos_bgp_community__", "bgp_community", COMMUNITY, "text", None),
         ("__hyperglass_vyos_ping__", "ping_v4", V4, "text", None),
-        ("__hyperglass_vyos_traceroute__", "traceroute_v4", V4, "text", None),
+        ("__hyperglass_vyos_traceroute__", "traceroute_v4", V4, "structured", None),
     ],
     "lab-arista": [
         ("__hyperglass_arista_eos_bgp_route_table__", "bgp_route_v4", V4, "structured", None),
