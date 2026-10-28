@@ -1,12 +1,11 @@
 """Session handler for external http data sources."""
 
 # Standard Library
-import re
 import json as _json
 import socket
 import typing as t
 from json import JSONDecodeError
-from socket import gaierror
+from urllib.parse import urlsplit
 
 # Third Party
 import httpx
@@ -165,22 +164,17 @@ class BaseExternal:
         log.bind(url=self.base_url).debug("Testing connection")
 
         try:
-            # Parse out just the hostname from a URL string.
-            # E.g. `https://www.example.com` becomes `www.example.com`
-            test_host = re.sub(r"http(s)?\:\/\/", "", self.base_url)
-
-            # Create a generic socket object
-            test_socket = socket.socket()
+            # Parse the hostname and port from the URL, defaulting the port by scheme.
+            # E.g. `http://192.0.2.1:9000/hook` becomes `192.0.2.1` and `9000`.
+            url = urlsplit(self.base_url)
+            test_port = url.port or (80 if url.scheme == "http" else 443)
 
             # Try opening a low-level socket to make sure it's even
             # listening on the port prior to trying to use it.
-            test_socket.connect((test_host, 443))
+            with socket.create_connection((url.hostname, test_port), timeout=self.timeout):
+                pass
 
-            # Properly shutdown & close the socket.
-            test_socket.shutdown(1)
-            test_socket.close()
-
-        except gaierror as err:
+        except OSError as err:
             # Raised if the target isn't listening on the port
             raise self._exception(
                 f"{self.name!r} appears to be unreachable at {self.base_url!r}", err

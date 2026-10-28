@@ -58,11 +58,11 @@ class Webhook(HyperglassModel):
     timestamp: datetime
 
     @model_validator(mode="before")
-    def validate_webhook(cls, model: "Webhook") -> "Webhook":
+    def validate_webhook(cls, values: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
         """Reset network attributes if the source is localhost."""
-        if model.source in ("127.0.0.1", "::1"):
-            model.network = {}
-        return model
+        if values.get("source") in ("127.0.0.1", "::1"):
+            values = {**values, "network": {}}
+        return values
 
     def msteams(self) -> t.Dict[str, t.Any]:
         """Format the webhook data as a Microsoft Teams card."""
