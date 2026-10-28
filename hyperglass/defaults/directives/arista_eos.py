@@ -76,11 +76,11 @@ AristaBGPCommunity = BuiltinDirective(
             action="permit",
             commands=[
                 "show ip bgp community {target}",
-                "show ipv6 bgp community {target}",
+                "show bgp ipv6 unicast community {target}",
             ],
             vrf_commands=[
                 "show ip bgp community {target} vrf {vrf}",
-                "show ipv6 bgp community {target} vrf {vrf}",
+                "show bgp ipv6 unicast community {target} vrf {vrf}",
             ],
         )
     ],
@@ -184,12 +184,14 @@ AristaBGPCommunityTable = BuiltinDirective(
             condition="*",
             action="permit",
             commands=[
-                "show ip bgp community {target} | json",
-                "show ipv6 bgp community {target} | json",
+                # Only the address-family detail form carries communities, and
+                # `show ipv6 bgp community` matches no IPv6 routes (#66).
+                "show bgp ipv4 unicast community {target} detail | json",
+                "show bgp ipv6 unicast community {target} detail | json",
             ],
             vrf_commands=[
-                "show ip bgp community {target} vrf {vrf} | json",
-                "show ipv6 bgp community {target} vrf {vrf} | json",
+                "show bgp ipv4 unicast community {target} detail vrf {vrf} | json",
+                "show bgp ipv6 unicast community {target} detail vrf {vrf} | json",
             ],
         )
     ],

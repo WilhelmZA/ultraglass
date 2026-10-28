@@ -58,3 +58,13 @@ def test_mikrotik(kind):
     for route in table.routes:
         assert route.as_path == [65000, 64999, 13335]
         assert set(route.communities) >= {"65000:777", "65000:777:1"}
+
+
+@pytest.mark.parametrize("family", (4, 6))
+def test_frr_community_detail(family):
+    """`json detail` keeps communities for FRR community queries (#67)."""
+    raw = (FIXTURES / "frr-live" / f"community{family}_detail.json").read_text()
+    table = parse_frr([raw])
+    assert [route.prefix for route in table.routes] == [PREFIXES[family]]
+    assert table.routes[0].as_path == [65000, 64999, 13335]
+    assert table.routes[0].communities == ["65000:777"]
