@@ -17,6 +17,7 @@ from hyperglass.exceptions import HyperglassError
 # Local
 from .events import check_redis
 from .routes import (
+    dns,
     info,
     query,
     device,
@@ -52,6 +53,7 @@ HANDLERS = [
     query,
     aspath_enrich,
     query_enrichment,
+    dns,
 ]
 
 if not STATE.settings.disable_ui:

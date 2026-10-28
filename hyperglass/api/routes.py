@@ -1,8 +1,10 @@
 """API Routes."""
 
 # Standard Library
+import re
 import json
 import time
+import socket
 import asyncio
 import typing as t
 from uuid import uuid4
@@ -11,6 +13,7 @@ from datetime import UTC, datetime
 # Third Party
 from litestar import Request, Response, get, post
 from litestar.di import Provide
+from litestar.middleware.rate_limit import RateLimitConfig
 from litestar.background_tasks import BackgroundTask
 
 # Project
@@ -114,6 +117,39 @@ async def aspath_enrich(data: dict) -> dict:
         return {"success": False, "error": "Enrichment lookup failed"}
 
     return {"success": True, "asn_organizations": results}
+
+
+# DNS record types in the DNS-over-HTTPS JSON format the UI already reads.
+_DNS_TYPES = {"A": (socket.AF_INET, 1), "AAAA": (socket.AF_INET6, 28)}
+_HOSTNAME = re.compile(
+    r"(?=.{1,253}\.?$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}\.?"
+)
+
+
+@get(
+    "/api/dns",
+    middleware=[RateLimitConfig(rate_limit=("minute", 120)).middleware],
+    include_in_schema=False,
+)
+async def dns(name: str, type: str = "A") -> dict:
+    """Resolve a hostname on the server, returning DNS-over-HTTPS JSON."""
+    record_type = type.upper()
+    if record_type not in _DNS_TYPES or not _HOSTNAME.fullmatch(name):
+        return {"Status": 1, "Question": [{"name": name, "type": 0}], "Answer": []}
+
+    family, type_code = _DNS_TYPES[record_type]
+    question = [{"name": name, "type": type_code}]
+    try:
+        records = await asyncio.get_running_loop().getaddrinfo(
+            name, None, family=family, type=socket.SOCK_STREAM
+        )
+    except socket.gaierror as err:
+        not_found = err.errno in (socket.EAI_NONAME, getattr(socket, "EAI_NODATA", None))
+        return {"Status": 3 if not_found else 2, "Question": question, "Answer": []}
+
+    addresses = dict.fromkeys(record[4][0] for record in records)
+    answer = [{"name": name, "type": type_code, "TTL": 0, "data": a} for a in addresses]
+    return {"Status": 0, "Question": question, "Answer": answer}
 
 
 @get("/api/query/{query_id:str}/enrichment")

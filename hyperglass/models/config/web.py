@@ -246,6 +246,14 @@ class Web(HyperglassModel):
     custom_html: t.Optional[FilePath] = None
     highlight: t.List[HighlightPattern] = []
 
+    @model_validator(mode="after")
+    def validate_fqdn_message(self) -> "Web":
+        """Describe server-side resolution, unless the message was customised."""
+        default = Text.model_fields["fqdn_message"].default
+        if self.dns_provider.name == "server" and self.text.fqdn_message == default:
+            self.text.fqdn_message = "Ultraglass has resolved {fqdn} to"
+        return self
+
 
 class WebPublic(Web):
     """Public web configuration."""

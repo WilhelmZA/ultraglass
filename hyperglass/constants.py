@@ -55,6 +55,8 @@ STATUS_CODE_MAP = {"warning": 400, "error": 400, "danger": 500}
 DNS_OVER_HTTPS = {
     "google": "https://dns.google/resolve",
     "cloudflare": "https://cloudflare-dns.com/dns-query",
+    # Resolve on the Ultraglass server, for networks that block public DoH providers.
+    "server": "/api/dns",
 }
 
 PARSED_RESPONSE_FIELDS = (

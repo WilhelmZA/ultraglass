@@ -17,7 +17,7 @@ Ultraglass provides extensive customisation options for the look and feel of the
 
 | Parameter           | Type   | Default Value                          | Description                                                                 |
 | :------------------ | :----- | :------------------------------------- | :-------------------------------------------------------------------------- |
-| `dns_provider.name` | String | cloudflare                             | If `cloudflare` or `google` are provided, no URL is necessary.              |
+| `dns_provider.name` | String | cloudflare                             | If `cloudflare` or `google` are provided, no URL is necessary. Use `server` to resolve hostnames on the Ultraglass server through `/api/dns` (A and AAAA, limited to 120 requests a minute per client), for networks that block public DNS-over-HTTPS. |
 | `dns_provider.url`  | String | `https://cloudflare-dns.com/dns-query` | Provide a custom DNS over HTTPS URL if you'd like to use your own resolver. |
 
 ### Logo
