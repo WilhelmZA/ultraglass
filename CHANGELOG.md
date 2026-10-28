@@ -61,7 +61,7 @@ Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/Wi
 
 - Keep query selections when returning from results through the browser Back button or the in-page button (#46, #47).
 - Serve configured Google Fonts locally after downloading them during the UI build. Failed downloads retain the Google Fonts fallback (#49).
-- `web.my_ip` now defaults to `server`, so a stock install sends no visitor address to a third party. A 3.3.1 install that relied on the external myip.wtf lookup now gets server detection, which returns only the address family of the request. Set `web.my_ip: external` to keep the external lookup, with its consent step (#90).
+- `web.my_ip` now defaults to `server`, so a stock install sends no visitor address to a third party. A 3.3.1 install that relied on the external myip.wtf lookup now gets server detection, which returns only the address family of the request. Set `web.my_ip: external` to keep the external lookup, with its consent step. When the external lookup fails, the button falls back to server detection (#90).
 - Updated the Python package, runtime metadata and UI package to 3.4.0-rc.1. Prerelease tags publish a GitHub prerelease and leave the `latest` image tag on the last stable release (#87).
 
 ## 3.3.1 - 2026-10-27

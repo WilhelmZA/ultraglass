@@ -10,7 +10,7 @@ Ultraglass provides extensive customisation options for the look and feel of the
 | `web.location_display_mode` | String | auto          | Show the locations field as a `dropdown`, `gallery`. When using `auto`, if there are more than 5 location groups, `dropdown` will be used. |
 | `web.custom_javascript`     | String |               | Path to a javascript file that will be loaded with the website.                                                                            |
 | `web.custom_html`           | String |               | Path to a custom HTML file that will be loaded with the website and rendered beneath the app.                                              |
-| `web.my_ip` | String | server | How the My IP button finds the visitor's address. `server` returns the address Ultraglass received the request from (it reads `X-Real-IP` or `X-Forwarded-For` behind a proxy), so no third party is contacted; only the address family used for the request is shown. `external` is opt-in: it asks myip.wtf, which can return both IPv4 and IPv6, after showing `web.text.ip_lookup_notice` and waiting for the visitor to confirm. `off` hides the button. |
+| `web.my_ip` | String | server | How the My IP button finds the visitor's address. `server` returns the address Ultraglass received the request from (it reads `X-Real-IP` or `X-Forwarded-For` behind a proxy), so no third party is contacted; only the address family used for the request is shown. `external` is opt-in: it asks myip.wtf, which can return both IPv4 and IPv6, after showing `web.text.ip_lookup_notice` and waiting for the visitor to confirm. If the myip.wtf lookup for a family fails, the button falls back to the server address for that family. `off` hides the button. |
 
 ### DNS over HTTPS
 
