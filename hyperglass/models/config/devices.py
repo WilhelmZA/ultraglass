@@ -159,9 +159,11 @@ class Device(HyperglassModelWithId, extra="allow"):
         # Set of all keys except for built-in key `target`.
         keys = {
             key
-            for group in [get_fmt_keys(command) for command in self.directive_commands]
-            for key in group
-            if key != "target"
+            for directive in self.directives
+            for rule in directive.rules
+            for command in rule.commands
+            for key in get_fmt_keys(command)
+            if key != "target" and key not in directive.variables
         }
 
         attrs = {k: v for k, v in self.attrs.items() if k in keys}

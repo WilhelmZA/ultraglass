@@ -24,6 +24,7 @@ class UIDirective(HyperglassModel):
     description: str
     info: t.Optional[str] = None
     options: t.Optional[t.List[t.Dict[str, t.Any]]] = None
+    variables: t.List[t.Dict[str, t.Any]] = []
 
 
 class UILocation(HyperglassModel):

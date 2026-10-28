@@ -109,12 +109,20 @@ type _DirectiveBase = {
   description: string;
   groups: string[];
   info: string | null;
+  variables?: _DirectiveVariable[];
 };
 
 type _DirectiveOption = {
   name: string;
   value: string;
   description: string | null;
+};
+
+type _DirectiveVariable = {
+  id: string;
+  name: string;
+  required: boolean;
+  options: _DirectiveOption[];
 };
 
 type _DirectiveSelect = _DirectiveBase & {
@@ -183,6 +191,7 @@ export type DeviceGroup = CamelCasedPropertiesDeep<_DeviceGroup>;
 export type Directive = CamelCasedPropertiesDeep<_Directive>;
 export type DirectiveSelect = CamelCasedPropertiesDeep<_DirectiveSelect>;
 export type DirectiveOption = CamelCasedPropertiesDeep<_DirectiveOption>;
+export type DirectiveVariable = CamelCasedPropertiesDeep<_DirectiveVariable>;
 export type Text = CamelCasedProperties<_Text>;
 export type Web = CamelCasedPropertiesDeep<_Web>;
 export type Greeting = CamelCasedProperties<_Greeting>;

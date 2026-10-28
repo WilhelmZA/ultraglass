@@ -95,6 +95,9 @@ class Query(BaseModel):
 
     # Directive `id` field
     query_type: QueryType
+
+    # Selected values of the directive's optional variables
+    query_variables: t.Dict[str, str] = {}
     _kwargs: t.Dict[str, t.Any]
 
     def __init__(self, **data) -> None:
@@ -132,6 +135,7 @@ class Query(BaseModel):
         self.query_target = self.directive.normalize_target(self.query_target)
 
         try:
+            self.directive.validate_variables(self.query_variables)
             self.validate_query_target()
         except InputValidationError as err:
             raise InputInvalid(**err.kwargs) from err
@@ -148,7 +152,10 @@ class Query(BaseModel):
 
     def __repr__(self) -> str:
         """Represent only the query fields."""
-        return repr_from_attrs(self, ("query_location", "query_type", "query_target"))
+        attrs = ("query_location", "query_type", "query_target")
+        if self.query_variables:
+            attrs = (*attrs, "query_variables")
+        return repr_from_attrs(self, attrs)
 
     def __str__(self) -> str:
         """Alias __str__ to __repr__."""

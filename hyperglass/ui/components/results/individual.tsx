@@ -93,7 +93,12 @@ const _Result: React.ForwardRefRenderFunction<HTMLDivElement, ResultProps> = (
   };
 
   const { data, error, isLoading, isFetching, refetch, isFetchedAfterMount } = useLGQuery(
-    { queryLocation, queryTarget: form.queryTarget, queryType: form.queryType },
+    {
+      queryLocation,
+      queryTarget: form.queryTarget,
+      queryType: form.queryType,
+      queryVariables: form.queryVariables,
+    },
     {
       onSuccess(data) {
         if (device !== null) {

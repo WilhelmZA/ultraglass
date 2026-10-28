@@ -15,7 +15,7 @@ import ipaddress
 # Project
 from hyperglass.log import log
 from hyperglass.util import get_fmt_keys
-from hyperglass.constants import TRANSPORT_REST, TARGET_FORMAT_SPACE
+from hyperglass.constants import TRANSPORT_REST, LINUX_PLATFORMS, TARGET_FORMAT_SPACE
 from hyperglass.exceptions.public import InputInvalid
 from hyperglass.exceptions.private import ConfigError
 
@@ -96,7 +96,8 @@ class Construct:
         """Return formatted command for 'Scrape' endpoints (SSH)."""
         keys = get_fmt_keys(command)
         attrs = {k: v for k, v in self.device.attrs.items() if k in keys}
-        for key in [k for k in keys if k != "target" and k != "mask"]:
+        variables = self.directive.variables
+        for key in [k for k in keys if k not in ("target", "mask") and k not in variables]:
             if key not in attrs:
                 raise ConfigError(
                     ("Command '{c}' has attribute '{k}', which is missing from device '{d}'"),
@@ -115,6 +116,16 @@ class Construct:
         except ValueError:
             pass
 
+        # Values come only from the directive's configured choices. Quote them where a shell
+        # parses the command.
+        selected = getattr(self.query, "query_variables", None) or {}
+        shell = self.device.platform in (*LINUX_PLATFORMS, "vyos", "vyos_1_3")
+        values = {
+            name: variable.render(selected.get(name), quote=shell)
+            for name, variable in variables.items()
+            if name in keys
+        }
+
         if self.directive._hyperglass_builtin and self.device.platform in (
             "bird",
             "frr",
@@ -126,7 +137,7 @@ class Construct:
             return shlex.join(
                 arg.format(target=self.target, mask=mask, **attrs) for arg in shlex.split(command)
             )
-        return command.format(target=self.target, mask=mask, **attrs)
+        return command.format(target=self.target, mask=mask, **attrs, **values)
 
     def queries(self):
         """Return queries for each enabled AFI."""

@@ -26,6 +26,7 @@ Each directive has the following options:
 | `groups`             | List of Strings |               | List of names by which directives are grouped in the UI.                                                                                                                   |
 | `multiple`           | Boolean         | `false`       | Command supports receiving multiple values. For example, Cisco IOS's `show ip bgp community` accepts multiple communities as arguments.                                    |
 | `multiple_separator` | String          | `" "`         | String by which multiple values are separated. For example, a list of values `[65001, 65002, 65003]` would be rendered as `65001 65002 65003` for when the command is run. |
+| `variables`          | Mapping         |               | Mapping/dict of [optional variables](#variables), each with a fixed list of allowed values.                                                                                |
 
 ## Rules
 
@@ -186,3 +187,39 @@ your-directive:
             - value: "65001:2"
               description: Provider B Routes
 ```
+
+## Variables
+
+A directive can declare extra template variables next to `{target}`. Each variable appears in the UI as its own select field, and the user can pick only one of the configured values. Ultraglass rejects any other value before it builds the command.
+
+| Parameter  | Type          | Default Value | Description                                                                              |
+| :--------- | :------------ | :------------ | :--------------------------------------------------------------------------------------- |
+| `name`     | String        | Variable key  | Field label in the UI.                                                                   |
+| `command`  | String        | `""`          | Text inserted before the selected value, for example `" group "`.                        |
+| `required` | Boolean       | `false`       | If `false`, the variable can stay empty, and its placeholder renders as an empty string. |
+| `items`    | List of Items |               | Allowed values. Each item has `name`, `value` and `description`. `value` defaults to `name`. |
+
+Variable keys must be valid identifiers and cannot be `target` or `mask`. A variable placeholder needs no matching device `attrs` entry. On BIRD, FRR, OpenBGPD and VyOS devices, Ultraglass shell-quotes the selected value.
+
+```yaml filename="directives.yaml" copy {6-17}
+show-bgp-summary:
+    name: BGP Summary
+    rules:
+        - condition: null
+          command: show bgp summary{instance}{group}
+    field: null
+    variables:
+        instance:
+            name: Routing Instance
+            command: " instance "
+            items:
+                - name: Internet
+                  value: inet
+        group:
+            name: BGP Group
+            command: " group "
+            items:
+                - name: party_x
+```
+
+With no selection, the command is `show bgp summary`. With both selected, the command is `show bgp summary instance inet group party_x`. The API accepts the selection as `queryVariables`, for example `{"queryVariables": {"group": "party_x"}}`.

@@ -2,11 +2,19 @@
 
 # Standard Library
 import re
+import shlex
 import typing as t
 from ipaddress import IPv4Network, IPv6Network, ip_network
 
 # Third Party
-from pydantic import Field, FilePath, PrivateAttr, IPvAnyNetwork, field_validator
+from pydantic import (
+    Field,
+    FilePath,
+    PrivateAttr,
+    IPvAnyNetwork,
+    field_validator,
+    model_validator,
+)
 
 # Project
 from hyperglass.log import log
@@ -63,6 +71,40 @@ class Select(Input):
 
     _type: PrivateAttr = PrivateAttr("select")
     options: t.List[Option]
+
+
+class VariableItem(HyperglassModel):
+    """One allowed value of a directive variable."""
+
+    name: t.Optional[str] = None
+    value: t.Optional[str] = None
+    description: t.Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_value(self) -> "VariableItem":
+        """Use the name as the value when no value is set."""
+        if self.value is None:
+            self.value = self.name
+        if not self.value:
+            raise ValueError("A variable item needs a 'name' or a 'value'")
+        if self.name is None:
+            self.name = self.value
+        return self
+
+
+class Variable(HyperglassModel):
+    """An optional command variable with a fixed set of allowed values."""
+
+    name: t.Optional[str] = None
+    command: str = ""
+    required: bool = False
+    items: t.List[VariableItem] = Field(min_length=1)
+
+    def render(self, value: t.Optional[str], *, quote: bool) -> str:
+        """Render the command fragment for a selected value, or nothing."""
+        if value is None:
+            return ""
+        return self.command + (shlex.quote(value) if quote else value)
 
 
 class Rule(HyperglassModel):
@@ -273,6 +315,36 @@ class Directive(HyperglassUniqueModel, unique_by=("id", "table_output")):
     groups: t.List[str] = []
     multiple: bool = False
     multiple_separator: str = " "
+    variables: t.Dict[str, Variable] = {}
+
+    @field_validator("variables")
+    @classmethod
+    def validate_variable_names(cls, variables: t.Dict[str, Variable]) -> t.Dict[str, Variable]:
+        """Variable names must be template identifiers and must not shadow built-in keys."""
+        for name in variables:
+            if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name) or name in ("target", "mask"):
+                raise ValueError(f"Invalid variable name '{name}'")
+        return variables
+
+    def validate_variables(self, values: t.Dict[str, str]) -> t.Dict[str, str]:
+        """Accept only configured variables and configured values."""
+        for name, value in values.items():
+            variable = self.variables.get(name)
+            if variable is None:
+                raise InputValidationError(
+                    error="Unknown variable '{name}'", target=name, name=name
+                )
+            if value not in (item.value for item in variable.items):
+                raise InputValidationError(
+                    error="'{value}' is not an allowed value for '{name}'",
+                    target=value,
+                    value=value,
+                    name=name,
+                )
+        for name, variable in self.variables.items():
+            if variable.required and name not in values:
+                raise InputValidationError(error="'{name}' is required", target=name, name=name)
+        return values
 
     @field_validator("rules", mode="before")
     @classmethod
@@ -368,6 +440,16 @@ class Directive(HyperglassUniqueModel, unique_by=("id", "table_output")):
 
         if self.field is not None and self.field.is_select:
             value["options"] = [o.export_dict() for o in self.field.options if o is not None]
+
+        value["variables"] = [
+            {
+                "id": name,
+                "name": variable.name or name,
+                "required": variable.required,
+                "options": [item.export_dict() for item in variable.items],
+            }
+            for name, variable in self.variables.items()
+        ]
 
         return value
 

@@ -39,7 +39,7 @@ export function useLGQuery(
     ctx: QueryFunctionContext<LGQueryKey>,
   ): Promise<QueryResponse> => {
     const [url, data] = ctx.queryKey;
-    const { queryLocation, queryTarget, queryType } = data;
+    const { queryLocation, queryTarget, queryType, queryVariables = {} } = data;
     const res = await fetchWithTimeout(
       url,
       {
@@ -49,6 +49,7 @@ export function useLGQuery(
           queryLocation,
           queryTarget,
           queryType,
+          queryVariables,
         }),
         mode: 'cors',
       },

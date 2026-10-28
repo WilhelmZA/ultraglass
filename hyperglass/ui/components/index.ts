@@ -20,6 +20,7 @@ export * from './path';
 export * from './prompt';
 export * from './query-location';
 export * from './query-target';
+export * from './query-variables';
 export * from './query-type';
 export * from './reset-button';
 export * from './resolved-target';

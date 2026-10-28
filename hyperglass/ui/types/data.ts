@@ -2,6 +2,7 @@ export interface FormData {
   queryLocation: string[];
   queryType: string;
   queryTarget: string[];
+  queryVariables?: Record<string, string>;
 }
 
 export type FormQuery = Swap<FormData, 'queryLocation', string>;
