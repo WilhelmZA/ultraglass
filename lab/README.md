@@ -98,7 +98,9 @@ The image is a QEMU VM (not a container) wrapped with vrnetlab. It needs KVM but
 
 ## The table feed
 
-`inject-table.sh` loads the best path per prefix with next hop rewritten to the core's own link address, so every route resolves. Expect about 1.09M IPv4 and 261k IPv6 routes on each device. Re-run `fetch-table.sh` for a fresher dump; set `COLLECTOR=rrc00` for a larger table.
+`inject-table.sh` loads the best path per prefix with next hop rewritten to the core's own link address, so every route resolves. Expect about 1.09M IPv4 and 261k IPv6 prefixes on each device. Re-run `fetch-table.sh` for a fresher dump; set `COLLECTOR=rrc00` for a larger table.
+
+The test prefixes carry every path rrc19 saw, not only the best one: 1.1.1.0/24 (13 paths), 2606:4700::/44 (11 paths) and the 5,463 prefixes AS13335 originates. `scripts/filter-mrt.py` cuts them from the dump into `data/testset-bview`, `inject-table.sh` loads that subset with all paths on top of the best-path table, and the core sends them over ADD-PATH (`send-max` in `configs/core/gobgpd.toml`). FRR, VyOS and Arista receive ADD-PATH by default; BIRD (`add paths rx`) and OpenBGPD (`announce add-path recv yes`) are configured for it. MikroTik CHR 7.16 does not negotiate ADD-PATH and gets the best path only. Huawei has ADD-PATH off and stays on its capped feed. All paths for the whole table is not offered: rrc19 averages about 9 paths per prefix, roughly 12M paths, which neither the core nor the devices can hold.
 
 ## Reproducing issue #19 (traceroute truncation)
 
