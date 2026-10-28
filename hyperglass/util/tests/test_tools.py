@@ -20,6 +20,7 @@ from ..tools import (
     deep_convert_keys,
     split_on_uppercase,
     run_coroutine_in_new_thread,
+    remove_ipv6_networks_from_no_proxy,
 )
 
 
@@ -211,3 +212,27 @@ def test_dict_to_kwargs():
     assert r1 == e1
     r2 = dict_to_kwargs(d2)
     assert r2 == e2
+
+
+def test_remove_ipv6_networks_from_no_proxy():
+    """Remove only IPv6 networks, which httpx cannot parse (#91)."""
+    value = "localhost,::1,192.168.250.0/24,fd00:250:ffff::/64,fd00:250:ffff::10,core"
+    environ = {"NO_PROXY": value, "no_proxy": value, "PATH": "/bin"}
+    removed = remove_ipv6_networks_from_no_proxy(environ)
+    assert removed == ["fd00:250:ffff::/64"]
+    expected = "localhost,::1,192.168.250.0/24,fd00:250:ffff::10,core"
+    assert environ == {"NO_PROXY": expected, "no_proxy": expected, "PATH": "/bin"}
+    assert remove_ipv6_networks_from_no_proxy({}) == []
+
+
+def test_httpx_accepts_cleaned_no_proxy(monkeypatch):
+    # Third Party
+    import httpx
+
+    monkeypatch.setenv("NO_PROXY", "fd00:250:ffff::/64,::1")
+    with pytest.raises(httpx.InvalidURL):
+        httpx.Client()
+    environ = {"NO_PROXY": "fd00:250:ffff::/64,::1"}
+    remove_ipv6_networks_from_no_proxy(environ)
+    monkeypatch.setenv("NO_PROXY", environ["NO_PROXY"])
+    httpx.Client().close()

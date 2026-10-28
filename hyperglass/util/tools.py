@@ -2,6 +2,7 @@
 
 # Standard Library
 import typing as t
+import ipaddress
 
 # Project
 from hyperglass.types import Series
@@ -192,3 +193,28 @@ def dict_to_kwargs(in_dict: t.Dict[str, t.Any]) -> str:
         out_str = f"{key}={value!r}"
         items = [*items, out_str]
     return " ".join(items)
+
+
+def remove_ipv6_networks_from_no_proxy(environ: t.MutableMapping[str, str]) -> t.List[str]:
+    """Remove IPv6 networks from `NO_PROXY` and `no_proxy`, and return what was removed.
+
+    httpx turns each entry into a mount URL, and an IPv6 entry with a prefix length makes
+    every client constructor raise `InvalidURL` (#91). httpx matches host names, not
+    networks, so it never applied these entries and removing them changes no proxy decision.
+    """
+    removed = []
+    for key in ("NO_PROXY", "no_proxy"):
+        if key not in environ:
+            continue
+        kept = []
+        for entry in environ[key].split(","):
+            if "/" in entry and "://" not in entry:
+                try:
+                    if ipaddress.ip_network(entry.strip(), strict=False).version == 6:
+                        removed.append(entry.strip())
+                        continue
+                except ValueError:
+                    pass
+            kept.append(entry)
+        environ[key] = ",".join(kept)
+    return sorted(set(removed))

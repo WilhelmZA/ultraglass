@@ -1,6 +1,7 @@
 """Start hyperglass."""
 
 # Standard Library
+import os
 import sys
 import typing as t
 import asyncio
@@ -11,7 +12,7 @@ import uvicorn
 
 # Local
 from .log import LibInterceptHandler, init_logger, enable_file_logging, enable_syslog_logging
-from .util import get_node_version
+from .util import get_node_version, remove_ipv6_networks_from_no_proxy
 from .settings import Settings
 from .constants import MIN_NODE_VERSION, MIN_PYTHON_VERSION, __version__
 
@@ -39,6 +40,11 @@ from .state import use_state
 LOG_LEVEL = logging.INFO if Settings.debug is False else logging.DEBUG
 logging.basicConfig(handlers=[LibInterceptHandler()], level=0, force=True)
 log = init_logger(LOG_LEVEL)
+
+# httpx cannot parse IPv6 networks in NO_PROXY, and every HTTP client would fail (#91).
+# Remove them before any client exists; uvicorn workers inherit the cleaned environment.
+if no_proxy_removed := remove_ipv6_networks_from_no_proxy(os.environ):
+    log.bind(removed=no_proxy_removed).warning("Ignoring IPv6 networks in NO_PROXY")
 
 
 async def build_ui() -> bool:

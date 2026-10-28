@@ -15,6 +15,7 @@ from .tools import (
     deep_convert_keys,
     split_on_uppercase,
     run_coroutine_in_new_thread,
+    remove_ipv6_networks_from_no_proxy,
 )
 from .typing import is_type, is_series
 from .validation import (
@@ -48,6 +49,7 @@ __all__ = (
     "parse_as_path",
     "parse_asn",
     "parse_exception",
+    "remove_ipv6_networks_from_no_proxy",
     "repr_from_attrs",
     "resolve_hostname",
     "run_coroutine_in_new_thread",
