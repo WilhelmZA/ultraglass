@@ -10,7 +10,7 @@ from pydantic import PrivateAttr, ValidationError
 # Project
 from hyperglass.log import log
 from hyperglass.exceptions.private import ParsingError
-from hyperglass.models.parsing.frr import FRRBGPTable
+from hyperglass.models.parsing.frr import FRRBGPTable, frr_bgp_table
 
 # Local
 from .._output import OutputPlugin
@@ -40,9 +40,19 @@ def parse_frr(output: t.Sequence[str]) -> "OutputDataModel":
             if not parsed:
                 continue
 
-            validated = FRRBGPTable(**parsed)
-            bgp_table = validated.bgp_table()
+            # AS path and community queries return a summary keyed by prefix.
+            if "routes" in parsed:
+                tables = [
+                    FRRBGPTable(prefix=prefix, paths=paths)
+                    for prefix, paths in parsed["routes"].items()
+                ]
+            else:
+                tables = [FRRBGPTable(**parsed)]
 
+            if not tables:
+                continue
+
+            bgp_table = frr_bgp_table(tables)
             if result is None:
                 result = bgp_table
             else:
@@ -71,8 +81,13 @@ class BGPRoutePluginFrr(OutputPlugin):
     """Coerce a FRR route table in JSON format to a standard BGP Table structure."""
 
     _hyperglass_builtin: bool = PrivateAttr(True)
-    platforms: t.Sequence[str] = ("frr",)
-    directives: t.Sequence[str] = ("__hyperglass_frr_bgp_route_table__",)
+    platforms: t.Sequence[str] = ("frr", "vyos")
+    directives: t.Sequence[str] = (
+        "__hyperglass_frr_bgp_route_table__",
+        "__hyperglass_vyos_bgp_route_table__",
+        "__hyperglass_vyos_bgp_aspath_table__",
+        "__hyperglass_vyos_bgp_community_table__",
+    )
 
     def process(self, *, output: "OutputType", query: "Query") -> "OutputType":
         """Parse FRR response if data is a string (and is therefore unparsed)."""

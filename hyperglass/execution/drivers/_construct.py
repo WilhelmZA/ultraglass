@@ -119,6 +119,7 @@ class Construct:
             "bird",
             "frr",
             "openbgpd",
+            "vyos",
         ):
             # Split the trusted template first. Quote complete arguments after substitution.
             return shlex.join(
