@@ -1,0 +1,12 @@
+BIRD 2.17.2 ready.
+Table master4:
+198.51.100.0/24      unicast [core4 04:49:10.567] * (100) [AS65000?]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: Incomplete
+	BGP.as_path: 65000
+	BGP.next_hop: 10.250.2.0
+	BGP.med: 5
+	BGP.local_pref: 100
+	BGP.community: (65000,100)
+	BGP.large_community: (65000, 1, 1)

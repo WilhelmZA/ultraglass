@@ -15,6 +15,9 @@ __all__ = (
     "BIRD_BGPRoute",
     "BIRD_Ping",
     "BIRD_Traceroute",
+    "BIRD_BGPRouteTable",
+    "BIRD_BGPASPathTable",
+    "BIRD_BGPCommunityTable",
 )
 
 NAME = "BIRD"
@@ -36,6 +39,7 @@ BIRD_BGPRoute = BuiltinDirective(
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
+    table_output="__hyperglass_bird_bgp_route_table__",
     platforms=PLATFORMS,
 )
 
@@ -52,6 +56,7 @@ BIRD_BGPASPath = BuiltinDirective(
         )
     ],
     field=Text(description="AS Path Regular Expression"),
+    table_output="__hyperglass_bird_bgp_aspath_table__",
     platforms=PLATFORMS,
 )
 
@@ -68,6 +73,7 @@ BIRD_BGPCommunity = BuiltinDirective(
         )
     ],
     field=Text(description="BGP Community String"),
+    table_output="__hyperglass_bird_bgp_community_table__",
     platforms=PLATFORMS,
 )
 
@@ -106,5 +112,58 @@ BIRD_Traceroute = BuiltinDirective(
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
+    platforms=PLATFORMS,
+)
+
+# Table Output Directives
+
+BIRD_BGPRouteTable = BuiltinDirective(
+    id="__hyperglass_bird_bgp_route_table__",
+    name="BGP Route",
+    rules=[
+        RuleWithIPv4(
+            condition="0.0.0.0/0",
+            action="permit",
+            command='birdc "show route for {target} all"',
+        ),
+        RuleWithIPv6(
+            condition="::/0",
+            action="permit",
+            command='birdc "show route for {target} all"',
+        ),
+    ],
+    field=Text(description="IP Address, Prefix, or Hostname"),
+    platforms=PLATFORMS,
+)
+
+BIRD_BGPASPathTable = BuiltinDirective(
+    id="__hyperglass_bird_bgp_aspath_table__",
+    name="BGP AS Path",
+    rules=[
+        RuleWithPattern(
+            condition="*",
+            action="permit",
+            commands=[
+                'birdc "show route all where bgp_path ~ {target}"',
+            ],
+        )
+    ],
+    field=Text(description="AS Path Regular Expression"),
+    platforms=PLATFORMS,
+)
+
+BIRD_BGPCommunityTable = BuiltinDirective(
+    id="__hyperglass_bird_bgp_community_table__",
+    name="BGP Community",
+    rules=[
+        RuleWithPattern(
+            condition="*",
+            action="permit",
+            commands=[
+                'birdc "show route all where {target} ~ bgp_community"',
+            ],
+        )
+    ],
+    field=Text(description="BGP Community String"),
     platforms=PLATFORMS,
 )
