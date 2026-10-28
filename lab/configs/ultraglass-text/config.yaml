@@ -5,3 +5,9 @@ logging:
   directory: /etc/hyperglass/logs
   samples:
     enable: true
+web:
+  # Defaults, stated explicitly: Cloudflare DNS over HTTPS and the external "My IP"
+  # lookup with visitor confirmation (#48, #49). The structured instance uses server.
+  dns_provider:
+    name: cloudflare
+  my_ip: external

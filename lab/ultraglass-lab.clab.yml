@@ -46,6 +46,9 @@ topology:
       exec:
         - ip addr add 10.250.1.1/31 dev eth1
         - ip addr add fd00:250:1::1/127 dev eth1
+        # Kernel VRF for the VRF LAB lab location (#50); frr.conf holds its routes.
+        - ip link add LAB type vrf table 100
+        - ip link set LAB up
         # All non-management traffic goes to the core; eth0 keeps the management subnet.
         - ip route replace default via 10.250.1.0 dev eth1
         - "ip -6 route replace default via fd00:250:1:: dev eth1"
@@ -130,7 +133,8 @@ topology:
 
     ultraglass:
       kind: linux
-      image: ultraglass-lab/ultraglass:dev
+      # lab-up.sh --image sets ULTRAGLASS_IMAGE; the default is the local dev build.
+      image: ${ULTRAGLASS_IMAGE:=ultraglass-lab/ultraglass:dev}
       mgmt-ipv4: 192.168.250.2
       env:
         HYPERGLASS_APP_PATH: /etc/hyperglass
@@ -149,7 +153,8 @@ topology:
     # neither instance can serve the other's cached result.
     ultraglass-text:
       kind: linux
-      image: ultraglass-lab/ultraglass:dev
+      # lab-up.sh --image sets ULTRAGLASS_IMAGE; the default is the local dev build.
+      image: ${ULTRAGLASS_IMAGE:=ultraglass-lab/ultraglass:dev}
       mgmt-ipv4: 192.168.250.4
       env:
         HYPERGLASS_APP_PATH: /etc/hyperglass

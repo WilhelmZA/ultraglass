@@ -30,11 +30,14 @@ MikroTik and Arista images are built separately (see their sections below). Buil
 ```sh
 ./lab-up.sh                        # whole lab (all vendors), injects the table
 ./lab-up.sh frr                    # ONE device only: core + redis + ultraglass + frr
+./lab-up.sh --image wilhelmza/ultraglass:3.4.0-rc.1   # run a published image instead of the dev build
 ./lab-down.sh                      # stop and remove everything (built images are kept)
 ./lab-status.sh                    # containers + BGP session state
 ```
 
 `lab-up.sh` is safe to run after a reboot. GoBGP keeps the table in memory, so it is injected fresh on every start. The single-device form (`./lab-up.sh <name>`, one of frr, bird, openbgpd, mikrotik, arista, vyos, huawei, junos, iol, ioll2) starts only that device plus the core, so it runs on far less RAM than the full lab. Use it on a stopped lab; Containerlab rejects a node filter that excludes running nodes during reconciliation.
+
+`--image <reference>` must come first, before an optional device name. Without it, both Ultraglass instances run the local dev build `ultraglass-lab/ultraglass:dev`. `lab-up.sh` pulls the image when it is not present. It then compares the image ID with each running Ultraglass container and removes any container that runs a different image, so the deploy recreates it. This also applies after you rebuild the dev image. `docker restart` and a plain redeploy keep a container's old image.
 
 Low-RAM machines can also cap the table size:
 
@@ -166,7 +169,7 @@ The test prefixes carry every path rrc19 saw, not only the best one: 1.1.1.0/24 
 
 ## VRF test setup (issue #50)
 
-The VRF checks use a VRF named `LAB` on five devices. It holds `198.51.100.0/24` and `2001:db8:100::/48` as Null0/blackhole static routes, originated into BGP, plus a `192.0.2.100/32` loopback for ping and traceroute. The setup is runtime-only on FRR and Huawei, so it is lost when those nodes restart. Reapply it with these commands:
+The VRF checks use a VRF named `LAB` on five devices. It holds `198.51.100.0/24` and `2001:db8:100::/48` as Null0/blackhole static routes, originated into BGP, plus a `192.0.2.100/32` loopback for ping and traceroute. Arista and FRR load VRF `LAB` from their startup configs (`configs/arista/ceos.cfg`, `configs/frr/frr.conf`; the topology creates the FRR kernel VRF). The setup is runtime-only on Huawei, VyOS and MikroTik, so it is lost when those nodes restart. Reapply it with these commands:
 
 - Arista: `vrf instance LAB`, `ip routing vrf LAB`, `ipv6 unicast-routing vrf LAB`, the two `ip[v6] route vrf LAB ... Null0` statics, `router bgp 65007` / `vrf LAB` with `rd 65007:100`, `router-id 10.250.7.100` and both `network` statements (IPv6 under `address-family ipv6`), and `interface Loopback100` / `vrf LAB` / `ip address 192.0.2.100/32`.
 - FRR: `ip link add LAB type vrf table 100 && ip link set LAB up` in the container, then in vtysh the two blackhole statics with `vrf LAB` and `router bgp 65001 vrf LAB` with both `network` statements.
@@ -174,7 +177,23 @@ The VRF checks use a VRF named `LAB` on five devices. It holds `198.51.100.0/24`
 - Huawei: `ip vpn-instance LAB` with `route-distinguisher 65008:100` for `ipv4-family` and `ipv6-family`, the two `ip[v6] route-static vpn-instance LAB ... NULL0`, `bgp 65008` / `ipv4-family vpn-instance LAB` and `ipv6-family vpn-instance LAB` with the `network` statements, and `interface LoopBack100` / `ip binding vpn-instance LAB` / `ip address 192.0.2.100 32`.
 - MikroTik: `/interface bridge add name=lab-vrf`, `/ip vrf add name=LAB interfaces=lab-vrf` and `/ip address add address=192.0.2.100/32 interface=lab-vrf`. RouterOS needs a BGP peer inside the VRF before BGP routes appear there, and the core has none, so BGP VRF queries are validated with `vrf: main`, which reads the full lab table.
 
-In the Ultraglass devices file, add a second entry per router with a different `name` and `vrf: LAB`.
+Both Ultraglass instances already list `lab-arista-vrf` and `lab-frr-vrf`. For another router, add a second entry with a different `name` and `vrf: LAB`.
+
+## 3.4.0 release candidate features (issue #88)
+
+Both Ultraglass instances are configured so each feature merged since 3.3.1 has a working example. Run a release candidate with `./lab-up.sh --image wilhelmza/ultraglass:3.4.0-rc.1`. The structured instance is http://127.0.0.1:8001 and the text instance is http://127.0.0.1:8002. Enable the core BGP sessions for Arista, FRR and Cisco IOL first (see [BGP session control](#bgp-session-control)).
+
+- **VRF locations (#50).** Config: `vrf: LAB` on `lab-arista-vrf` and `lab-frr-vrf` in both `devices.yaml` files. Test: select `lab-arista-vrf`, query BGP Route `198.51.100.1`. The result shows `198.51.100.0/24` from VRF `LAB`. Query the same target on `lab-arista`; the default VRF does not hold it. `lab-frr-vrf` offers BGP queries only, because FRR has no VRF form for ping or traceroute.
+- **Directive variables (#52).** Config: `lab-bgp-summary` in both `directives.yaml` files, attached to `lab-arista`. Test: select `lab-arista` and BGP Summary. The form shows an Address Family select (required) and a VRF select (optional). Choose IPv4 for `show ip bgp summary`, or IPv4 and LAB for `show ip bgp summary vrf LAB`. Over the API, send `"queryType": "lab-bgp-summary", "queryTarget": "null", "queryVariables": {"family": "ipv6"}`. A directive without a field still needs a target; the UI sends `null`. A missing `family` or a value outside the list returns an input error.
+- **VyOS 1.3 (#51).** Not in the lab. No VyOS 1.3 image is available, so `platform: vyos_1_3` is untested here.
+- **Server-side DNS (#48).** Config: `web.dns_provider.name: server` on the structured instance; `cloudflare` on the text instance. Test: query BGP Route with target `one.one.one.one` on each instance. The structured instance resolves through `/api/dns`; the text instance resolves in the browser through Cloudflare.
+- **My IP modes (#49).** Config: `web.my_ip: server` on the structured instance; `external` on the text instance. Test: open the target field's My IP button on each instance. `server` fills the address the server sees without a prompt. `external` asks for confirmation before it contacts myip.wtf.
+- **Self-hosted fonts (#49).** No config: the UI build downloads the configured fonts. Test: `docker exec clab-ultraglass-ultraglass ls /etc/hyperglass/static/fonts` lists `body.css`, `mono.css` and the font files. Without internet access, the UI falls back to Google Fonts links.
+- **Cisco IOS structured BGP (#83, #84).** Config: `structured_output: true` on `lab-iol` in the structured instance. `lab-ioll2` stays text-only for comparison. Test: query BGP Route `1.1.1.1` on `lab-iol` and `lab-ioll2`. `lab-iol` shows a table, `lab-ioll2` shows device text. An IPv6 address target returns an input error on both, because IOS accepts only an IPv6 prefix such as `2606:4700::/44`.
+- **SSH session logs (#45).** Config: `logging.session_log: true` on the structured instance. Test: run any query, then `ls configs/ultraglass/logs/`. Each device gets one file per day, named `<device>-<YYYYMMDD>.log`.
+- **Paging control (#44).** Config: none; `disable_paging` defaults to `true` on every device. Test: a long Arista or Cisco result arrives complete, without `--More--` prompts.
+
+Smoke test both instances after a change: `python3 scripts/smoke-test.py` and `python3 scripts/smoke-test.py --text`.
 
 ## Capturing parser fixtures
 

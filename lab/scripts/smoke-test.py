@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Run every query type against every lab device and print one line per result.
 
-Usage: smoke-test.py [device ...]. Reads the directive IDs from the running lab.
+Usage: smoke-test.py [--text] [device ...]. Reads the directive IDs from the running lab.
+--text queries the text instance (port 8002) instead of the structured one (port 8001).
 """
 
 import json
@@ -11,8 +12,17 @@ import sys
 import time
 import urllib.request
 
-API = "http://127.0.0.1:8001/api"
-PLATFORMS = {"junos": "juniper", "iol": "cisco_ios", "ioll2": "cisco_ios"}
+INSTANCES = {"structured": ("http://127.0.0.1:8001/api", "1"), "text": ("http://127.0.0.1:8002/api", "2")}
+API, REDIS_DB = INSTANCES["structured"]
+# Device name without "lab-" -> platform, where they differ.
+PLATFORMS = {
+    "junos": "juniper",
+    "iol": "cisco_ios",
+    "ioll2": "cisco_ios",
+    "arista": "arista_eos",
+    "arista-vrf": "arista_eos",
+    "frr-vrf": "frr",
+}
 
 # Target per query type. Pick values that exist in the rrc19 table.
 TARGETS = {
@@ -26,7 +36,7 @@ TARGETS = {
 
 def directives():
     raw = subprocess.run(
-        ["docker", "exec", "clab-ultraglass-redis", "redis-cli", "-n", "1", "--no-raw",
+        ["docker", "exec", "clab-ultraglass-redis", "redis-cli", "-n", REDIS_DB, "--no-raw",
          "get", "hyperglass.state.ui_params"],
         capture_output=True, text=True, check=True,
     ).stdout
@@ -42,6 +52,9 @@ def query(device, directive, target):
             data = json.load(resp)
     except urllib.error.HTTPError as error:
         data = json.load(error)
+    except TimeoutError:
+        # Broad AS-path and community scans with enrichment can outlast the client.
+        return "timeout", "none", time.monotonic() - started, None
     runtime = time.monotonic() - started
     output = data.get("output")
     if isinstance(output, dict):
@@ -58,7 +71,12 @@ def query(device, directive, target):
 
 
 def main():
-    devices = sys.argv[1:] or [d["id"] for d in json.load(urllib.request.urlopen(f"{API}/devices"))]
+    global API, REDIS_DB
+    args = sys.argv[1:]
+    if args[:1] == ["--text"]:
+        API, REDIS_DB = INSTANCES["text"]
+        args = args[1:]
+    devices = args or [d["id"] for d in json.load(urllib.request.urlopen(f"{API}/devices"))]
     ids = directives()
     for device in devices:
         platform = device.removeprefix("lab-")

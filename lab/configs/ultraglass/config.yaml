@@ -5,6 +5,8 @@ logging:
   directory: /etc/hyperglass/logs
   samples:
     enable: true
+  # SSH session logs (#45): one file per device and day in the logs directory.
+  session_log: true
 structured:
   communities:
     mode: deny
@@ -14,3 +16,9 @@ structured:
   ip_enrichment:
     enrich_traceroute: true
     enrich_bgproute: true
+web:
+  # Resolve hostnames and "My IP" on the server (#48, #49). The text instance keeps
+  # the defaults, so both paths stay testable.
+  dns_provider:
+    name: server
+  my_ip: server

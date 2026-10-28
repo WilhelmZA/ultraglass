@@ -77,6 +77,9 @@ devices:
     credential:
       username: admin
       password: admin
+    directives:
+      - builtins
+      - lab-bgp-summary
     platform: arista_eos
     structured_output: false
     attrs:
@@ -118,3 +121,32 @@ devices:
     attrs:
       source4: 10.250.10.1
       source6: fd00:250:10::1
+
+  # VRF locations (#50). Arista and FRR hold VRF LAB from their startup configs, with
+  # 198.51.100.0/24 and 2001:db8:100::/48 originated into BGP. FRR in a VRF offers BGP
+  # queries only.
+  - name: lab-arista-vrf
+    address: 192.168.250.17
+    group: VRF
+    credential:
+      username: admin
+      password: admin
+    platform: arista_eos
+    vrf: LAB
+    structured_output: false
+    attrs:
+      source4: 192.0.2.100
+      source6: 2001:db8:100::1
+
+  - name: lab-frr-vrf
+    address: 192.168.250.11
+    group: VRF
+    credential:
+      username: lg
+      password: lg
+    platform: frr
+    vrf: LAB
+    structured_output: false
+    attrs:
+      source4: 10.250.1.1
+      source6: fd00:250:1::1

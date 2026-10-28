@@ -1,0 +1,24 @@
+# Directive variables (#52): one required and one optional fixed-choice field.
+# The UI shows each variable as a select field, and the API takes the selection as
+# queryVariables, for example {"queryVariables": {"family": "ipv6", "vrf": "LAB"}}.
+lab-bgp-summary:
+  name: BGP Summary
+  field: null
+  rules:
+    - condition: null
+      command: show {family} bgp summary{vrf}
+  variables:
+    family:
+      name: Address Family
+      required: true
+      items:
+        - name: IPv4
+          value: ip
+        - name: IPv6
+          value: ipv6
+    vrf:
+      name: VRF
+      command: " vrf "
+      items:
+        - name: LAB
+          value: LAB

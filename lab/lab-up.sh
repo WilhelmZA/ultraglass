@@ -5,12 +5,21 @@
 #   ./lab-up.sh frr             just one device: core + redis + both ultraglass + frr
 #   ./lab-up.sh mikrotik        devices: frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2
 #   PREFIXES=50000 ./lab-up.sh frr   cap the table for low-RAM machines
+#   ./lab-up.sh --image wilhelmza/ultraglass:3.4.0-rc.1 [device]
+#                               run a published Ultraglass image instead of the
+#                               local dev build (ultraglass-lab/ultraglass:dev)
 #
 # Images must be built (scripts/build-images.sh) and the table fetched
 # (scripts/fetch-table.sh). GoBGP holds the RIB in memory, so the table is
 # injected fresh on every start.
 set -e
 cd "$(dirname "$0")"
+IMAGE=ultraglass-lab/ultraglass:dev
+if [ "${1:-}" = "--image" ]; then
+    [ -n "${2:-}" ] || { echo "--image needs an image reference" >&2; exit 1; }
+    IMAGE="$2"
+    shift 2
+fi
 DEV="${1:-}"
 
 # Ultraglass refuses to start without its (git-ignored) log directory.
@@ -21,16 +30,32 @@ if [ ! -e data/bview ]; then
     exit 1
 fi
 
+# Use the image's ID, so a rebuilt dev image or a different tag both count as a change.
+if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+    echo "Pulling $IMAGE..."
+    docker pull "$IMAGE"
+fi
+WANT="$(docker image inspect -f '{{.Id}}' "$IMAGE")"
+# `docker restart` and a redeploy keep a container's old image, so remove any
+# Ultraglass container that runs a different image. The deploy recreates it.
+for C in clab-ultraglass-ultraglass clab-ultraglass-ultraglass-text; do
+    HAVE="$(docker inspect -f '{{.Image}}' "$C" 2>/dev/null || true)"
+    if [ -n "$HAVE" ] && [ "$HAVE" != "$WANT" ]; then
+        echo "Recreating $C on $IMAGE"
+        docker rm -f "$C" >/dev/null
+    fi
+done
+
 if [ -n "$DEV" ]; then
     case " frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2 " in
         *" $DEV "*) : ;;
         *) echo "Unknown device '$DEV'. Pick one of: frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2" >&2; exit 1 ;;
     esac
     echo "Starting single device: $DEV (plus core, redis, ultraglass)"
-    sudo containerlab deploy -t ultraglass-lab.clab.yml --node-filter "core,redis,ultraglass,ultraglass-text,$DEV"
+    sudo env ULTRAGLASS_IMAGE="$IMAGE" containerlab deploy -t ultraglass-lab.clab.yml --node-filter "core,redis,ultraglass,ultraglass-text,$DEV"
 else
     echo "Starting the whole lab"
-    sudo containerlab deploy -t ultraglass-lab.clab.yml
+    sudo env ULTRAGLASS_IMAGE="$IMAGE" containerlab deploy -t ultraglass-lab.clab.yml
 fi
 
 echo "Waiting for the core router..."
@@ -84,5 +109,5 @@ if docker inspect clab-ultraglass-huawei >/dev/null 2>&1; then
 fi
 
 echo
-echo "Lab up. Ultraglass structured: http://127.0.0.1:8001  text: http://127.0.0.1:8002"
+echo "Lab up on $IMAGE. Ultraglass structured: http://127.0.0.1:8001  text: http://127.0.0.1:8002"
 echo "Query a device by its name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei, lab-junos, lab-iol, lab-ioll2"
