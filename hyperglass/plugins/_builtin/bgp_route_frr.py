@@ -40,10 +40,14 @@ def parse_frr(output: t.Sequence[str]) -> "OutputDataModel":
             if not parsed:
                 continue
 
-            # AS path and community queries return a summary keyed by prefix.
+            # AS path and community queries return routes keyed by prefix: a list of
+            # summary paths, or with `json detail`, an object holding detail paths.
             if "routes" in parsed:
                 tables = [
-                    FRRBGPTable(prefix=prefix, paths=paths)
+                    FRRBGPTable(
+                        prefix=prefix,
+                        paths=paths["paths"] if isinstance(paths, dict) else paths,
+                    )
                     for prefix, paths in parsed["routes"].items()
                 ]
             else:
@@ -84,6 +88,8 @@ class BGPRoutePluginFrr(OutputPlugin):
     platforms: t.Sequence[str] = ("frr", "vyos")
     directives: t.Sequence[str] = (
         "__hyperglass_frr_bgp_route_table__",
+        "__hyperglass_frr_bgp_aspath_table__",
+        "__hyperglass_frr_bgp_community_table__",
         "__hyperglass_vyos_bgp_route_table__",
         "__hyperglass_vyos_bgp_aspath_table__",
         "__hyperglass_vyos_bgp_community_table__",
