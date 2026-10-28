@@ -9,6 +9,7 @@ Devices that return structured or easily parsed data can display their response 
 -   Huawei VRP
 -   Juniper Junos
 -   Mikrotik RouterOS/SwitchOS
+-   OpenBGPD (opt-in with `structured_output: true`; BGP tables use `bgpctl -j show rib detail`, and RPKI state comes from the daemon's origin validation)
 -   VyOS (opt-in with `structured_output: true`; BGP tables read FRR JSON through `vtysh`. AS path and community results carry no communities or route age, because FRR summary output omits them)
 
 When structured output is available, Ultraglass can check the RPKI state of each returned BGP prefix using one of two methods:

@@ -1,0 +1,371 @@
+{
+	"rib": [
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 37497 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 1,
+			"valid": true,
+			"best": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 5,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"communities": [
+				"13335:10045",
+				"37497:4104"
+			],
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 37239 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 2,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"communities": [
+				"37195:666"
+			],
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 3491 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 3,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"communities": [
+				"3491:300",
+				"3491:311",
+				"3491:9001",
+				"3491:9080",
+				"3491:9081",
+				"3491:9087",
+				"3491:50000",
+				"3491:62210",
+				"3491:62220"
+			],
+			"large_communities": [
+				"13335:10000071:0"
+			],
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.26.60"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 328206 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 4,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"communities": [
+				"65000:1000",
+				"65000:1010"
+			],
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 917 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 5,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"communities": [
+				"917:59001",
+				"13335:10045",
+				"57695:12000"
+			],
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 328320 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 6,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"communities": [
+				"13335:10045"
+			],
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 327983 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 7,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 37680 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 8,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"communities": [
+				"13335:10045",
+				"37680:0",
+				"37680:293",
+				"37680:3001",
+				"37680:50033"
+			],
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 328137 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 9,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 327804 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 10,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"large_communities": [
+				"327804:111:10001",
+				"327804:555:13335",
+				"327804:888:1"
+			],
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "2606:4700::/44",
+			"aspath": "65000 327960 174 13335",
+			"exit_nexthop": "fd00:250:3::",
+			"true_nexthop": "fd00:250:3::1",
+			"neighbor": { "description": "core6", "remote_addr": "fd00:250:3::", "bgp_id": "10.250.0.1" },
+			"path_id": 11,
+			"valid": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 2,
+			"last_update": "01:22:24",
+			"last_update_sec": 4944,
+			"communities": [
+				"174:21101",
+				"174:22012"
+			],
+			"attributes": [
+				{
+					"type": "Aggregator",
+					"flags": { "partial": false, "transitive": true, "optional": true },
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.6.180"
+				}
+			]
+		}
+	]
+}
