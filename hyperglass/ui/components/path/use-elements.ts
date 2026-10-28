@@ -1,6 +1,5 @@
 import dagre from 'dagre';
 import { useMemo } from 'react';
-import isEqual from 'react-fast-compare';
 
 import type { Edge, Node } from 'reactflow';
 import type { NodeData } from './chart';
@@ -39,7 +38,7 @@ function isTracerouteData(data: AllStructuredResponses): data is TracerouteStruc
  * Calculate the positions for each AS Path.
  * @see https://github.com/MrBlenny/react-flow-chart/issues/61
  */
-function* buildElements(
+export function* buildElements(
   base: BasePath,
   data: AllStructuredResponses,
 ): Generator<FlowElement<NodeData>> {
@@ -112,110 +111,65 @@ function* buildElements(
     return;
   }
 
-  const totalPaths = asPaths.length - 1;
-
   const g = new dagre.graphlib.Graph();
-  g.setGraph({ marginx: 20, marginy: 20 });
+  g.setGraph({ marginx: 20, marginy: 20, rankdir: 'BT', align: 'UR' });
   g.setDefaultEdgeLabel(() => ({}));
 
   // Set the origin (i.e., the hyperglass user) at the base.
   g.setNode(base.asn, { width: NODE_WIDTH, height: NODE_HEIGHT });
 
+  // One node per ASN, shared by every path that crosses it. IXPs carry no ASN, so
+  // each distinct IXP name gets its own node.
+  const nodes = new Map<string, { asn: string; name: string }>();
+  const edges = new Map<string, Edge<NodeData>>();
+
   for (const [groupIdx, pathGroup] of asPaths.entries()) {
-    // For each ROUTE's AS Path:
-
-    // Find the route after this one.
-    const nextGroup = groupIdx < totalPaths ? asPaths[groupIdx + 1] : [];
-
-    // Connect the first hop in the AS Path to the base (for dagre).
-    g.setEdge(base.asn, `${groupIdx}-${pathGroup[0]}`);
-
-    // Eliminate duplicate AS Paths.
-    if (!isEqual(pathGroup, nextGroup)) {
-      for (const [idx, asn] of pathGroup.entries()) {
-        // For each ASN in the ROUTE:
-
-        const node = `${groupIdx}-${asn}`;
-        const endIdx = pathGroup.length - 1;
-
-        // Add the AS as a node.
-        g.setNode(node, { width: NODE_WIDTH, height: NODE_HEIGHT });
-
-        // Connect the first hop in the AS Path to the base (for react-flow).
-        if (idx === 0) {
-          yield {
-            id: `e${base.asn}-${node}`,
-            source: base.asn,
-            target: node,
-          };
-        }
-        // Connect every intermediate hop to each other.
-        if (idx !== endIdx) {
-          const next = `${groupIdx}-${pathGroup[idx + 1]}`;
-          g.setEdge(node, next);
-          yield {
-            id: `e${node}-${next}`,
-            source: node,
-            target: next,
-          };
-        }
+    let previous = base.asn;
+    for (const [idx, asn] of pathGroup.entries()) {
+      let node = asn;
+      let name = asnOrgs[asn]?.name || (asn === '0' ? 'Private/Unknown' : `AS${asn}`);
+      if (asn === 'IXP') {
+        const ixpName = pathGroupOrgs[groupIdx]?.[idx];
+        name = ixpName && ixpName !== 'None' ? ixpName : 'IXP';
+        node = `IXP-${name}`;
       }
+      if (!nodes.has(node)) {
+        nodes.set(node, { asn, name });
+        g.setNode(node, { width: NODE_WIDTH, height: NODE_HEIGHT });
+      }
+      const id = `e${previous}-${node}`;
+      if (previous !== node && !edges.has(id)) {
+        g.setEdge(previous, node);
+        edges.set(id, { id, source: previous, target: node });
+      }
+      previous = node;
     }
   }
 
   // Now that that nodes are added, create the layout.
-  dagre.layout(g, { rankdir: 'BT', align: 'UR' });
+  dagre.layout(g);
 
-  // Get the base ASN's positions.
-  const x = g.node(base.asn).x - NODE_WIDTH / 2;
-  const y = g.node(base.asn).y + NODE_HEIGHT * 6;
+  const hasChildren = new Set([...edges.values()].map(edge => edge.source));
 
-  yield {
-    id: base.asn,
-    type: 'ASNode',
-    position: { x, y },
-    data: {
-      asn: base.asn,
-      name: asnOrgs[base.asn]?.name || base.name,
-      hasChildren: true,
-      hasParents: false,
-    },
-  };
+  for (const edge of edges.values()) {
+    yield edge;
+  }
 
-  for (const [groupIdx, pathGroup] of asPaths.entries()) {
-    const nextGroup = groupIdx < totalPaths ? asPaths[groupIdx + 1] : [];
-    if (!isEqual(pathGroup, nextGroup)) {
-      for (const [idx, asn] of pathGroup.entries()) {
-        const node = `${groupIdx}-${asn}`;
-        const endIdx = pathGroup.length - 1;
-        const x = g.node(node).x - NODE_WIDTH / 2;
-        const y = g.node(node).y - NODE_HEIGHT * (idx * 6);
-
-        // Get each ASN's positions.
-        // Determine display name for this node. Prefer ASN org mapping, but
-        // for traceroute IXPs prefer the per-hop IXP name if present.
-        let nodeName = asnOrgs[asn]?.name || (asn === '0' ? 'Private/Unknown' : `AS${asn}`);
-        if (asn === 'IXP') {
-          const ixpName = pathGroupOrgs[groupIdx]?.[idx];
-          if (ixpName && ixpName !== 'None') {
-            nodeName = ixpName;
-          } else {
-            nodeName = 'IXP';
-          }
-        }
-
-        yield {
-          id: node,
-          type: 'ASNode',
-          position: { x, y },
-          data: {
-            asn: `${asn}`,
-            name: nodeName,
-            hasChildren: idx < endIdx,
-            hasParents: true,
-          },
-        };
-      }
-    }
+  for (const [id, { asn, name }] of [
+    [base.asn, { asn: base.asn, name: asnOrgs[base.asn]?.name || base.name }] as const,
+    ...nodes,
+  ]) {
+    const position = g.node(id);
+    yield {
+      id,
+      type: 'ASNode',
+      position: { x: position.x - NODE_WIDTH / 2, y: position.y - NODE_HEIGHT / 2 },
+      data: {
+        asn: `${asn}`,
+        name,
+        hasChildren: hasChildren.has(id),
+        hasParents: id !== base.asn,
+      },
+    };
   }
 }
