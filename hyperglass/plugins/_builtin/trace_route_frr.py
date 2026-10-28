@@ -197,7 +197,8 @@ class FrrTracerouteTable(TracerouteResult):
                     rtt1=rtt1,
                     rtt2=rtt2,
                     rtt3=rtt3,
-                    sent_count=None,
+                    # Probes on the line, timeouts included; the model derives loss.
+                    sent_count=min(len(re.findall(r"\*|\d+(?:\.\d+)?\s*ms", line)), 3) or None,
                     last_rtt=rtt1,
                     best_rtt=(
                         min(filter(None, [rtt1, rtt2, rtt3])) if any([rtt1, rtt2, rtt3]) else None
