@@ -8,6 +8,20 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- Parse Huawei IPv4 brief columns and IPv6 brief blocks for AS-path and community queries. Remove literal target quotes that VRP misinterprets. Reject incomplete tables and recognized VRP command errors (#20).
+- Treat Huawei BGP validity as distinct from RPKI validity. Preserve missing AS paths and communities instead of inventing attributes (#20, #22).
+- Separate RPKI cached results by backend and Routinator server URL (#22).
+- Set the EOS lab neighbour-wide prefix limits so full-table sessions do not remain in `Idle(MaxPath)` (#23).
+
+### Added
+
+- Add captured Huawei, EOS, FRR, and MikroTik parser regression fixtures, including complete traceroute output (#25).
+- Add repeatable browser validation for mixed structured/text devices and live-provider policy replay (#22, #23).
+
 ## 3.3.1 - 2026-10-27
 
 This patch keeps MikroTik community queries anchored and correctly escapes the RouterOS regex anchors, replacing the superseded substring form so community matching stays exact.

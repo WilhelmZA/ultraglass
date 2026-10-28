@@ -63,6 +63,7 @@ async def test_driver_reads_to_prompt_except_mikrotik(monkeypatch, platform):
         "BIRD 2.17.2 ready.\nsyntax error, unexpected CF_SYM_UNDEFINED",
         "traceroute: socket: Operation not permitted",
         "unknown argument: _13335$\nvalid commands/args:\n  <asnum>",
+        "    ^\nError: Wrong parameter found at '^' position.",
     ],
 )
 @pytest.mark.asyncio

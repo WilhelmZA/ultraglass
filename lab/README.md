@@ -46,6 +46,12 @@ Ultraglass UI: http://127.0.0.1:8001. Query a device by name: lab-frr, lab-bird,
 
 Run `python3 scripts/verify-issues.py --api http://127.0.0.1:8001/api --output /path/to/evidence lab-arista lab-frr lab-bird lab-mikrotik` to check mixed-vendor directive resolution and rejected command-injection inputs. The script retains complete API responses in `results.json`. Keep `logging.samples.enable` enabled to capture device output. Run against an isolated test instance when comparing code versions so cached results cannot mask a regression.
 
+Run `python3 scripts/verify-browser.py --url http://127.0.0.1:8001 --output /path/to/browser-evidence lab-huawei lab-arista lab-frr lab-bird lab-openbgpd lab-vyos` with Playwright and Chromium installed to test all five query types through mixed-vendor UI selection. The script includes MikroTik, opens each result panel, and checks rendered tables or text against the API response. It retains JSON evidence and viewport screenshots.
+
+Run `python3 scripts/verify-policies.py --routinator https://routinator.nlnetlabs.nl --output /path/to/policy-results.json` with development dependencies installed to replay captured EOS, FRR, and Huawei routes against live RPKI and enrichment providers. The 36 cases cover community deny/permit/name modes, Cloudflare/Routinator, and inline/deferred enrichment. This replay checks model data; it does not replace browser or live-device query validation.
+
+Set `ULTRAGLASS_LAB_API=http://127.0.0.1:8002/api` when running `pytest tests/` against an isolated API instance. The default remains port 8001.
+
 ## Devices
 
 | Node | Platform | Mgmt IP | Login | Notes |

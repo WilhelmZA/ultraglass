@@ -19,6 +19,7 @@ COMMAND_ERROR = re.compile(
     r"|vtysh_connect\([^\n]*Permission denied"
     r"|(?:[\w/.-]+:\s*)?(?:Permission denied|Operation not permitted)\s*$"
     r"|(?:traceroute|ping|bgpctl|birdc):[^\n]*(?:not permitted|Permission denied|invalid|unknown)"
+    r"|Error:\s*(?:Wrong parameter|Unrecognized command|Incomplete command)"
     r"|unknown argument:|failure:\s|bad command name\b)",
     re.IGNORECASE | re.MULTILINE,
 )

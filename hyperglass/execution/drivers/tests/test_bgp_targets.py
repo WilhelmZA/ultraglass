@@ -73,6 +73,21 @@ def test_bird_community():
     ]
 
 
+@pytest.mark.parametrize("suffix", ["", "_table"])
+@pytest.mark.parametrize(
+    "kind,target,keyword",
+    [
+        ("bgp_aspath", "_13335$", "regular-expression"),
+        ("bgp_community", "37195:302", "community"),
+    ],
+)
+def test_huawei_targets_are_not_literal_quoted(suffix, kind, target, keyword):
+    assert construct("huawei", kind + suffix, target) == [
+        f"display bgp routing-table {keyword} {target}",
+        f"display bgp ipv6 routing-table {keyword} {target}",
+    ]
+
+
 @pytest.mark.parametrize(
     "target,operator",
     [
