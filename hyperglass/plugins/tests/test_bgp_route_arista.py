@@ -71,3 +71,11 @@ def test_arista_merges_multiple_json_responses():
     result = parse_arista((sample, empty))
     assert result.count == 1
     assert len(result.routes) == 1
+
+
+def test_asdot_as_path_keeps_origin():
+    sample = SAMPLE.read_text().replace('"65002 65003"', '"65000 65000.100"')
+    sample = sample.replace('"asn": "65001"', '"asn": "0.65001"')
+    result = parse_arista((sample,))
+
+    assert result.routes[0].as_path == [65000, 4259840100]

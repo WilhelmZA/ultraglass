@@ -9,6 +9,7 @@ from pydantic import ConfigDict, model_validator
 
 # Project
 from hyperglass.log import log
+from hyperglass.util import parse_asn, parse_as_path
 from hyperglass.models.data import BGPRouteTable
 
 # Local
@@ -65,7 +66,9 @@ class FRRPath(_FRRBase):
     def validate_path(cls, values):
         """Extract meaningful data from FRR response."""
         new = values.copy()
-        new["aspath"] = values["aspath"]["segments"][0]["list"]
+        new["aspath"] = parse_as_path(values["aspath"]["segments"][0]["list"])
+        if "aggregatorAs" in values:
+            new["aggregatorAs"] = parse_asn(values["aggregatorAs"]) or 0
         community = values.get("community", {"list": []})
         new["community"] = community["list"]
         new["lastUpdate"] = values["lastUpdate"]["epoch"]

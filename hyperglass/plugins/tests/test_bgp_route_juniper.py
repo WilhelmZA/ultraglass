@@ -68,3 +68,23 @@ def test_juniper_bgp_route_aspath():
     with AS_PATH.open("r") as file:
         sample = file.read()
     return _tester(sample)
+
+
+def test_juniper_bgp_route_asdot():
+    sample = DIRECT.read_text().replace("1299 13335 I", "1299 65000.100 I")
+    plugin = BGPRoutePluginJuniper()
+    device = MockDevice(
+        name="Test Device",
+        address="127.0.0.1",
+        group="Test Network",
+        credential={"username": "", "password": ""},
+        platform="juniper",
+        structured_output=True,
+        directives=[],
+        attrs={"source4": "192.0.2.1", "source6": "2001:db8::1"},
+    )
+    query = type("Query", (), {"device": device})
+
+    result = plugin.process(output=(sample,), query=query)
+
+    assert result.routes[0].as_path == [1299, 4259840100]

@@ -9,6 +9,7 @@ from pydantic import ConfigDict
 
 # Project
 from hyperglass.log import log
+from hyperglass.util import parse_as_path
 from hyperglass.settings import Settings
 from hyperglass.models.data.bgp_route import BGPRoute, BGPRouteTable  # Add BGPRoute import
 
@@ -166,9 +167,9 @@ def _process_kv(route: dict, key: str, val: str):
     # v7 keys (with dot)
     elif key in (".as-path", "as-path", "bgp-as-path"):
         if val and val.lower() != "none":
-            # Find all numbers in the as-path string
-            nums = re.findall(r"\b\d{1,10}\b", val)
-            route["as_path"] = [int(n) for n in nums if 1 <= int(n) <= 4294967295]
+            # Find all asplain or asdot ASNs in the as-path string
+            nums = re.findall(r"\b\d{1,10}(?:\.\d{1,5})?\b", val)
+            route["as_path"] = [n for n in parse_as_path(nums) if n >= 1]
     elif key in (".origin", "origin", "bgp-origin"):
         route["origin"] = val
     elif key in (".med", "med", "bgp-med"):
