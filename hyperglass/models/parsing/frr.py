@@ -68,9 +68,17 @@ class FRRPath(_FRRBase):
     def validate_path(cls, values):
         """Extract meaningful data from FRR response."""
         new = values.copy()
-        # Local prefixes have an empty segment list.
+        # Local prefixes have an empty segment list. Confederation segments are
+        # internal to the confederation and are not part of the displayed path.
         segments = values["aspath"].get("segments", [])
-        new["aspath"] = parse_as_path([asn for s in segments for asn in s.get("list", [])])
+        new["aspath"] = parse_as_path(
+            [
+                asn
+                for segment in segments
+                if not segment.get("type", "").startswith("as-confed")
+                for asn in segment.get("list", [])
+            ]
+        )
         if "aggregatorAs" in values:
             new["aggregatorAs"] = parse_asn(values["aggregatorAs"]) or 0
         community = values.get("community", {"list": []})

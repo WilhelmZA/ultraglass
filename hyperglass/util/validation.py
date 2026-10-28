@@ -1,6 +1,7 @@
 """Validation Utilities."""
 
 # Standard Library
+import re
 import typing as t
 
 # Third Party
@@ -96,6 +97,23 @@ def parse_asn(value: t.Union[int, str]) -> t.Optional[int]:
 
 
 def parse_as_path(value: t.Union[str, t.Sequence[t.Union[int, str]]]) -> t.List[int]:
-    """Convert an AS path string or list to integer ASNs, skipping non-ASN tokens."""
-    tokens = value.split() if isinstance(value, str) else value
-    return [asn for asn in (parse_asn(token) for token in tokens) if asn is not None]
+    """Convert an AS path string or list to integer ASNs, skipping non-ASN tokens.
+
+    Confederation segments in parentheses are internal to the confederation and are
+    dropped. AS_SET members in brackets or braces are kept.
+    """
+    if not isinstance(value, str):
+        return [asn for asn in (parse_asn(token) for token in value) if asn is not None]
+
+    as_path = []
+    confed_depth = 0
+    for token in re.findall(r"[()]|[^\s(),\[\]{}]+", value):
+        if token == "(":
+            confed_depth += 1
+        elif token == ")":
+            confed_depth = max(confed_depth - 1, 0)
+        elif confed_depth == 0:
+            asn = parse_asn(token)
+            if asn is not None:
+                as_path.append(asn)
+    return as_path

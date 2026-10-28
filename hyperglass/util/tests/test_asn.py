@@ -34,3 +34,10 @@ def test_parse_as_path_mixed():
     assert parse_as_path("1299 65000.100 13335 I") == [1299, 4259840100, 13335]
     assert parse_as_path(["174", 13335, "1.10"]) == [174, 13335, 65546]
     assert parse_as_path("") == []
+
+
+def test_parse_as_path_confederation_and_sets():
+    assert parse_as_path("(65527) 1299 13335 I") == [1299, 13335]
+    assert parse_as_path("(65527 65528) 64500 ?") == [64500]
+    assert parse_as_path("1299 [64500 64501] I") == [1299, 64500, 64501]
+    assert parse_as_path("1299 {64500,64501}") == [1299, 64500, 64501]
