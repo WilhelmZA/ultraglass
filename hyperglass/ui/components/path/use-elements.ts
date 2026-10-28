@@ -116,7 +116,6 @@ export function* buildElements(
     marginx: 20,
     marginy: 20,
     rankdir: 'BT',
-    align: 'UR',
     ranksep: NODE_HEIGHT * 2,
   });
   g.setDefaultEdgeLabel(() => ({}));
