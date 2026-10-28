@@ -112,7 +112,13 @@ export function* buildElements(
   }
 
   const g = new dagre.graphlib.Graph();
-  g.setGraph({ marginx: 20, marginy: 20, rankdir: 'BT', align: 'UR' });
+  g.setGraph({
+    marginx: 20,
+    marginy: 20,
+    rankdir: 'BT',
+    align: 'UR',
+    ranksep: NODE_HEIGHT * 2,
+  });
   g.setDefaultEdgeLabel(() => ({}));
 
   // Set the origin (i.e., the hyperglass user) at the base.
