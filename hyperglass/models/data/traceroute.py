@@ -5,7 +5,7 @@ import typing as t
 from ipaddress import ip_address, AddressValueError
 
 # Third Party
-from pydantic import field_validator, computed_field
+from pydantic import field_validator, model_validator, computed_field
 
 # Project
 from hyperglass.external.ip_enrichment import TargetDetail
@@ -52,6 +52,26 @@ class TracerouteHop(HyperglassModel):
             except AddressValueError:
                 return None
         return value
+
+    @model_validator(mode="after")
+    def derive_statistics(self) -> "TracerouteHop":
+        """Fill loss/last/best/worst from the probe RTTs when the parser has none.
+
+        MikroTik reports these natively. Other parsers only see per-probe RTTs, so
+        derive them here; loss needs `sent_count` (probes on the line, timeouts
+        included) because a missing RTT alone cannot tell a timeout from no probe.
+        """
+        rtts = [rtt for rtt in (self.rtt1, self.rtt2, self.rtt3) if rtt is not None]
+        if self.last_rtt is None and rtts:
+            self.last_rtt = rtts[-1]
+        if self.best_rtt is None and rtts:
+            self.best_rtt = min(rtts)
+        if self.worst_rtt is None and rtts:
+            self.worst_rtt = max(rtts)
+        if self.loss_pct is None and self.sent_count:
+            replies = min(len(rtts), self.sent_count)
+            self.loss_pct = round((self.sent_count - replies) * 100 / self.sent_count)
+        return self
 
     @property
     def ip_display(self) -> t.Optional[str]:
