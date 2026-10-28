@@ -27,6 +27,25 @@ INDIRECT = Path(__file__).parent.parent.parent.parent / ".samples" / "juniper_ro
 AS_PATH = Path(__file__).parent.parent.parent.parent / ".samples" / "juniper_route_aspath.xml"
 
 
+def _parse(sample: str):
+    plugin = BGPRoutePluginJuniper()
+
+    device = MockDevice(
+        name="Test Device",
+        address="127.0.0.1",
+        group="Test Network",
+        credential={"username": "", "password": ""},
+        platform="juniper",
+        structured_output=True,
+        directives=[],
+        attrs={"source4": "192.0.2.1", "source6": "2001:db8::1"},
+    )
+
+    query = type("Query", (), {"device": device})
+
+    return plugin.process(output=(sample,), query=query)
+
+
 def _tester(sample: str):
     plugin = BGPRoutePluginJuniper()
 
@@ -72,19 +91,13 @@ def test_juniper_bgp_route_aspath():
 
 def test_juniper_bgp_route_asdot():
     sample = DIRECT.read_text().replace("1299 13335 I", "1299 65000.100 I")
-    plugin = BGPRoutePluginJuniper()
-    device = MockDevice(
-        name="Test Device",
-        address="127.0.0.1",
-        group="Test Network",
-        credential={"username": "", "password": ""},
-        platform="juniper",
-        structured_output=True,
-        directives=[],
-        attrs={"source4": "192.0.2.1", "source6": "2001:db8::1"},
-    )
-    query = type("Query", (), {"device": device})
-
-    result = plugin.process(output=(sample,), query=query)
+    result = _parse(sample)
 
     assert result.routes[0].as_path == [1299, 4259840100]
+
+
+def test_juniper_bgp_route_confederation():
+    sample = DIRECT.read_text().replace("1299 13335 I", "(65527) 1299 13335 I")
+    result = _parse(sample)
+
+    assert result.routes[0].as_path == [1299, 13335]
