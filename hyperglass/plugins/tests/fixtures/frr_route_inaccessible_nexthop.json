@@ -1,0 +1,49 @@
+
+{
+  "prefix":"198.18.10.0/24",
+  "version":0,
+  "paths":[
+    {
+      "aspath":{
+        "string":"65000",
+        "segments":[
+          {
+            "type":"as-sequence",
+            "list":[
+              65000
+            ]
+          }
+        ],
+        "length":1
+      },
+      "origin":"incomplete",
+      "valid":false,
+      "version":0,
+      "addpathRxId":1,
+      "addpathTxId":0,
+      "addpathTxIdAll":0,
+      "addpathTxIdBestPerAS":0,
+      "addpathTxIdBestSelected":0,
+      "lastUpdate":{
+        "epoch":1793162069,
+        "string":"Wed Oct 28 04:34:29 2026\n"
+      },
+      "nexthops":[
+        {
+          "ip":"10.99.99.99",
+          "hostname":"core",
+          "afi":"ipv4",
+          "accessible":false,
+          "importCheckEnabled":true,
+          "used":true
+        }
+      ],
+      "peer":{
+        "peerId":"10.250.1.0",
+        "routerId":"10.250.0.1",
+        "hostname":"core",
+        "type":"external"
+      }
+    }
+  ]
+}

@@ -53,3 +53,40 @@ def test_frr_route_sample():
     with SAMPLE.open("r") as file:
         sample = file.read()
     return _tester(sample)
+
+
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def _process(sample: str):
+    plugin = BGPRoutePluginFrr()
+    device = MockDevice(
+        name="Test Device",
+        address="127.0.0.1",
+        group="Test Network",
+        credential={"username": "", "password": ""},
+        platform="frr",
+        structured_output=True,
+        directives=["__hyperglass_frr_bgp_route_table__"],
+        attrs={"source4": "192.0.2.1", "source6": "2001:db8::1"},
+    )
+    query = type("Query", (), {"device": device})
+    return plugin.process(output=(sample,), query=query)
+
+
+def test_frr_route_not_in_table_is_empty():
+    assert _process((FIXTURES / "frr_route_empty.json").read_text()) is None
+
+
+def test_frr_local_prefix_has_empty_as_path():
+    result = _process((FIXTURES / "frr_route_local.json").read_text())
+
+    assert result.count == 1
+    assert result.routes[0].as_path == []
+
+
+def test_frr_inaccessible_next_hop_without_metric():
+    result = _process((FIXTURES / "frr_route_inaccessible_nexthop.json").read_text())
+
+    assert result.count == 1
+    assert result.routes[0].next_hop == "10.99.99.99"
