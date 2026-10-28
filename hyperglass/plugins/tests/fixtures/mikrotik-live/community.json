@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-10-28T09:32:01.171950+00:00",
+  "device": {
+    "id": "lab-mikrotik",
+    "name": "lab-mikrotik",
+    "platform": "mikrotik_routeros"
+  },
+  "query": {
+    "type": "__hyperglass_mikrotik_bgp_community_table__",
+    "target": "65000:777",
+    "location": "lab-mikrotik"
+  },
+  "raw": [
+    "Flags: X - disabled, F - filtered, U - unreachable, A - active; c - connect, s - static, r - rip, b - bgp, o - ospf, i - isis, d - dhcp, v - vpn, m - modem, a - ldp-address, l - ldp-mapping, g - slaac, y - bgp-mpls-vpn; H - hw-offloaded; + - ecmp, B - blackhole \n Ab   afi=ip4 contribution=active dst-address=1.0.0.0/24 routing-table=main gateway=10.250.4.0 immediate-gw=10.250.4.0%ether2 distance=20 scope=40 target-scope=10 belongs-to=\"bgp-IP-10.250.4.0\" \n       bgp.peer-cache-id=*2800002 .as-path=\"65000,64999,13335\" .communities=65000:777 .large-communities=65000:777:1 .origin=incomplete \n       debug.fwp-ptr=0x202C2360 \n\n Ab   afi=ip6 contribution=active dst-address=2606:4700:4700::/48 routing-table=main gateway=fd00:250:4:: immediate-gw=fd00:250:4::%ether2 distance=20 scope=40 target-scope=10 belongs-to=\"bgp-IP6-fd00:250:4::\" \n       bgp.peer-cache-id=*2800001 .as-path=\"65000,64999,13335\" .communities=65000:777 .large-communities=65000:777:1 .origin=incomplete \n       debug.fwp-ptr=0x202C23C0"
+  ]
+}

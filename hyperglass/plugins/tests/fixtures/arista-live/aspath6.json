@@ -1,0 +1,51 @@
+{
+    "vrfs": {
+        "default": {
+            "vrf": "default",
+            "routerId": "10.250.7.1",
+            "asn": "65007",
+            "bgpRouteEntries": {
+                "2606:4700:4700::/48": {
+                    "address": "2606:4700:4700::",
+                    "maskLength": 48,
+                    "bgpRoutePaths": [
+                        {
+                            "nextHop": "fd00:250:7::",
+                            "reasonNotBestpath": "noReason",
+                            "localPreference": 100,
+                            "weight": 0,
+                            "tag": 0,
+                            "med": 0,
+                            "routeType": {
+                                "stale": false,
+                                "valid": true,
+                                "suppressed": false,
+                                "active": false,
+                                "backup": false,
+                                "ecmpHead": false,
+                                "ecmp": false,
+                                "ecmpContributor": false,
+                                "atomicAggregator": false,
+                                "queued": false,
+                                "luRoute": false,
+                                "sixPeRoute": false,
+                                "ucmp": false,
+                                "implicitEcmpFast": false,
+                                "origin": "Incomplete"
+                            },
+                            "peerEntry": {
+                                "peerAddr": "fd00:250:7::",
+                                "peerRouterId": "10.250.0.1"
+                            },
+                            "asPathEntry": {
+                                "asPathType": "External",
+                                "asPath": "65000 64999 13335 ?"
+                            }
+                        }
+                    ],
+                    "totalPaths": 1
+                }
+            }
+        }
+    }
+}

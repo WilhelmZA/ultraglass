@@ -1,0 +1,9 @@
+{
+ "vrfId": 0,
+ "vrfName": "default",
+ "tableVersion": 1097289,
+ "routerId": "10.250.1.1",
+ "defaultLocPrf": 100,
+ "localAS": 65001,
+ "routes": { "1.0.0.0/24": [{"valid":true,"pathFrom":"external","prefix":"1.0.0.0","prefixLen":24,"network":"1.0.0.0/24","version":1097289,"weight":0,"peerId":"10.250.1.0","path":"65000 64999 13335","origin":"incomplete","nexthops":[{"ip":"10.250.1.0","hostname":"core","afi":"ipv4","used":true}]}]
+ }  } 

@@ -1,0 +1,9 @@
+{
+ "vrfId": 0,
+ "vrfName": "default",
+ "tableVersion": 264420,
+ "routerId": "10.250.1.1",
+ "defaultLocPrf": 100,
+ "localAS": 65001,
+ "routes": { "2606:4700:4700::/48": [{"valid":true,"pathFrom":"external","prefix":"2606:4700:4700::","prefixLen":48,"network":"2606:4700:4700::/48","version":264420,"weight":0,"peerId":"fd00:250:1::","path":"65000 64999 13335","origin":"incomplete","nexthops":[{"ip":"fd00:250:1::","hostname":"core","afi":"ipv6","scope":"global","used":true}]}]
+ }  } 
