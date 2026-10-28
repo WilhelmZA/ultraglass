@@ -1,0 +1,46 @@
+BIRD 2.17.2 ready.
+Table master4:
+154.197.75.0/24      unicast [core4 03:23:05.243] * (100) [AS209242i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 37239 13335 209242
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 0.90.0.146 AS13335
+	BGP.community: (37195,302)
+154.117.213.0/24     unicast [core4 03:23:05.140] * (100) [AS327799i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 37239 16637 36890 327799
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.community: (37195,302)
+84.20.201.0/24       unicast [core4 03:22:38.866] * (100) [AS16096i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 37239 13335 16096
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 0.90.0.146 AS13335
+	BGP.community: (37195,302)
+54.115.104.0/21      unicast [core4 03:21:42.083] * (100) [AS16509i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 37239 16509
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.community: (37195,302)
+34.95.192.0/20       unicast [core4 03:21:36.271] * (100) [AS396982i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 37239 15169 396982
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.community: (37195,302)

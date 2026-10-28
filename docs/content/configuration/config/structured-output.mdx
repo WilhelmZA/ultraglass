@@ -5,6 +5,7 @@ import { Callout } from "nextra/components";
 Devices that return structured or easily parsed data can display their response in a table, or as JSON through the REST API. The following platforms currently have structured data support in Ultraglass:
 
 -   Arista EOS
+-   BIRD (opt-in with `structured_output: true`; parses `show route all` text. BIRD prints no route age or RPKI state, so both show as unknown)
 -   FRRouting
 -   Huawei VRP
 -   Juniper Junos

@@ -1,0 +1,129 @@
+BIRD 2.17.2 ready.
+Table master4:
+1.1.1.0/24           unicast [core4 03:22:16.604] * (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 37239 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.community: (37195,302)
+                     unicast [core4 03:24:33.622] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 32653 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.community: (13335,10045)
+                     unicast [core4 03:24:33.622] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 3491 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.community: (3491,500) (3491,517) (3491,9001) (3491,50000) (3491,62210) (3491,62220) (13335,10045)
+                     unicast [core4 03:24:33.622] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 199524 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+                     unicast [core4 03:24:33.622] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 328206 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.community: (65000,1000) (65000,1010)
+                     unicast [core4 03:24:33.622] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 37697 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.community: (37697,210)
+                     unicast [core4 03:24:33.622] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 917 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.community: (917,59001) (13335,10045) (57695,12000)
+                     unicast [core4 03:24:33.622] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 328320 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.community: (13335,10045)
+                     unicast [core4 03:24:33.623] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 327983 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+                     unicast [core4 03:24:33.623] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 37680 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.community: (13335,10045) (37680,0) (37680,293) (37680,3001) (37680,50033)
+                     unicast [core4 03:24:33.623] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 328137 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+                     unicast [core4 03:24:33.623] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 327804 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.large_community: (327804, 111, 10001) (327804, 555, 13335) (327804, 888, 1)
+                     unicast [core4 03:24:33.623] (100) [AS13335i]
+	via 10.250.2.0 on eth1
+	Type: BGP univ
+	BGP.origin: IGP
+	BGP.as_path: 65000 327960 13335
+	BGP.next_hop: 10.250.2.0
+	BGP.local_pref: 100
+	BGP.atomic_aggr: 
+	BGP.aggregator: 10.34.16.20 AS13335
+	BGP.community: (13335,10045)

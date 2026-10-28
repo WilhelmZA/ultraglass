@@ -2,6 +2,7 @@
 
 # Local
 from .bgp_route_frr import BGPRoutePluginFrr
+from .bgp_route_bird import BGPRoutePluginBird
 from .remove_command import RemoveCommand
 from .bgp_route_arista import BGPRoutePluginArista
 from .bgp_route_huawei import BGPRoutePluginHuawei
@@ -19,6 +20,7 @@ from .bgp_route_enrichment import ZBgpRouteEnrichment
 
 __all__ = (
     "BGPRoutePluginArista",
+    "BGPRoutePluginBird",
     "BGPRoutePluginFrr",
     "BGPRoutePluginJuniper",
     "BGPRoutePluginOpenBGPD",
