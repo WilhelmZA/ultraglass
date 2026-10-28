@@ -1,0 +1,205 @@
+{
+	"rib": [
+		{
+			"prefix": "1.0.0.0/24",
+			"aspath": "65000 37239 13335",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 1,
+			"valid": true,
+			"best": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 5,
+			"last_update": "01:22:28",
+			"last_update_sec": 4948,
+			"communities": [
+				"37195:302"
+			],
+			"attributes": [
+				{
+					"type": "Atomic Aggregate",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": false
+					},
+					"length": 0
+				},
+				{
+					"type": "Aggregator",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": true
+					},
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "1.1.1.0/24",
+			"aspath": "65000 37239 13335",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 1,
+			"valid": true,
+			"best": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 5,
+			"last_update": "01:22:28",
+			"last_update_sec": 4948,
+			"communities": [
+				"37195:302"
+			],
+			"attributes": [
+				{
+					"type": "Atomic Aggregate",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": false
+					},
+					"length": 0
+				},
+				{
+					"type": "Aggregator",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": true
+					},
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "1.118.3.0/24",
+			"aspath": "65000 37239 16509",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 1,
+			"valid": true,
+			"best": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 5,
+			"last_update": "01:24:44",
+			"last_update_sec": 5084,
+			"communities": [
+				"37195:302"
+			]
+		},
+		{
+			"prefix": "1.118.79.0/24",
+			"aspath": "65000 37239 13335 137753",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 1,
+			"valid": true,
+			"best": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 5,
+			"last_update": "01:24:44",
+			"last_update_sec": 5084,
+			"communities": [
+				"37195:302"
+			],
+			"attributes": [
+				{
+					"type": "Atomic Aggregate",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": false
+					},
+					"length": 0
+				},
+				{
+					"type": "Aggregator",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": true
+					},
+					"length": 8,
+					"AS": 13335,
+					"router_id": "0.90.0.147"
+				}
+			]
+		},
+		{
+			"prefix": "1.178.7.0/24",
+			"aspath": "65000 37239 16509",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 1,
+			"valid": true,
+			"best": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 5,
+			"last_update": "01:24:44",
+			"last_update_sec": 5084,
+			"communities": [
+				"37195:302"
+			]
+		}
+	]
+}

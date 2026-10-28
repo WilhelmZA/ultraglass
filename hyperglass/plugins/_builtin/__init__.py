@@ -7,6 +7,7 @@ from .bgp_route_arista import BGPRoutePluginArista
 from .bgp_route_huawei import BGPRoutePluginHuawei
 from .bgp_routestr_huawei import BGPSTRRoutePluginHuawei
 from .bgp_route_juniper import BGPRoutePluginJuniper
+from .bgp_route_openbgpd import BGPRoutePluginOpenBGPD
 from .mikrotik_garbage_output import MikrotikGarbageOutput
 from .bgp_routestr_mikrotik import BGPSTRRoutePluginMikrotik
 from .trace_route_frr import TraceroutePluginFrr
@@ -20,6 +21,7 @@ __all__ = (
     "BGPRoutePluginArista",
     "BGPRoutePluginFrr",
     "BGPRoutePluginJuniper",
+    "BGPRoutePluginOpenBGPD",
     "BGPRoutePluginHuawei",
     "BGPSTRRoutePluginHuawei",
     "MikrotikGarbageOutput",

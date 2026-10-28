@@ -1,0 +1,30 @@
+{
+	"rib": [
+		{
+			"prefix": "198.51.100.0/24",
+			"aspath": "65000",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": { "description": "core4", "remote_addr": "10.250.3.0", "bgp_id": "10.250.0.1" },
+			"path_id": 6,
+			"valid": true,
+			"best": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "incomplete",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 5,
+			"last_update": "00:00:03",
+			"last_update_sec": 3,
+			"communities": [
+				"65000:100"
+			],
+			"large_communities": [
+				"65000:1:1"
+			]
+		}
+	]
+}

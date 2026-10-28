@@ -15,6 +15,9 @@ __all__ = (
     "OpenBGPD_BGPRoute",
     "OpenBGPD_Ping",
     "OpenBGPD_Traceroute",
+    "OpenBGPD_BGPRouteTable",
+    "OpenBGPD_BGPASPathTable",
+    "OpenBGPD_BGPCommunityTable",
 )
 
 NAME = "OpenBGPD"
@@ -36,6 +39,7 @@ OpenBGPD_BGPRoute = BuiltinDirective(
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
+    table_output="__hyperglass_openbgpd_bgp_route_table__",
     platforms=PLATFORMS,
 )
 
@@ -69,6 +73,7 @@ OpenBGPD_BGPASPath = BuiltinDirective(
         )
     ],
     field=Text(description="ASN, _ASN_, _ASN$, or ^ASN_"),
+    table_output="__hyperglass_openbgpd_bgp_aspath_table__",
     platforms=PLATFORMS,
 )
 
@@ -86,6 +91,7 @@ OpenBGPD_BGPCommunity = BuiltinDirective(
         )
     ],
     field=Text(description="BGP Community String"),
+    table_output="__hyperglass_openbgpd_bgp_community_table__",
     platforms=PLATFORMS,
 )
 
@@ -124,5 +130,77 @@ OpenBGPD_Traceroute = BuiltinDirective(
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
+    platforms=PLATFORMS,
+)
+
+# Table Output Directives
+# `bgpctl -j show rib detail` returns JSON with communities for every path.
+
+OpenBGPD_BGPRouteTable = BuiltinDirective(
+    id="__hyperglass_openbgpd_bgp_route_table__",
+    name="BGP Route",
+    rules=[
+        RuleWithIPv4(
+            condition="0.0.0.0/0",
+            action="permit",
+            command="bgpctl -j show rib detail inet {target}",
+        ),
+        RuleWithIPv6(
+            condition="::/0",
+            action="permit",
+            command="bgpctl -j show rib detail inet6 {target}",
+        ),
+    ],
+    field=Text(description="IP Address, Prefix, or Hostname"),
+    platforms=PLATFORMS,
+)
+
+OpenBGPD_BGPASPathTable = BuiltinDirective(
+    id="__hyperglass_openbgpd_bgp_aspath_table__",
+    name="BGP AS Path",
+    rules=[
+        RuleWithPattern(
+            condition=r"^_?[0-9]+\$$",
+            action="permit",
+            commands=[
+                "bgpctl -j show rib detail inet source-as {target}",
+                "bgpctl -j show rib detail inet6 source-as {target}",
+            ],
+        ),
+        RuleWithPattern(
+            condition=r"^\^[0-9]+_$",
+            action="permit",
+            commands=[
+                "bgpctl -j show rib detail inet peer-as {target}",
+                "bgpctl -j show rib detail inet6 peer-as {target}",
+            ],
+        ),
+        RuleWithPattern(
+            condition=r"^(?:[0-9]+|_[0-9]+_)$",
+            action="permit",
+            commands=[
+                "bgpctl -j show rib detail inet as {target}",
+                "bgpctl -j show rib detail inet6 as {target}",
+            ],
+        )
+    ],
+    field=Text(description="ASN, _ASN_, _ASN$, or ^ASN_"),
+    platforms=PLATFORMS,
+)
+
+OpenBGPD_BGPCommunityTable = BuiltinDirective(
+    id="__hyperglass_openbgpd_bgp_community_table__",
+    name="BGP Community",
+    rules=[
+        RuleWithPattern(
+            condition="*",
+            action="permit",
+            commands=[
+                "bgpctl -j show rib detail inet community {target}",
+                "bgpctl -j show rib detail inet6 community {target}",
+            ],
+        )
+    ],
+    field=Text(description="BGP Community String"),
     platforms=PLATFORMS,
 )

@@ -1,0 +1,253 @@
+{
+	"rib": [
+		{
+			"prefix": "1.0.0.0/24",
+			"aspath": "65000 37239 13335",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 1,
+			"valid": true,
+			"best": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 5,
+			"last_update": "01:22:26",
+			"last_update_sec": 4946,
+			"communities": [
+				"37195:302"
+			],
+			"attributes": [
+				{
+					"type": "Atomic Aggregate",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": false
+					},
+					"length": 0
+				},
+				{
+					"type": "Aggregator",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": true
+					},
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "1.0.0.0/24",
+			"aspath": "65000 32653 13335",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 2,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:26",
+			"last_update_sec": 4946,
+			"communities": [
+				"13335:10045"
+			],
+			"attributes": [
+				{
+					"type": "Atomic Aggregate",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": false
+					},
+					"length": 0
+				},
+				{
+					"type": "Aggregator",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": true
+					},
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "1.0.0.0/24",
+			"aspath": "65000 3491 13335",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 3,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:26",
+			"last_update_sec": 4946,
+			"communities": [
+				"3491:500",
+				"3491:517",
+				"3491:9001",
+				"3491:50000",
+				"3491:62210",
+				"3491:62220",
+				"13335:10045"
+			],
+			"attributes": [
+				{
+					"type": "Atomic Aggregate",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": false
+					},
+					"length": 0
+				},
+				{
+					"type": "Aggregator",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": true
+					},
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "1.0.0.0/24",
+			"aspath": "65000 199524 13335",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 4,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:26",
+			"last_update_sec": 4946,
+			"attributes": [
+				{
+					"type": "Atomic Aggregate",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": false
+					},
+					"length": 0
+				},
+				{
+					"type": "Aggregator",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": true
+					},
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		},
+		{
+			"prefix": "1.0.0.0/24",
+			"aspath": "65000 328206 13335",
+			"exit_nexthop": "10.250.3.0",
+			"true_nexthop": "10.250.3.1",
+			"neighbor": {
+				"description": "core4",
+				"remote_addr": "10.250.3.0",
+				"bgp_id": "10.250.0.1"
+			},
+			"path_id": 5,
+			"valid": true,
+			"ecmp": true,
+			"source": "external",
+			"ovs": "not-found",
+			"avs": "unknown",
+			"origin": "IGP",
+			"metric": 0,
+			"localpref": 100,
+			"weight": 0,
+			"dmetric": 4,
+			"last_update": "01:22:26",
+			"last_update_sec": 4946,
+			"communities": [
+				"65000:1000",
+				"65000:1010"
+			],
+			"attributes": [
+				{
+					"type": "Atomic Aggregate",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": false
+					},
+					"length": 0
+				},
+				{
+					"type": "Aggregator",
+					"flags": {
+						"partial": false,
+						"transitive": true,
+						"optional": true
+					},
+					"length": 8,
+					"AS": 13335,
+					"router_id": "10.34.16.20"
+				}
+			]
+		}
+	]
+}
