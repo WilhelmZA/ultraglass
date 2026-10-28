@@ -1,0 +1,75 @@
+{
+    "vrfs": {
+        "default": {
+            "vrf": "default",
+            "routerId": "10.250.7.1",
+            "asn": "65007",
+            "bgpRouteEntries": {
+                "198.51.100.0/24": {
+                    "address": "198.51.100.0",
+                    "maskLength": 24,
+                    "bgpRoutePaths": [
+                        {
+                            "nextHop": "10.250.7.0",
+                            "reasonNotBestpath": "noReason",
+                            "localPreference": 100,
+                            "weight": 0,
+                            "tag": 0,
+                            "med": 0,
+                            "routeType": {
+                                "stale": false,
+                                "valid": true,
+                                "suppressed": false,
+                                "active": true,
+                                "backup": false,
+                                "ecmpHead": false,
+                                "ecmp": false,
+                                "ecmpContributor": false,
+                                "atomicAggregator": false,
+                                "queued": false,
+                                "luRoute": false,
+                                "sixPeRoute": false,
+                                "ucmp": false,
+                                "implicitEcmpFast": false,
+                                "origin": "Incomplete"
+                            },
+                            "peerEntry": {
+                                "peerAddr": "10.250.7.0",
+                                "peerRouterId": "10.250.0.1"
+                            },
+                            "asPathEntry": {
+                                "asPathType": "External",
+                                "asPath": "65000"
+                            },
+                            "routeDetail": {
+                                "nextHopVrfName": "",
+                                "communityList": [
+                                    "65000:100"
+                                ],
+                                "extCommunityList": [],
+                                "extCommunityListRaw": [],
+                                "largeCommunityList": [
+                                    "65000:1:1"
+                                ],
+                                "rxPathId": 1,
+                                "rxSafi": "Unicast",
+                                "origin": "Incomplete",
+                                "recvdFromRRClient": false,
+                                "recmpEligible": false,
+                                "tunnelRibEligible": false,
+                                "igpMetric": 0
+                            },
+                            "timestamp": 1793162219
+                        }
+                    ],
+                    "totalAdvertisedPeers": 0,
+                    "bgpAdvertisedPeers": {
+                        "peerList": []
+                    },
+                    "bgpAdvertisedPeerGroups": {},
+                    "totalPaths": 1
+                }
+            }
+        }
+    }
+}
