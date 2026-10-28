@@ -56,11 +56,13 @@ def check_panel(page, device, kind):
         expect(tooltip).to_be_visible(timeout=10000)
         result["asn_tooltip"] = tooltip.inner_text()
         page.mouse.move(0, 0)
+        expect(page.get_by_role("tooltip")).to_have_count(0, timeout=10000)
         cells.nth(column(panel, "RPKI State")).locator("div").first.hover()
         rpki = page.get_by_role("tooltip").filter(has_text="Valid")
         expect(rpki).to_be_visible(timeout=10000)
         result["rpki_tooltip"] = rpki.inner_text()
         page.mouse.move(0, 0)
+        expect(page.get_by_role("tooltip")).to_have_count(0, timeout=10000)
 
     if device in NAMED[kind]:
         cells.nth(column(panel, "Communities")).locator("button").first.click()
