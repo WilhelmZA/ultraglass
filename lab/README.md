@@ -23,7 +23,7 @@ A containerlab topology for testing ultraglass against every supported platform,
 ./scripts/fetch-table.sh           # download rrc19 full table into data/
 ```
 
-MikroTik and Arista images are built separately (see their sections below). Juniper and the other VM vendors need their own images too.
+MikroTik and Arista images are built separately (see their sections below). Build Juniper with `sh scripts/build-junos.sh <vjunos.qcow2>` and Cisco IOL with `sh scripts/build-cisco-iol.sh <refplat.iso>`.
 
 ## Start and stop
 
@@ -34,7 +34,7 @@ MikroTik and Arista images are built separately (see their sections below). Juni
 ./lab-status.sh                    # containers + BGP session state
 ```
 
-`lab-up.sh` is safe to run after a reboot. GoBGP keeps the table in memory, so it is injected fresh on every start. The single-device form (`./lab-up.sh <name>`, one of frr, bird, openbgpd, mikrotik, arista, vyos, huawei) starts only that device plus the core, so it runs on far less RAM than the full lab.
+`lab-up.sh` is safe to run after a reboot. GoBGP keeps the table in memory, so it is injected fresh on every start. The single-device form (`./lab-up.sh <name>`, one of frr, bird, openbgpd, mikrotik, arista, vyos, huawei, junos, iol, ioll2) starts only that device plus the core, so it runs on far less RAM than the full lab. Use it on a stopped lab; Containerlab rejects a node filter that excludes running nodes during reconciliation.
 
 Low-RAM machines can also cap the table size:
 
@@ -42,9 +42,27 @@ Low-RAM machines can also cap the table size:
 PREFIXES=50000 ./lab-up.sh frr     # inject 50k prefixes per family instead of the full ~1.1M
 ```
 
+### BGP session control
+
+Keep BGP sessions disabled for routers that are not under test to reduce routing-table RAM use. Enable both IPv4 and IPv6 sessions when testing a router. Leave the core running to retain the injected table.
+
+Use `disable` or `enable` on the core. Select the router numbers in the loop: FRR `1`, BIRD `2`, OpenBGPD `3`, MikroTik `4`, VyOS `5`, Junos `6`, Arista `7`, Huawei `8`, Cisco IOL `9`, Cisco IOL-L2 `10`.
+
+```sh
+# Disable unused routers while testing Cisco and Junos.
+ACTION=disable                  # change to enable to restore selected sessions
+for N in 1 2 3 4 5 7 8; do
+    docker exec clab-ultraglass-core gobgp neighbor "10.250.$N.1" "$ACTION"
+    docker exec clab-ultraglass-core gobgp neighbor "fd00:250:$N::1" "$ACTION"
+done
+./lab-status.sh
+```
+
+Disabled sessions show `Idle(Admin)`. Enabled sessions should reach `Establ`. These changes are runtime-only; repeat the selection after the core restarts. Current selection, set on 28 October 2026: Junos, Cisco IOL and Cisco IOL-L2 enabled; all other router sessions disabled.
+
 Two Ultraglass instances run against the same devices so every query can be cross-checked. http://127.0.0.1:8001 (`configs/ultraglass/`) sets `structured_output: true` on every device, so each platform returns whatever structured parsers it has. http://127.0.0.1:8002 (`configs/ultraglass-text/`) sets `structured_output: false` on every device and has no `structured` block, so every query returns raw device text. Each instance uses its own Redis database (1 and 2), so neither can serve the other's cached result. BIRD, OpenBGPD and VyOS have structured traceroute only; their BGP queries return text on both instances.
 
-Query a device by name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei. Run `./scripts/smoke-test.py` for every query type against every running device.
+Query a device by name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei, lab-junos, lab-iol, lab-ioll2. Run `./scripts/smoke-test.py lab-junos lab-iol lab-ioll2` to check the new nodes through the API.
 
 Run `python3 scripts/verify-issues.py --api http://127.0.0.1:8001/api --output /path/to/evidence lab-arista lab-frr lab-bird lab-mikrotik` to check mixed-vendor directive resolution and rejected command-injection inputs. The script retains complete API responses in `results.json`. Keep `logging.samples.enable` enabled to capture device output. Run against an isolated test instance when comparing code versions so cached results cannot mask a regression.
 
@@ -64,13 +82,50 @@ Set `ULTRAGLASS_LAB_API=http://127.0.0.1:8003/api` when running `pytest tests/` 
 | openbgpd | openbgpd | 192.168.250.13 | root / lg | bgpctl needs root socket |
 | mikrotik | mikrotik_routeros | 192.168.250.14 | admin / admin | CHR 7.16.2, full table, eBGP to core |
 | vyos | vyos | 192.168.250.15 | admin / admin | VyOS 1.5 stream, full table, SSH enabled in boot config |
+| junos | juniper | 192.168.250.16 | admin / admin@123 | vJunos-router 26.2R1.7, vrnetlab AMD patch |
 | arista | arista_eos | 192.168.250.17 | admin / admin | cEOS 4.36.3M, full table, structured output |
 | huawei | huawei (VRP) | 192.168.250.18 | admin / admin | CE12800 V200R005 (vrnetlab qemu), capped table, structured output |
+| iol | cisco_ios | 192.168.250.19 | admin / admin | IOS XE 17.18.2 router, vrnetlab IOL wrapper, 4 GB router memory |
+| ioll2 | cisco_ios | 192.168.250.20 | admin / admin | IOS XE 17.18.2 switch, routed data port, 4 GB router memory |
 | ultraglass | — | 192.168.250.2 | — | this repo's image, port 8001 |
 | ultraglass-text | — | 192.168.250.4 | — | same image, all text, port 8002 |
 | redis | — | 192.168.250.3 | — | cache only, no persistence |
 
-Juniper, Cisco and Nokia SR OS are not built here: their images are VM-based or licensed, and the Intel-only nested-VMX vendors (Juniper vMX/vJunos, Cisco XRv9k/n9kv) will not boot on an AMD host. Add each as a `vr-*` node once its image is in place, give it a `10.250.N.1/31` link to a new `core:ethN` with a matching GoBGP neighbor, and uncomment its entry in `configs/ultraglass/devices.yaml`.
+Juniper and Cisco IOL run through vrnetlab wrappers. Nokia SR OS still needs its image and license.
+
+### Juniper vJunos-router on AMD
+
+The original build skipped an upstream AMD fix. The vendor disk checks for Intel `vmx` rather than AMD `svm`. [vrnetlab PR #459](https://github.com/srl-labs/vrnetlab/pull/459) patches that check, and current launchers use `-cpu host`. Local validation on 28 October 2026 confirms FPC `Online` and established IPv4/IPv6 BGP on this Ryzen host.
+
+Run `sh scripts/build-junos.sh ~/Downloads/vJunos-router-26.2R1.7.qcow2`. The script preserves the vendor disk and builds `ultraglass-lab/juniper_vjunos-router:26.2R1.7` from a patched copy. Give the node at least one data link and verify `show chassis fpc` reports `Online`; SSH alone does not prove forwarding works.
+
+The persistent `junos` node passes IPv4/IPv6 BGP route, IPv4 ping and traceroute queries on both Ultraglass instances. Structured route queries return 13 IPv4 paths and 11 IPv6 paths for the test prefixes. The broad AS13335 path query exceeds the smoke test's 120-second timeout; the full Junos smoke run does not pass.
+
+### Cisco IOL router and switch wrappers
+
+`scripts/build-cisco-iol.sh` extracts the IOL and IOL-L2 container archives from `refplat-20260409-free.iso` and builds them with the pinned upstream vrnetlab wrapper. Images are `ultraglass-lab/cisco_iol:17.18.02` and `ultraglass-lab/cisco_iol:L2-17.18.02`. Both use Containerlab kind `cisco_iol`; the switch also sets `type: l2`.
+
+The only wrapper adjustment adds `-m "${IOL_MEMORY:-4096}"` to the IOL launch command. Both the default allocation and 2 GB fail with `No memory` during full-table import. The topology explicitly sets `IOL_MEMORY: "4096"`. Partial startup configs preserve Containerlab's SSH and management VRF setup, then configure Ethernet0/1 and dual-stack BGP.
+
+IOL reads the partial startup config only on its first boot. `lab-up.sh` runs `scripts/save-cisco-iol.sh` to save it to NVRAM before a later restart. After a direct `containerlab deploy`, run `sh scripts/save-cisco-iol.sh` yourself. Core addressing for the Cisco links is applied by `lab-up.sh`.
+
+Both Cisco nodes hold 1,094,726 IPv4 and 261,509 IPv6 prefixes. BGP route, AS-path, community, IPv4 ping and traceroute queries pass on both Ultraglass instances. Cisco BGP output is text; the structured instance parses traceroute hops.
+
+For Cisco IPv6 BGP route queries, enter a prefix such as `2606:4700::/44`. IOS XE rejects a bare IPv6 address in this command.
+
+The supplied free ISO contains IOS XE IOL images, not IOSv, XRd or NX-OS. Cisco's [CML image license terms](https://developer.cisco.com/docs/modeling-labs/cml-free/) apply independently of the wrapper.
+
+[CML Free](https://developer.cisco.com/docs/modeling-labs/cml-free/) requires a free Cisco account and registration, with no subscription or time limit. It includes IOL XE routing, IOL L2 switching and ASAv, with five simultaneous nodes. [Register](https://mkto.cisco.com/cml-free.html), then [download CML Free](https://software.cisco.com/download/home/286193282/type/286326381/release/CML-Free).
+
+An alternative deployment is a local CML VM connected through an [L2 external connector](https://developer.cisco.com/docs/modeling-labs/external-connectors/). This supports external BGP peers and inbound SSH from Ultraglass.
+
+[CML Personal](https://u.cisco.com/labs/cisco-modeling-labs-personal-1) is advertised at US$199 and includes 20 nodes. Its [reference image collection](https://developer.cisco.com/docs/modeling-labs/reference-platforms-and-images/) adds IOSv, Catalyst 8000V, XRd, XRv9000 and Nexus 9300v. This provides a purchase path without an existing hardware support contract. [DevNet Sandbox](https://developer.cisco.com/sandbox) provides free remote Cisco lab access as another option.
+
+### Nokia SR OS trial and lab access
+
+For local deployment, request an SR-SIM evaluation image and license from Nokia or a Nokia IP networking partner. SR-SIM requires a license at boot. Nokia also explicitly documents [vSIM trial requests](https://documentation.nokia.com/sr/22-10/books/vsim-installation-setup/vsim-software-licens.html). An evaluation request still needs vendor approval; no anonymous local trial download was verified.
+
+[My Nokia Learning Labs](https://www.nokia.com/networks/training/src/mysrlab/) advertises remote lab access from €100 for 30 hours. This is a remote training option; external SSH access and custom BGP peering for Ultraglass need confirmation before purchase. Public SR Linux images do not replace SR OS driver coverage.
 
 ### MikroTik CHR — build notes (three traps)
 
@@ -92,7 +147,7 @@ The `mikrotik` node, its `core:eth4` / `10.250.4.1` link, and `configs/mikrotik/
 
 ### Huawei CE12800 — build notes (four traps)
 
-The image is a QEMU VM (not a container) wrapped with vrnetlab. It needs KVM but not nested Intel VMX, so it boots on this AMD host (unlike vJunos/vMX). Build it with vrnetlab's `huawei_vrp` target: rename the disk to `huawei_ce12800-<version>.qcow2`, drop it in `vrnetlab/huawei/huawei_vrp/`, and `make`. The result is tagged `vrnetlab/huawei_vrp:ce12800-<version>` — the image the `huawei` node references.
+The image is a QEMU VM (not a container) wrapped with vrnetlab. It needs KVM but not nested Intel VMX, so it boots on this AMD host. Build it with vrnetlab's `huawei_vrp` target: rename the disk to `huawei_ce12800-<version>.qcow2`, drop it in `vrnetlab/huawei/huawei_vrp/`, and `make`. The result is tagged `vrnetlab/huawei_vrp:ce12800-<version>` — the image the `huawei` node references.
 
 1. **Login is `admin` / `admin`.** vrnetlab wipes the image's built-in user during console bootstrap and configures its own. containerlab's `huawei_vrp` kind sets `admin`/`admin`, not vrnetlab's documented `vrnetlab`/`VR-netlab9`.
 2. **GE ports are L2 switchports.** The data port `GE1/0/0` must be made routed with `undo portswitch` before it takes an IP, and the CE12800 is a two-stage-commit switch, so every change needs `commit`. `scripts/configure-huawei.py` does this (and the eBGP config) after boot; `lab-up.sh` calls it, and it is idempotent. It needs netmiko on the host.

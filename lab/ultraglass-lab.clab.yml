@@ -88,6 +88,12 @@ topology:
       mgmt-ipv4: 192.168.250.15
       startup-config: configs/vyos/config.boot
 
+    junos:
+      kind: juniper_vjunosrouter
+      image: ultraglass-lab/juniper_vjunos-router:26.2R1.7
+      mgmt-ipv4: 192.168.250.16
+      startup-config: configs/vjunos/config.conf
+
     arista:
       kind: arista_ceos
       image: ceos:4.36.3M
@@ -98,6 +104,23 @@ topology:
       kind: huawei_vrp
       image: vrnetlab/huawei_vrp:ce12800-V200R005C10SPC607B607
       mgmt-ipv4: 192.168.250.18
+
+    iol:
+      kind: cisco_iol
+      image: ultraglass-lab/cisco_iol:17.18.02
+      mgmt-ipv4: 192.168.250.19
+      env:
+        IOL_MEMORY: "4096"
+      startup-config: configs/iol/config.partial.cfg
+
+    ioll2:
+      kind: cisco_iol
+      type: l2
+      image: ultraglass-lab/cisco_iol:L2-17.18.02
+      mgmt-ipv4: 192.168.250.20
+      env:
+        IOL_MEMORY: "4096"
+      startup-config: configs/ioll2/config.partial.cfg
 
     redis:
       kind: linux
@@ -147,5 +170,8 @@ topology:
     - endpoints: ["core:eth3", "openbgpd:eth1"]
     - endpoints: ["core:eth4", "mikrotik:eth1"]
     - endpoints: ["core:eth5", "vyos:eth1"]
+    - endpoints: ["core:eth6", "junos:eth1"]
     - endpoints: ["core:eth7", "arista:eth1"]
     - endpoints: ["core:eth8", "huawei:eth1"]
+    - endpoints: ["core:eth9", "iol:eth1"]
+    - endpoints: ["core:eth10", "ioll2:eth1"]

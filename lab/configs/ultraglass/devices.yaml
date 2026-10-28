@@ -59,18 +59,17 @@ devices:
       source4: 10.250.5.1
       source6: fd00:250:5::1
 
-  # vJunos needs nested Intel VMX and cannot boot on the AMD lab host.
-  # Uncomment once a Junos node is running.
-  # - name: lab-junos
-  #   address: 192.168.250.16
-  #   group: Juniper
-  #   credential:
-  #     username: admin
-  #     password: admin@123
-  #   platform: juniper
-  #   attrs:
-  #     source4: 10.250.6.1
-  #     source6: fd00:250:6::1
+  - name: lab-junos
+    address: 192.168.250.16
+    group: Juniper
+    credential:
+      username: admin
+      password: admin@123
+    platform: juniper
+    structured_output: true
+    attrs:
+      source4: 10.250.6.1
+      source6: fd00:250:6::1
 
   - name: lab-arista
     address: 192.168.250.17
@@ -95,3 +94,27 @@ devices:
     attrs:
       source4: 10.250.8.1
       source6: fd00:250:8::1
+
+  - name: lab-iol
+    address: 192.168.250.19
+    group: Cisco
+    credential:
+      username: admin
+      password: admin
+    platform: cisco_ios
+    structured_output: true
+    attrs:
+      source4: 10.250.9.1
+      source6: fd00:250:9::1
+
+  - name: lab-ioll2
+    address: 192.168.250.20
+    group: Cisco
+    credential:
+      username: admin
+      password: admin
+    platform: cisco_ios
+    structured_output: true
+    attrs:
+      source4: 10.250.10.1
+      source6: fd00:250:10::1

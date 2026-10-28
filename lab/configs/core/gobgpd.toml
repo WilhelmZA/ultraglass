@@ -164,6 +164,43 @@
     [neighbors.afi-safis.config]
       afi-safi-name = "ipv6-unicast"
 
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.9.1"
+    peer-as = 65009
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+    [neighbors.afi-safis.add-paths.config]
+      send-max = 255
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:9::1"
+    peer-as = 65009
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+    [neighbors.afi-safis.add-paths.config]
+      send-max = 255
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.10.1"
+    peer-as = 65010
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+    [neighbors.afi-safis.add-paths.config]
+      send-max = 255
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:10::1"
+    peer-as = 65010
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+    [neighbors.afi-safis.add-paths.config]
+      send-max = 255
+
 # ---------------------------------------------------------------------------
 # Huawei CE12800 feed cap. The CE12800 is an old, slow emulated DC switch that
 # cannot absorb a ~1.1M-route full table (it ingests a few routes per second

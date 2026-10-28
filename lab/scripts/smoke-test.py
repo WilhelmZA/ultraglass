@@ -12,6 +12,7 @@ import time
 import urllib.request
 
 API = "http://127.0.0.1:8001/api"
+PLATFORMS = {"junos": "juniper", "iol": "cisco_ios", "ioll2": "cisco_ios"}
 
 # Target per query type. Pick values that exist in the rrc19 table.
 TARGETS = {
@@ -61,11 +62,14 @@ def main():
     ids = directives()
     for device in devices:
         platform = device.removeprefix("lab-")
+        platform = PLATFORMS.get(platform, platform)
         for directive in ids:
             if not directive.startswith(f"__hyperglass_{platform}_"):
                 continue
             kind = directive[len(f"__hyperglass_{platform}_"):-2].removesuffix("_table")
             for target in TARGETS.get(kind, []):
+                if platform == "cisco_ios" and kind == "bgp_route" and ":" in target:
+                    target = "2606:4700::/44"
                 level, shape, runtime, _ = query(device, directive, target)
                 print(f"{device:14} {kind:14} {target:18} {str(level):8} {runtime:6.1f}s  {shape}")
 
