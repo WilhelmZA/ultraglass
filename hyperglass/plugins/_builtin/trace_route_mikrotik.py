@@ -139,6 +139,11 @@ class TraceroutePluginMikrotik(OutputPlugin):
                 _log.debug("No device found, using cleanup-only mode")
             return _clean_traceroute_only(output, query)
 
+        if not getattr(device, "structured_output", False):
+            if Settings.debug:
+                _log.debug("Structured output off for this device, using cleanup-only mode")
+            return _clean_traceroute_only(output, query)
+
         if params is None:
             if Settings.debug:
                 _log.debug("No params found, using cleanup-only mode")
