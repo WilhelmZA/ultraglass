@@ -5,10 +5,11 @@ import typing as t
 from datetime import UTC, datetime
 
 # Third Party
-from pydantic import Field, ConfigDict
+from pydantic import Field, ConfigDict, field_validator
 
 # Project
 from hyperglass.log import log
+from hyperglass.util import parse_asn, parse_as_path
 from hyperglass.models.data import BGPRouteTable
 
 # Local
@@ -100,8 +101,16 @@ class AristaBGPTable(_AristaBase):
     router_id: str
     vrf: str
     bgp_route_entries: t.Dict[str, AristaRouteEntry]
-    # The raw value is really a string, but `int` will convert it.
+    # The raw value is a string, in asplain or asdot notation.
     asn: int
+
+    @field_validator("asn", mode="before")
+    def validate_asn(cls, value):
+        """Convert asplain or asdot local ASN to an integer."""
+        asn = parse_asn(value)
+        if asn is None:
+            raise ValueError(f"Invalid ASN: {value}")
+        return asn
 
     @staticmethod
     def _get_route_age(timestamp: int) -> int:
@@ -110,10 +119,8 @@ class AristaBGPTable(_AristaBase):
         return now_timestamp - timestamp
 
     @staticmethod
-    def _get_as_path(as_path: str) -> t.List[str]:
-        if as_path == "":
-            return []
-        return [int(p) for p in as_path.split() if p.isdecimal()]
+    def _get_as_path(as_path: str) -> t.List[int]:
+        return parse_as_path(as_path)
 
     def bgp_table(self: "AristaBGPTable") -> "BGPRouteTable":
         """Convert the Arista-formatted fields to standard parsed data model."""

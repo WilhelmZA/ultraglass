@@ -73,3 +73,29 @@ def resolve_hostname(
 
     yield ip4
     yield ip6
+
+
+def parse_asn(value: t.Union[int, str]) -> t.Optional[int]:
+    """Convert an asplain or asdot ASN to an integer.
+
+    Returns `None` for anything that is not an ASN, such as origin codes or
+    AS_SET and confederation delimiters.
+    """
+    if isinstance(value, int):
+        return value if 0 <= value <= 4294967295 else None
+    value = value.strip()
+    if value.isdecimal():
+        asn = int(value)
+        return asn if asn <= 4294967295 else None
+    high, sep, low = value.partition(".")
+    if sep and high.isdecimal() and low.isdecimal():
+        high_value, low_value = int(high), int(low)
+        if high_value <= 65535 and low_value <= 65535:
+            return high_value * 65536 + low_value
+    return None
+
+
+def parse_as_path(value: t.Union[str, t.Sequence[t.Union[int, str]]]) -> t.List[int]:
+    """Convert an AS path string or list to integer ASNs, skipping non-ASN tokens."""
+    tokens = value.split() if isinstance(value, str) else value
+    return [asn for asn in (parse_asn(token) for token in tokens) if asn is not None]

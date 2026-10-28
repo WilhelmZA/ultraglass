@@ -10,6 +10,7 @@ from pydantic import ConfigDict, field_validator, model_validator
 
 # Project
 from hyperglass.log import log
+from hyperglass.util import parse_as_path
 from hyperglass.models.data.bgp_route import BGPRoute, BGPRouteTable
 
 # Local
@@ -265,12 +266,7 @@ def _extract_route_entries(lines: t.List[str]) -> t.List[HuaweiRouteEntry]:
                     v = v.strip()
                     if v.startswith("AS-path"):
                         as_path_str = remove_prefix(v, "AS-path ")
-                        try:
-                            route_data["as_path"] = [
-                                int(a) for a in as_path_str.split() if a.isdigit()
-                            ]
-                        except ValueError:
-                            route_data["as_path"] = []
+                        route_data["as_path"] = parse_as_path(as_path_str)
                     elif v.startswith("origin"):
                         route_data["origin"] = remove_prefix(v, "origin ")
                     elif v.startswith("MED"):

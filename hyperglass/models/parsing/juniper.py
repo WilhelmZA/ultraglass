@@ -8,7 +8,7 @@ from pydantic import ConfigDict, field_validator, model_validator
 
 # Project
 from hyperglass.log import log
-from hyperglass.util import deep_convert_keys
+from hyperglass.util import parse_asn, parse_as_path, deep_convert_keys
 from hyperglass.models.data.bgp_route import BGPRouteTable
 
 # Local
@@ -123,9 +123,16 @@ class JuniperRouteTableEntry(JuniperBase):
 
     @field_validator("as_path", mode="before")
     def validate_as_path(cls, value):
-        """Remove origin flags from AS_PATH."""
-        disallowed = ("E", "I", "?")
-        return [int(a) for a in value.split() if a not in disallowed]
+        """Remove origin flags from AS_PATH and convert asdot ASNs."""
+        return parse_as_path(value)
+
+    @field_validator("peer_as", "source_as", mode="before")
+    def validate_asn(cls, value):
+        """Convert asplain or asdot ASNs to integers."""
+        asn = parse_asn(value)
+        if asn is None:
+            raise ValueError(f"Invalid ASN: {value}")
+        return asn
 
     @field_validator("communities", mode="before")
     def validate_communities(cls, value):

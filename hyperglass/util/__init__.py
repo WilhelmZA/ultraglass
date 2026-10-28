@@ -17,7 +17,13 @@ from .tools import (
     run_coroutine_in_new_thread,
 )
 from .typing import is_type, is_series
-from .validation import get_driver, resolve_hostname, validate_platform
+from .validation import (
+    parse_asn,
+    get_driver,
+    parse_as_path,
+    resolve_hostname,
+    validate_platform,
+)
 from .system_info import cpu_count, check_python, get_system_info, get_node_version
 
 __all__ = (
@@ -39,6 +45,8 @@ __all__ = (
     "is_series",
     "is_type",
     "move_files",
+    "parse_as_path",
+    "parse_asn",
     "parse_exception",
     "repr_from_attrs",
     "resolve_hostname",
