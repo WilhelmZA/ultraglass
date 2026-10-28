@@ -34,7 +34,7 @@ MikroTik and Arista images are built separately (see their sections below). Juni
 ./lab-status.sh                    # containers + BGP session state
 ```
 
-`lab-up.sh` is safe to run after a reboot. GoBGP keeps the table in memory, so it is injected fresh on every start. The single-device form (`./lab-up.sh <name>`, one of frr, bird, openbgpd, mikrotik, arista, vyos) starts only that device plus the core, so it runs on far less RAM than the full lab.
+`lab-up.sh` is safe to run after a reboot. GoBGP keeps the table in memory, so it is injected fresh on every start. The single-device form (`./lab-up.sh <name>`, one of frr, bird, openbgpd, mikrotik, arista, vyos, huawei) starts only that device plus the core, so it runs on far less RAM than the full lab.
 
 Low-RAM machines can also cap the table size:
 
@@ -42,7 +42,7 @@ Low-RAM machines can also cap the table size:
 PREFIXES=50000 ./lab-up.sh frr     # inject 50k prefixes per family instead of the full ~1.1M
 ```
 
-Ultraglass UI: http://127.0.0.1:8001. Query a device by name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista. Run `./scripts/smoke-test.py` for every query type against every running device.
+Ultraglass UI: http://127.0.0.1:8001. Query a device by name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei. Run `./scripts/smoke-test.py` for every query type against every running device.
 
 Run `python3 scripts/verify-issues.py --api http://127.0.0.1:8001/api --output /path/to/evidence lab-arista lab-frr lab-bird lab-mikrotik` to check mixed-vendor directive resolution and rejected command-injection inputs. The script retains complete API responses in `results.json`. Keep `logging.samples.enable` enabled to capture device output. Run against an isolated test instance when comparing code versions so cached results cannot mask a regression.
 
@@ -55,10 +55,13 @@ Run `python3 scripts/verify-issues.py --api http://127.0.0.1:8001/api --output /
 | bird | bird | 192.168.250.12 | root / lg | birdc needs root socket |
 | openbgpd | openbgpd | 192.168.250.13 | root / lg | bgpctl needs root socket |
 | mikrotik | mikrotik_routeros | 192.168.250.14 | admin / admin | CHR 7.16.2, full table, eBGP to core |
+| vyos | vyos | 192.168.250.15 | admin / admin | VyOS 1.5 stream, full table, SSH enabled in boot config |
+| arista | arista_eos | 192.168.250.17 | admin / admin | cEOS 4.36.3M, full table, structured output |
+| huawei | huawei (VRP) | 192.168.250.18 | admin / admin | CE12800 V200R005 (vrnetlab qemu), capped table, structured output |
 | ultraglass | — | 192.168.250.2 | — | this repo's image, port 8001 |
 | redis | — | 192.168.250.3 | — | cache only, no persistence |
 
-Arista, Juniper, Cisco, Huawei and Nokia are not built here: their images are VM-based or licensed. Add each as a `vr-*` node once its image is in place, give it a `10.250.N.1/31` link to a new `core:ethN` with a matching GoBGP neighbor, and uncomment its entry in `configs/ultraglass/devices.yaml`.
+Juniper, Cisco and Nokia SR OS are not built here: their images are VM-based or licensed, and the Intel-only nested-VMX vendors (Juniper vMX/vJunos, Cisco XRv9k/n9kv) will not boot on an AMD host. Add each as a `vr-*` node once its image is in place, give it a `10.250.N.1/31` link to a new `core:ethN` with a matching GoBGP neighbor, and uncomment its entry in `configs/ultraglass/devices.yaml`.
 
 ### MikroTik CHR — build notes (three traps)
 
@@ -77,6 +80,15 @@ Patch `launch.py` before building:
 2. Add `b"CHR Login"` to the login `expect()` list (and an `elif ridx == 2:` branch that sends `admin+ct` on `wait="CHR Login: "`). Newer CHR prints `CHR Login:`, which the stock script does not match, so bootstrap loops forever. Harmless on 7.16.2, needed if you ever move to a build that prints it.
 
 The `mikrotik` node, its `core:eth4` / `10.250.4.1` link, and `configs/mikrotik/config.auto.rsc` are already in the topology. The config uses RouterOS 7.16.2 BGP syntax (`as=`/`router-id`/`local.address` on the connection, no instance — the instance model is 7.20+). On some boots `config.auto.rsc` applies only partially; if the data-plane address or BGP session is missing, re-apply it over SSH (`admin`/`admin`).
+
+### Huawei CE12800 — build notes (four traps)
+
+The image is a QEMU VM (not a container) wrapped with vrnetlab. It needs KVM but not nested Intel VMX, so it boots on this AMD host (unlike vJunos/vMX). Build it with vrnetlab's `huawei_vrp` target: rename the disk to `huawei_ce12800-<version>.qcow2`, drop it in `vrnetlab/huawei/huawei_vrp/`, and `make`. The result is tagged `vrnetlab/huawei_vrp:ce12800-<version>` — the image the `huawei` node references.
+
+1. **Login is `admin` / `admin`.** vrnetlab wipes the image's built-in user during console bootstrap and configures its own. containerlab's `huawei_vrp` kind sets `admin`/`admin`, not vrnetlab's documented `vrnetlab`/`VR-netlab9`.
+2. **GE ports are L2 switchports.** The data port `GE1/0/0` must be made routed with `undo portswitch` before it takes an IP, and the CE12800 is a two-stage-commit switch, so every change needs `commit`. `scripts/configure-huawei.py` does this (and the eBGP config) after boot; `lab-up.sh` calls it, and it is idempotent. It needs netmiko on the host.
+3. **It cannot hold a full table.** The emulated control plane ingests only a few routes per second and resets on the hold timer long before ~1.1M routes converge. The core therefore caps what it advertises to this peer — the short aggregates (`<=/12`) plus the test prefixes — via a GoBGP export policy keyed to the huawei neighbour (`configs/core/gobgpd.toml`), and gives it a long hold time. Every other device still gets the full table.
+4. **Structured parser gap.** With structured output on, `bgp_route` and `traceroute` parse cleanly, but `bgp_aspath` and `bgp_community` return the brief multi-route table, which the Huawei structured parser does not read, so they come back empty (issue #20).
 
 ## The table feed
 
@@ -99,7 +111,7 @@ The `mikrotik` node, its `core:eth4` / `10.250.4.1` link, and `configs/mikrotik/
 python3 -m pytest tests/ -k frr -v     # tests for devices that are not running are skipped
 ```
 
-Each case is one (device, query). Known, filed bugs are marked xfail with their issue number, so the suite stays green until a fix lands, then flags the xpass. Dataplane queries (ping, traceroute) are tested IPv4 only, because the lab core has no IPv6 egress. The 30 cases cover bgp_route, bgp_aspath, bgp_community, ping and traceroute (v4 and v6 where relevant) across FRR, BIRD, OpenBGPD, MikroTik and Arista.
+Each case is one (device, query). Known, filed bugs are marked xfail with their issue number, so the suite stays green until a fix lands, then flags the xpass. Dataplane queries (ping, traceroute) are tested IPv4 only, because the lab core has no IPv6 egress. The 42 cases cover bgp_route, bgp_aspath, bgp_community, ping and traceroute (v4 and v6 where relevant) across FRR, BIRD, OpenBGPD, MikroTik, Arista, VyOS and Huawei.
 
 ## Tear down
 

@@ -32,6 +32,8 @@ topology:
         - ip addr add fd00:250:6::/127 dev eth6
         - ip addr add 10.250.7.0/31 dev eth7
         - ip addr add fd00:250:7::/127 dev eth7
+        - ip addr add 10.250.8.0/31 dev eth8
+        - ip addr add fd00:250:8::/127 dev eth8
 
     frr:
       kind: linux
@@ -91,6 +93,11 @@ topology:
       mgmt-ipv4: 192.168.250.17
       startup-config: configs/arista/ceos.cfg
 
+    huawei:
+      kind: huawei_vrp
+      image: vrnetlab/huawei_vrp:ce12800-V200R005C10SPC607B607
+      mgmt-ipv4: 192.168.250.18
+
     redis:
       kind: linux
       image: redis:7-alpine
@@ -120,3 +127,4 @@ topology:
     - endpoints: ["core:eth4", "mikrotik:eth1"]
     - endpoints: ["core:eth5", "vyos:eth1"]
     - endpoints: ["core:eth7", "arista:eth1"]
+    - endpoints: ["core:eth8", "huawei:eth1"]

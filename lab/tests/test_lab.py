@@ -66,6 +66,14 @@ MATRIX = {
         ("__hyperglass_mikrotik_ping__", "ping_v4", V4, "text", None),
         ("__hyperglass_mikrotik_traceroute__", "traceroute_v4", V4, "structured", None),
     ],
+    "lab-vyos": [
+        ("__hyperglass_vyos_bgp_route__", "bgp_route_v4", V4, "text", None),
+        ("__hyperglass_vyos_bgp_route__", "bgp_route_v6", V6, "text", None),
+        ("__hyperglass_vyos_bgp_aspath__", "bgp_aspath", ASPATH, "text", None),
+        ("__hyperglass_vyos_bgp_community__", "bgp_community", COMMUNITY, "text", None),
+        ("__hyperglass_vyos_ping__", "ping_v4", V4, "text", None),
+        ("__hyperglass_vyos_traceroute__", "traceroute_v4", V4, "text", None),
+    ],
     "lab-arista": [
         ("__hyperglass_arista_eos_bgp_route_table__", "bgp_route_v4", V4, "structured", None),
         ("__hyperglass_arista_eos_bgp_route_table__", "bgp_route_v6", V6, "structured", None),
@@ -74,6 +82,19 @@ MATRIX = {
         ("__hyperglass_arista_eos_ping__", "ping_v4", V4, "text", 33),
         # The shared standard traceroute parser now gives Arista structured hops.
         ("__hyperglass_arista_eos_traceroute__", "traceroute_v4", V4, "structured", None),
+    ],
+    # Huawei CE12800 VRP (V200R005). A full table crashes the slow emulated
+    # control plane, so the lab caps what the core sends it (see lab-up.sh /
+    # gobgpd.toml). Structured output: bgp_route and traceroute parse cleanly,
+    # but aspath/community return the brief multi-route table that the Huawei
+    # structured parser does not read, so they come back empty (issue #20).
+    "lab-huawei": [
+        ("__hyperglass_huawei_bgp_route_table__", "bgp_route_v4", V4, "structured", None),
+        ("__hyperglass_huawei_bgp_route_table__", "bgp_route_v6", V6, "structured", None),
+        ("__hyperglass_huawei_bgp_aspath_table__", "bgp_aspath", ASPATH, "structured", 20),
+        ("__hyperglass_huawei_bgp_community_table__", "bgp_community", COMMUNITY, "structured", 20),
+        ("__hyperglass_huawei_ping__", "ping_v4", V4, "text", None),
+        ("__hyperglass_huawei_traceroute__", "traceroute_v4", V4, "structured", None),
     ],
 }
 

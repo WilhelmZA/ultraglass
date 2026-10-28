@@ -75,3 +75,14 @@ devices:
     attrs:
       source4: 10.250.7.1
       source6: fd00:250:7::1
+
+  - name: lab-huawei
+    address: 192.168.250.18
+    group: Huawei
+    credential:
+      username: admin
+      password: admin
+    platform: huawei
+    attrs:
+      source4: 10.250.8.1
+      source6: fd00:250:8::1

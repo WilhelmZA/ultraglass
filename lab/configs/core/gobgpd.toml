@@ -109,3 +109,82 @@
   [[neighbors.afi-safis]]
     [neighbors.afi-safis.config]
       afi-safi-name = "ipv6-unicast"
+
+# CE12800 is a slow VM switch: a full-table burst keeps it too busy to send
+# keepalives, so give it a long hold time or the session flaps mid-convergence.
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.8.1"
+    peer-as = 65008
+  [neighbors.timers.config]
+    hold-time = 900
+    keepalive-interval = 300
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:8::1"
+    peer-as = 65008
+  [neighbors.timers.config]
+    hold-time = 900
+    keepalive-interval = 300
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+
+# ---------------------------------------------------------------------------
+# Huawei CE12800 feed cap. The CE12800 is an old, slow emulated DC switch that
+# cannot absorb a ~1.1M-route full table (it ingests a few routes per second
+# and resets on the hold timer mid-convergence). So export to the huawei
+# neighbours only a small, representative slice: the short aggregates (<=/12)
+# plus the prefixes the lab tests query. Every other neighbour is unaffected.
+[[defined-sets.prefix-sets]]
+  prefix-set-name = "ps-hw-v4"
+  [[defined-sets.prefix-sets.prefix-list]]
+    ip-prefix = "0.0.0.0/0"
+    masklength-range = "0..12"
+  [[defined-sets.prefix-sets.prefix-list]]
+    ip-prefix = "1.0.0.0/24"
+  [[defined-sets.prefix-sets.prefix-list]]
+    ip-prefix = "1.1.1.0/24"
+[[defined-sets.prefix-sets]]
+  prefix-set-name = "ps-hw-v6"
+  [[defined-sets.prefix-sets.prefix-list]]
+    ip-prefix = "::/0"
+    masklength-range = "0..16"
+  [[defined-sets.prefix-sets.prefix-list]]
+    ip-prefix = "2606:4700::/44"
+
+[[defined-sets.neighbor-sets]]
+  neighbor-set-name = "ns-hw"
+  neighbor-info-list = ["10.250.8.1", "fd00:250:8::1"]
+
+[[policy-definitions]]
+  name = "pol-hw-exp"
+  [[policy-definitions.statements]]
+    name = "st-hw-v4"
+    [policy-definitions.statements.conditions.match-prefix-set]
+      prefix-set = "ps-hw-v4"
+    [policy-definitions.statements.conditions.match-neighbor-set]
+      neighbor-set = "ns-hw"
+    [policy-definitions.statements.actions]
+      route-disposition = "accept-route"
+  [[policy-definitions.statements]]
+    name = "st-hw-v6"
+    [policy-definitions.statements.conditions.match-prefix-set]
+      prefix-set = "ps-hw-v6"
+    [policy-definitions.statements.conditions.match-neighbor-set]
+      neighbor-set = "ns-hw"
+    [policy-definitions.statements.actions]
+      route-disposition = "accept-route"
+  [[policy-definitions.statements]]
+    name = "st-hw-deny"
+    [policy-definitions.statements.conditions.match-neighbor-set]
+      neighbor-set = "ns-hw"
+    [policy-definitions.statements.actions]
+      route-disposition = "reject-route"
+
+[global.apply-policy.config]
+  export-policy-list = ["pol-hw-exp"]
+  default-export-policy = "accept-route"
