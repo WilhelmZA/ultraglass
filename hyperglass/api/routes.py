@@ -41,6 +41,7 @@ __all__ = (
     "query",
     "aspath_enrich",
     "query_enrichment",
+    "dns",
 )
 
 # MikroTik occasionally answers a BGP query before its routing table has finished
@@ -126,11 +127,20 @@ _HOSTNAME = re.compile(
 )
 
 
-@get(
-    "/api/dns",
-    middleware=[RateLimitConfig(rate_limit=("minute", 120)).middleware],
-    include_in_schema=False,
-)
+def _dns_client(request: Request) -> str:
+    """Identify the client behind a reverse proxy, as the webhook logging does."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if request.headers.get("x-real-ip"):
+        return request.headers["x-real-ip"]
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "anonymous"
+
+
+_DNS_RATE_LIMIT = RateLimitConfig(rate_limit=("minute", 120), identifier_for_request=_dns_client)
+
+
+@get("/api/dns", middleware=[_DNS_RATE_LIMIT.middleware], include_in_schema=False)
 async def dns(name: str, type: str = "A") -> dict:
     """Resolve a hostname on the server, returning DNS-over-HTTPS JSON."""
     record_type = type.upper()

@@ -63,6 +63,29 @@ def test_dns_is_rate_limited(client):
     assert statuses[120] == 429
 
 
+def test_dns_rate_limit_is_per_forwarded_client(client):
+    for _ in range(120):
+        client.get(
+            "/api/dns",
+            params={"name": "one.one.one.one"},
+            headers={"x-forwarded-for": "198.51.100.1, 10.0.0.2"},
+        )
+
+    limited = client.get(
+        "/api/dns",
+        params={"name": "one.one.one.one"},
+        headers={"x-forwarded-for": "198.51.100.1, 10.0.0.2"},
+    )
+    other = client.get(
+        "/api/dns",
+        params={"name": "one.one.one.one"},
+        headers={"x-forwarded-for": "198.51.100.2, 10.0.0.2"},
+    )
+
+    assert limited.status_code == 429
+    assert other.status_code == 200
+
+
 def test_server_dns_provider():
     # Project
     from hyperglass.models.config.web import DnsOverHttps
