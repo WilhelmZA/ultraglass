@@ -27,11 +27,12 @@ Use `vyos` for VyOS 1.4 and later. Use `vyos_1_3` for VyOS 1.3, which uses the o
 
 ### Structured output
 
-Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured output by default. BIRD, OpenBGPD, VyOS, and Huawei VRPv8 require `structured_output: true` for structured BGP results.
+Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured output by default. BIRD, Cisco IOS, OpenBGPD, VyOS, and Huawei VRPv8 require `structured_output: true` for structured BGP results.
 
 | Platform | Structured BGP source | Limitations |
 | :------- | :-------------------- | :---------- |
 | BIRD | `show route all` text | Route age and router RPKI state remain unknown. |
+| Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Router RPKI state is read when the router validates origins. |
 | OpenBGPD | `bgpctl -j show rib detail` JSON | Router RPKI state comes from daemon origin validation. |
 | VyOS 1.4+ | FRR JSON through `vtysh` | AS-path and community summary results omit communities and route age. |
 | VyOS 1.3 | Not supported | Use text BGP results, even with structured traceroute enabled. |

@@ -1,0 +1,8 @@
+BGP routing table entry for 1.1.1.0/24, version 1099408
+Paths: (1 available, best #1, table default)
+  Not advertised to any peer
+  65000 327960 13335, (aggregated by 13335 10.34.16.20)
+    10.250.9.0 from 10.250.9.0 (10.250.0.1)
+      Origin IGP, localpref 100, valid, external, atomic-aggregate, best
+      Community: 13335:10045
+      Updated on Oct 28 2026 12:25:31 UTC

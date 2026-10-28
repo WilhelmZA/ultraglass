@@ -22,10 +22,11 @@ from pathlib import Path
 
 TEST_PREFIXES = {"1.0.0.0/24", "2606:4700:4700::/48"}
 # Device output that carries no communities, so the policy has nothing to act on.
-# EOS `show ip bgp regexp`, Huawei brief AS-path output and FRR `regexp` JSON (FRR, VyOS)
-# omit them.
-NO_ASPATH_COMMUNITIES = {"lab-arista", "lab-huawei", "lab-frr", "lab-vyos"}
-NO_COMMUNITY_COMMUNITIES = set()
+# EOS `show ip bgp regexp`, Huawei brief AS-path output, FRR `regexp` JSON (FRR, VyOS)
+# and the Cisco IOS summary table omit them.
+CISCO_IOS = {"lab-iol", "lab-ioll2"}
+NO_ASPATH_COMMUNITIES = {"lab-arista", "lab-huawei", "lab-frr", "lab-vyos", *CISCO_IOS}
+NO_COMMUNITY_COMMUNITIES = CISCO_IOS
 # Huawei brief community output omits the AS path, so RPKI and organisations cannot apply.
 NO_COMMUNITY_ASPATH = {"lab-huawei"}
 # Ultraglass resolves a vendor directive id to each device's equivalent by name.

@@ -24,12 +24,14 @@ This section describes merged changes on `main`, not a published release.
 - Reject `platform: http` devices without an `http` configuration block (#42).
 - Merge duplicate ASN nodes and space the combined AS-path chart (#43).
 - Derive traceroute statistics from probe samples and honour MikroTik text-output mode (#57, #58).
+- Remove the `large:` prefix from Junos large communities, so community names and policies match them (#82).
 
 ### Added
 
 - Add captured Huawei, EOS, FRR, and MikroTik parser regression fixtures, including complete traceroute output (#25).
 - Add repeatable browser validation for mixed structured/text devices and live-provider policy replay (#22, #23).
 - Add opt-in structured BGP output for VyOS 1.4+, OpenBGPD, and BIRD (#54, #55, #56).
+- Add opt-in structured BGP output for Cisco IOS and IOS XE, with captured IOL 17.18.02 and vJunos 26.2R1.7 fixtures (#83, #25).
 - Add native VRF forms for built-in queries on EOS, FRRouting, Huawei VRP, MikroTik RouterOS, and VyOS 1.4+ (#50).
 - Add the `vyos_1_3` platform with version-specific commands and text-only BGP output (#51).
 - Add fixed-choice directive variables, UI select fields, and API `queryVariables` validation (#52).
