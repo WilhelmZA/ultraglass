@@ -31,11 +31,13 @@ Huawei_BGPRoute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="display bgp routing-table {target} | no-more",
+            vrf_command="display bgp vpnv4 vpn-instance {vrf} routing-table {target} | no-more",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="display bgp ipv6 routing-table {target} | no-more",
+            vrf_command="display bgp vpnv6 vpn-instance {vrf} routing-table {target} | no-more",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -55,6 +57,10 @@ Huawei_BGPASPath = BuiltinDirective(
                 "display bgp routing-table regular-expression {target}",
                 "display bgp ipv6 routing-table regular-expression {target}",
             ],
+            vrf_commands=[
+                "display bgp vpnv4 vpn-instance {vrf} routing-table regular-expression {target}",
+                "display bgp vpnv6 vpn-instance {vrf} routing-table regular-expression {target}",
+            ],
         )
     ],
     field=Text(description="AS Path Regular Expression"),
@@ -73,6 +79,10 @@ Huawei_BGPCommunity = BuiltinDirective(
                 "display bgp routing-table community {target}",
                 "display bgp ipv6 routing-table community {target}",
             ],
+            vrf_commands=[
+                "display bgp vpnv4 vpn-instance {vrf} routing-table community {target}",
+                "display bgp vpnv6 vpn-instance {vrf} routing-table community {target}",
+            ],
         )
     ],
     field=Text(description="BGP Community String"),
@@ -88,11 +98,13 @@ Huawei_Ping = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="ping -c 5 -a {source4} {target}",
+            vrf_command="ping -c 5 -vpn-instance {vrf} {target}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="ping ipv6 -c 5 -a {source6} {target}",
+            vrf_command="ping ipv6 -c 5 -vpn-instance {vrf} {target}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -107,11 +119,13 @@ Huawei_Traceroute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="tracert -w 500 -q 1 -f 1 -a {source4} {target}",
+            vrf_command="tracert -w 500 -q 1 -f 1 -vpn-instance {vrf} {target}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="tracert ipv6 -w 500 -q 1 -f 1 -a {source6} {target}",
+            vrf_command="tracert ipv6 -w 500 -q 1 -f 1 -vpn-instance {vrf} {target}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -128,11 +142,13 @@ HuaweiBGPRouteTable = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="display bgp routing-table {target} | no-more",
+            vrf_command="display bgp vpnv4 vpn-instance {vrf} routing-table {target} | no-more",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="display bgp ipv6 routing-table {target} | no-more",
+            vrf_command="display bgp vpnv6 vpn-instance {vrf} routing-table {target} | no-more",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -150,6 +166,10 @@ HuaweiBGPASPathTable = BuiltinDirective(
                 "display bgp routing-table regular-expression {target}",
                 "display bgp ipv6 routing-table regular-expression {target}",
             ],
+            vrf_commands=[
+                "display bgp vpnv4 vpn-instance {vrf} routing-table regular-expression {target}",
+                "display bgp vpnv6 vpn-instance {vrf} routing-table regular-expression {target}",
+            ],
         )
     ],
     field=Text(description="AS Path Regular Expression"),
@@ -166,6 +186,10 @@ HuaweiBGPCommunityTable = BuiltinDirective(
             commands=[
                 "display bgp routing-table community {target}",
                 "display bgp ipv6 routing-table community {target}",
+            ],
+            vrf_commands=[
+                "display bgp vpnv4 vpn-instance {vrf} routing-table community {target}",
+                "display bgp vpnv6 vpn-instance {vrf} routing-table community {target}",
             ],
         )
     ],

@@ -76,7 +76,8 @@ class AristaRoutePath(_AristaBase):
 
     as_path_entry: AristaAsPathEntry
     med: int = 0
-    local_preference: int
+    # Locally originated routes have no local preference; 100 is the BGP default.
+    local_preference: int = 100
     weight: int
     peer_entry: AristaPeerEntry
     reason_not_bestpath: str

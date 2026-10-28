@@ -109,6 +109,18 @@ The test prefixes carry every path rrc19 saw, not only the best one: 1.1.1.0/24 
 
 `./scripts/silent-hop.sh on` makes the core drop ICMP time-exceeded, so hops go silent and the 2 s read timeout can cut traceroute output short. `off` restores it.
 
+## VRF test setup (issue #50)
+
+The VRF checks use a VRF named `LAB` on five devices. It holds `198.51.100.0/24` and `2001:db8:100::/48` as Null0/blackhole static routes, originated into BGP, plus a `192.0.2.100/32` loopback for ping and traceroute. The setup is runtime-only on FRR and Huawei, so it is lost when those nodes restart. Reapply it with these commands:
+
+- Arista: `vrf instance LAB`, `ip routing vrf LAB`, `ipv6 unicast-routing vrf LAB`, the two `ip[v6] route vrf LAB ... Null0` statics, `router bgp 65007` / `vrf LAB` with `rd 65007:100`, `router-id 10.250.7.100` and both `network` statements (IPv6 under `address-family ipv6`), and `interface Loopback100` / `vrf LAB` / `ip address 192.0.2.100/32`.
+- FRR: `ip link add LAB type vrf table 100 && ip link set LAB up` in the container, then in vtysh the two blackhole statics with `vrf LAB` and `router bgp 65001 vrf LAB` with both `network` statements.
+- VyOS: `set vrf name LAB table 100`, the two `set vrf name LAB protocols static route[6] ... blackhole`, `set vrf name LAB protocols bgp system-as 65005` with both `network` statements, and `set interfaces dummy dum100 vrf LAB address 192.0.2.100/32`.
+- Huawei: `ip vpn-instance LAB` with `route-distinguisher 65008:100` for `ipv4-family` and `ipv6-family`, the two `ip[v6] route-static vpn-instance LAB ... NULL0`, `bgp 65008` / `ipv4-family vpn-instance LAB` and `ipv6-family vpn-instance LAB` with the `network` statements, and `interface LoopBack100` / `ip binding vpn-instance LAB` / `ip address 192.0.2.100 32`.
+- MikroTik: `/interface bridge add name=lab-vrf`, `/ip vrf add name=LAB interfaces=lab-vrf` and `/ip address add address=192.0.2.100/32 interface=lab-vrf`. RouterOS needs a BGP peer inside the VRF before BGP routes appear there, and the core has none, so BGP VRF queries are validated with `vrf: main`, which reads the full lab table.
+
+In the Ultraglass devices file, add a second entry per router with a different `name` and `vrf: LAB`.
+
 ## Capturing parser fixtures
 
 `configs/ultraglass/config.yaml` enables `logging.samples`, so every query appends the raw device output and the parsed result to `configs/ultraglass/logs/`. Use these to build parser regression fixtures (issue #25).

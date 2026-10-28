@@ -73,8 +73,10 @@ class Rule(HyperglassModel):
     condition: Condition
     action: Action = "permit"
     commands: t.List[str] = Field([], alias="command")
+    # Commands for a device with a `vrf`, where `{vrf}` is the VRF name.
+    vrf_commands: t.List[str] = Field([], alias="vrf_command")
 
-    @field_validator("commands", mode="before")
+    @field_validator("commands", "vrf_commands", mode="before")
     def validate_commands(cls, value: t.Union[str, t.List[str]]) -> t.List[str]:
         """Ensure commands is a list."""
         if isinstance(value, str):
@@ -405,15 +407,22 @@ DirectiveT = t.Union[BuiltinDirective, Directive]
 class Directives(MultiModel[Directive], model=Directive, unique_by="id"):
     """Collection of directives."""
 
-    def device_builtins(self, *, platform: str, table_output: bool):
-        """Get builtin directives for a device."""
+    def device_builtins(self, *, platform: str, table_output: bool, vrf: bool = False):
+        """Get builtin directives for a device.
 
+        A device with a VRF only gets the built-ins that have a VRF form for every rule.
+        """
+        selected = (
+            self.table_if_available(directive) if table_output else directive  # noqa: IF100 GFY
+            for directive in self
+            if directive._hyperglass_builtin is True
+            and platform in getattr(directive, "platforms", ())
+        )
         return Directives(
             *(
-                self.table_if_available(directive) if table_output else directive  # noqa: IF100 GFY
-                for directive in self
-                if directive._hyperglass_builtin is True
-                and platform in getattr(directive, "platforms", ())
+                directive
+                for directive in selected
+                if not vrf or all(rule.vrf_commands for rule in directive.rules)
             )
         )
 

@@ -31,11 +31,13 @@ Mikrotik_BGPRoute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0",
+            vrf_command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0 and routing-table={vrf}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0",
+            vrf_command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0 and routing-table={vrf}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -53,6 +55,9 @@ Mikrotik_BGPASPath = BuiltinDirective(
             action="permit",
             commands=[
                 'routing route print detail without-paging where bgp and bgp.as-path~"{target}"',
+            ],
+            vrf_commands=[
+                'routing route print detail without-paging where bgp and bgp.as-path~"{target}" and routing-table={vrf}',
             ],
         )
     ],
@@ -72,6 +77,9 @@ Mikrotik_BGPCommunity = BuiltinDirective(
             commands=[
                 'routing route print detail without-paging where bgp and bgp.communities~"{target}"',
             ],
+            vrf_commands=[
+                'routing route print detail without-paging where bgp and bgp.communities~"{target}" and routing-table={vrf}',
+            ],
         )
     ],
     field=Text(description="BGP Community String"),
@@ -88,11 +96,13 @@ Mikrotik_Ping = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="ping src-address={source4} count=5 {target}",
+            vrf_command="ping vrf={vrf} count=5 {target}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="ping src-address={source6} count=5 {target}",
+            vrf_command="ping vrf={vrf} count=5 {target}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -107,11 +117,13 @@ Mikrotik_Traceroute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="tool traceroute src-address={source4} timeout=1 duration=30 count=3 {target}",
+            vrf_command="tool traceroute vrf={vrf} timeout=1 duration=30 count=3 {target}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="tool traceroute src-address={source6} timeout=1 duration=30 count=3 {target}",
+            vrf_command="tool traceroute vrf={vrf} timeout=1 duration=30 count=3 {target}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -128,11 +140,13 @@ MikrotikBGPRouteTable = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0",
+            vrf_command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0 and routing-table={vrf}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0",
+            vrf_command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0 and routing-table={vrf}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -149,6 +163,9 @@ MikrotikBGPASPathTable = BuiltinDirective(
             commands=[
                 'routing route print detail without-paging where bgp and bgp.as-path~"{target}"',
             ],
+            vrf_commands=[
+                'routing route print detail without-paging where bgp and bgp.as-path~"{target}" and routing-table={vrf}',
+            ],
         )
     ],
     field=Text(description="AS Path Regular Expression"),
@@ -164,6 +181,9 @@ MikrotikBGPCommunityTable = BuiltinDirective(
             action="permit",
             commands=[
                 'routing route print detail without-paging where bgp and bgp.communities~"{target}"',
+            ],
+            vrf_commands=[
+                'routing route print detail without-paging where bgp and bgp.communities~"{target}" and routing-table={vrf}',
             ],
         )
     ],

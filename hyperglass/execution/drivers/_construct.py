@@ -138,8 +138,14 @@ class Construct:
                 target=self.query.query_target,
             )
 
+        vrf = getattr(self.device, "vrf", None)
         for rule in [r for r in self.directive.rules if r._passed is True]:
-            for command in rule.commands:
+            if vrf is not None and rule.vrf_commands:
+                # The VRF name is validated on the device, so it is safe to insert as text.
+                commands = [command.replace("{vrf}", vrf) for command in rule.vrf_commands]
+            else:
+                commands = rule.commands
+            for command in commands:
                 query.append(self.format(command))
         self._log.bind(constructed_query=query).debug("Constructed query")
         return query

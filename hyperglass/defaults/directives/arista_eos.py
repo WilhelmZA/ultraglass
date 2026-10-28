@@ -31,11 +31,13 @@ AristaBGPRoute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="show ip bgp {target}",
+            vrf_command="show ip bgp {target} vrf {vrf}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="show ipv6 bgp {target}",
+            vrf_command="show ipv6 bgp {target} vrf {vrf}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -53,6 +55,10 @@ AristaBGPASPath = BuiltinDirective(
             commands=[
                 "show ip bgp regexp {target}",
                 "show ipv6 bgp regexp {target}",
+            ],
+            vrf_commands=[
+                "show ip bgp regexp {target} vrf {vrf}",
+                "show ipv6 bgp regexp {target} vrf {vrf}",
             ],
         )
     ],
@@ -72,6 +78,10 @@ AristaBGPCommunity = BuiltinDirective(
                 "show ip bgp community {target}",
                 "show ipv6 bgp community {target}",
             ],
+            vrf_commands=[
+                "show ip bgp community {target} vrf {vrf}",
+                "show ipv6 bgp community {target} vrf {vrf}",
+            ],
         )
     ],
     field=Text(description="BGP Community String"),
@@ -88,11 +98,13 @@ AristaPing = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="ping ip {target} source {source4}",
+            vrf_command="ping vrf {vrf} ip {target}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="ping ipv6 {target} source {source6}",
+            vrf_command="ping vrf {vrf} ipv6 {target}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -107,11 +119,13 @@ AristaTraceroute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="traceroute ip {target} source {source4}",
+            vrf_command="traceroute vrf {vrf} ip {target}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="traceroute ipv6 {target} source {source6}",
+            vrf_command="traceroute vrf {vrf} ipv6 {target}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -128,11 +142,13 @@ AristaBGPRouteTable = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="show ip bgp {target} | json",
+            vrf_command="show ip bgp {target} vrf {vrf} | json",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="show ipv6 bgp {target} | json",
+            vrf_command="show ipv6 bgp {target} vrf {vrf} | json",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -150,6 +166,10 @@ AristaBGPASPathTable = BuiltinDirective(
                 "show ip bgp regexp {target} | json",
                 "show ipv6 bgp regexp {target} | json",
             ],
+            vrf_commands=[
+                "show ip bgp regexp {target} vrf {vrf} | json",
+                "show ipv6 bgp regexp {target} vrf {vrf} | json",
+            ],
         )
     ],
     field=Text(description="AS Path Regular Expression"),
@@ -166,6 +186,10 @@ AristaBGPCommunityTable = BuiltinDirective(
             commands=[
                 "show ip bgp community {target} | json",
                 "show ipv6 bgp community {target} | json",
+            ],
+            vrf_commands=[
+                "show ip bgp community {target} vrf {vrf} | json",
+                "show ipv6 bgp community {target} vrf {vrf} | json",
             ],
         )
     ],

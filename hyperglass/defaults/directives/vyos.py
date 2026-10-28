@@ -31,11 +31,13 @@ VyOS_BGPRoute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="show bgp ipv4 {target}",
+            vrf_command="show bgp vrf {vrf} ipv4 {target}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="show bgp ipv6 {target}",
+            vrf_command="show bgp vrf {vrf} ipv6 {target}",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -53,6 +55,10 @@ VyOS_BGPASPath = BuiltinDirective(
             commands=[
                 'show bgp ipv4 regexp "{target}"',
                 'show bgp ipv6 regexp "{target}"',
+            ],
+            vrf_commands=[
+                'show bgp vrf {vrf} ipv4 regexp "{target}"',
+                'show bgp vrf {vrf} ipv6 regexp "{target}"',
             ],
         )
     ],
@@ -72,6 +78,10 @@ VyOS_BGPCommunity = BuiltinDirective(
                 "show bgp ipv4 community {target}",
                 "show bgp ipv6 community {target}",
             ],
+            vrf_commands=[
+                "show bgp vrf {vrf} ipv4 community {target}",
+                "show bgp vrf {vrf} ipv6 community {target}",
+            ],
         )
     ],
     field=Text(description="BGP Community String"),
@@ -87,11 +97,13 @@ VyOS_Ping = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="ping {target} count 5 interface {source4}",
+            vrf_command="ping {target} vrf {vrf} count 5",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="ping {target} count 5 interface {source6}",
+            vrf_command="ping {target} vrf {vrf} count 5",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -106,11 +118,13 @@ VyOS_Traceroute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="traceroute {target} source-address {source4} icmp",
+            vrf_command="traceroute {target} vrf {vrf} icmp",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="traceroute {target} source-address {source6} icmp",
+            vrf_command="traceroute {target} vrf {vrf} icmp",
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -128,11 +142,13 @@ VyOS_BGPRouteTable = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command='vtysh -c "show bgp ipv4 unicast {target} json"',
+            vrf_command='vtysh -c "show bgp vrf {vrf} ipv4 unicast {target} json"',
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command='vtysh -c "show bgp ipv6 unicast {target} json"',
+            vrf_command='vtysh -c "show bgp vrf {vrf} ipv6 unicast {target} json"',
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -150,6 +166,10 @@ VyOS_BGPASPathTable = BuiltinDirective(
                 'vtysh -c "show bgp ipv4 unicast regexp {target} json"',
                 'vtysh -c "show bgp ipv6 unicast regexp {target} json"',
             ],
+            vrf_commands=[
+                'vtysh -c "show bgp vrf {vrf} ipv4 unicast regexp {target} json"',
+                'vtysh -c "show bgp vrf {vrf} ipv6 unicast regexp {target} json"',
+            ],
         )
     ],
     field=Text(description="AS Path Regular Expression"),
@@ -166,6 +186,10 @@ VyOS_BGPCommunityTable = BuiltinDirective(
             commands=[
                 'vtysh -c "show bgp ipv4 unicast community {target} json"',
                 'vtysh -c "show bgp ipv6 unicast community {target} json"',
+            ],
+            vrf_commands=[
+                'vtysh -c "show bgp vrf {vrf} ipv4 unicast community {target} json"',
+                'vtysh -c "show bgp vrf {vrf} ipv6 unicast community {target} json"',
             ],
         )
     ],

@@ -7,7 +7,7 @@ from pathlib import Path
 from ipaddress import IPv4Address, IPv6Address
 
 # Third Party
-from pydantic import FilePath, ValidationInfo, field_validator
+from pydantic import Field, FilePath, ValidationInfo, field_validator
 from netmiko.ssh_dispatcher import CLASS_MAPPER  # type: ignore
 
 # Project
@@ -66,6 +66,8 @@ class Device(HyperglassModelWithId, extra="allow"):
     http: t.Optional[HttpConfiguration] = None
     platform: str
     structured_output: t.Optional[bool] = None
+    # Run built-in queries in this VRF. Built-ins without a VRF form are not offered.
+    vrf: t.Optional[str] = Field(None, pattern=r"^[A-Za-z0-9_.:-]{1,64}$")
     directives: Directives = Directives()
     driver: t.Optional[SupportedDriver] = None
     driver_config: t.Dict[str, t.Any] = {}
@@ -296,7 +298,18 @@ class Device(HyperglassModelWithId, extra="allow"):
         # Directives matching provided IDs.
         device_directives = directives.filter(*directive_ids)
         # Matching built-in directives for this device's platform.
-        builtins = directives.device_builtins(platform=platform, table_output=structured_output)
+        builtins = directives.device_builtins(
+            platform=platform,
+            table_output=structured_output,
+            vrf=info.data.get("vrf") is not None,
+        )
+
+        if info.data.get("vrf") is not None and directive_options.builtins and not len(builtins):
+            raise ConfigError(
+                "Device '{device}' sets vrf, but platform '{platform}' has no VRF-capable built-in directives",
+                device=info.data["name"],
+                platform=platform,
+            )
 
         if directive_options.builtins is True:
             # Add all builtins.

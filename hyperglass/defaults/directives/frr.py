@@ -29,11 +29,13 @@ FRRouting_BGPRoute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command='vtysh -c "show bgp ipv4 unicast {target}"',
+            vrf_command='vtysh -c "show bgp vrf {vrf} ipv4 unicast {target}"',
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command='vtysh -c "show bgp ipv6 unicast {target}"',
+            vrf_command='vtysh -c "show bgp vrf {vrf} ipv6 unicast {target}"',
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
@@ -52,6 +54,10 @@ FRRouting_BGPASPath = BuiltinDirective(
                 'vtysh -c "show bgp ipv4 unicast regexp {target}"',
                 'vtysh -c "show bgp ipv6 unicast regexp {target}"',
             ],
+            vrf_commands=[
+                'vtysh -c "show bgp vrf {vrf} ipv4 unicast regexp {target}"',
+                'vtysh -c "show bgp vrf {vrf} ipv6 unicast regexp {target}"',
+            ],
         )
     ],
     field=Text(description="AS Path Regular Expression"),
@@ -68,6 +74,10 @@ FRRouting_BGPCommunity = BuiltinDirective(
             commands=[
                 'vtysh -c "show bgp ipv4 unicast community {target}"',
                 'vtysh -c "show bgp ipv6 unicast community {target}"',
+            ],
+            vrf_commands=[
+                'vtysh -c "show bgp vrf {vrf} ipv4 unicast community {target}"',
+                'vtysh -c "show bgp vrf {vrf} ipv6 unicast community {target}"',
             ],
         )
     ],
@@ -123,11 +133,13 @@ FRRouting_BGPRouteTable = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command='vtysh -c "show bgp ipv4 unicast {target} json"',
+            vrf_command='vtysh -c "show bgp vrf {vrf} ipv4 unicast {target} json"',
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command='vtysh -c "show bgp ipv6 unicast {target} json"',
+            vrf_command='vtysh -c "show bgp vrf {vrf} ipv6 unicast {target} json"',
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),

@@ -86,3 +86,15 @@ def test_captured_large_community():
     result = parse_arista((sample,))
 
     assert result.routes[0].communities == ["65000:100", "65000:1:1"]
+
+
+def test_captured_vrf_local_route():
+    sample = (Path(__file__).parent / "fixtures" / "arista_vrf_local_route.json").read_text()
+    result = parse_arista((sample,))
+
+    assert result.vrf == "LAB"
+    assert result.routes[0].prefix == "198.51.100.0/24"
+    assert result.routes[0].local_preference == 100
+    # A locally originated route has an empty AS path; the source AS is the local AS.
+    assert result.routes[0].as_path == []
+    assert result.routes[0].source_as == 65007
