@@ -147,8 +147,8 @@ HuaweiBGPASPathTable = BuiltinDirective(
             condition="*",
             action="permit",
             commands=[
-                'display bgp routing-table regular-expression "{target}"',
-                'display bgp ipv6 routing-table regular-expression "{target}"',
+                "display bgp routing-table regular-expression {target}",
+                "display bgp ipv6 routing-table regular-expression {target}",
             ],
         )
     ],
@@ -164,8 +164,8 @@ HuaweiBGPCommunityTable = BuiltinDirective(
             condition="*",
             action="permit",
             commands=[
-                'display bgp routing-table community "{target}"',
-                'display bgp ipv6 routing-table community "{target}"',
+                "display bgp routing-table community {target}",
+                "display bgp ipv6 routing-table community {target}",
             ],
         )
     ],

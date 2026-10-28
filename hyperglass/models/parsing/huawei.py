@@ -3,6 +3,7 @@
 # Standard Library
 import re
 import typing as t
+from ipaddress import ip_address, ip_network
 
 # Third Party
 from pydantic import ConfigDict, field_validator, model_validator
@@ -319,6 +320,78 @@ def _extract_route_entries(lines: t.List[str]) -> t.List[HuaweiRouteEntry]:
     return routes
 
 
+def _brief_route(prefix: str, flags: str, values: dict) -> HuaweiRouteEntry:
+    """Map only attributes present in a brief VRP response."""
+    path = values.get("Path/Ogn", "").strip()
+    # AS sets and dotted ASNs cannot be represented losslessly by this model.
+    if path and not re.fullmatch(r"(?:\d+\s+)*\d*\s*[ie?]", path):
+        raise ValueError(f"Unsupported Huawei AS path: {path}")
+    return HuaweiRouteEntry(
+        prefix=str(ip_network(prefix)),
+        original_next_hop=str(ip_address(values.get("NextHop", "").strip())),
+        metric=int(values.get("MED", "").strip() or 0),
+        local_preference=int(values.get("LocPrf", "").strip() or 100),
+        preference=int(values.get("PrefVal", "").strip() or 0),
+        duration=-1,
+        as_path=[int(asn) for asn in re.findall(r"\d+", path)],
+        communities=re.findall(r"\d+:\d+(?::\d+)?", values.get("Community", "")),
+        is_valid="*" in flags,
+        is_best=">" in flags,
+    )
+
+
+def _brief_fields(line: str) -> dict:
+    """Read IPv6 field labels without consuming a neighbouring empty value."""
+    labels = list(re.finditer(r"(NextHop|LocPrf|MED|PrefVal|Path/Ogn|Community)\s*:", line))
+    return {
+        match[1]: line[
+            match.end() : labels[index + 1].start() if index + 1 < len(labels) else len(line)
+        ].strip()
+        for index, match in enumerate(labels)
+    }
+
+
+def _extract_brief_routes(lines: t.List[str]) -> t.List[HuaweiRouteEntry]:
+    """Read IPv4 columns and IPv6 labelled blocks from captured VRP output."""
+    routes = []
+    columns = []
+    prefix = ""
+    block = None
+    flags = ""
+    for line in lines:
+        if "Network" in line and "NextHop" in line and "PrefVal" in line:
+            columns = [(match.group(), match.start()) for match in re.finditer(r"\S+", line)]
+            continue
+        network = re.match(r"^\s*([*>idh sS]*)\s+Network\s*:\s*(\S+)\s+PrefixLen\s*:\s*(\d+)", line)
+        if network:
+            if block is not None:
+                routes.append(_brief_route(prefix, flags, block))
+            flags, address, length = network.groups()
+            prefix = f"{address}/{length}"
+            block = {}
+            continue
+        if block is not None:
+            block.update(_brief_fields(line))
+            continue
+        if columns and re.match(r"^\s*[*>idh sS]*[*>]", line):
+            values = {
+                name: line[
+                    start : columns[index + 1][1] if index + 1 < len(columns) else None
+                ].strip()
+                for index, (name, start) in enumerate(columns)
+            }
+            prefix = values["Network"] or prefix
+            if not prefix:
+                raise ValueError("Huawei brief route has no prefix")
+            routes.append(_brief_route(prefix, line[: columns[0][1]], values))
+    if block is not None:
+        routes.append(_brief_route(prefix, flags, block))
+    count = re.search(r"Total Number of Routes\s*:\s*(\d+)", "\n".join(lines))
+    if count and int(count[1]) != len(routes):
+        raise ValueError("Incomplete or unsupported Huawei brief routing table")
+    return routes
+
+
 class HuaweiBGPRouteTable(BGPRouteTable):
     """Canonical Huawei BGP Route Table."""
 
@@ -358,6 +431,8 @@ class HuaweiBGPTable(HuaweiBase):
 
         # Extract route entries
         instance.routes = _extract_route_entries(lines)
+        if not instance.routes:
+            instance.routes = _extract_brief_routes(lines)
 
         _log.debug(f"Parsed {len(instance.routes)} Huawei routes")
         return instance
@@ -380,9 +455,8 @@ class HuaweiBGPTable(HuaweiBase):
                 "source_as": route.source_as,
                 "source_rid": route.source_rid,
                 "peer_rid": route.peer_rid,
-                "rpki_state": (
-                    RPKI_STATE_MAP["valid"] if route.is_valid else RPKI_STATE_MAP["unknown"]
-                ),
+                # VRP's '*' / 'valid' marks BGP usability, not RPKI validation.
+                "rpki_state": RPKI_STATE_MAP["unverified"],
             }
             routes.append(BGPRoute(**route_data))
 

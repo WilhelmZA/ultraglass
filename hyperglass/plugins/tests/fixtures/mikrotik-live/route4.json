@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-10-27T07:28:50.281426+00:00",
+  "device": {
+    "id": "lab-mikrotik",
+    "name": "lab-mikrotik",
+    "platform": "mikrotik_routeros"
+  },
+  "query": {
+    "type": "__hyperglass_mikrotik_bgp_route_table__",
+    "target": "1.1.1.1",
+    "location": "lab-mikrotik"
+  },
+  "raw": [
+    "Flags: X - disabled, F - filtered, U - unreachable, A - active; c - connect, s - static, r - rip, b - bgp, o - ospf, i - isis, d - dhcp, v - vpn, m - modem, a - ldp-address, l - ldp-mapping, g - slaac, y - bgp-mpls-vpn; H - hw-offloaded; + - ecmp, B - blackhole \n Ab   afi=ip4 contribution=active dst-address=1.1.1.0/24 routing-table=main gateway=10.250.4.0 immediate-gw=10.250.4.0%ether2 distance=20 scope=40 target-scope=10 belongs-to=\"bgp-IP-10.250.4.0\" \n       bgp.peer-cache-id=*2800002 .aggregator=\"13335:10.34.16.20\" .as-path=\"65000,37239,13335\" .communities=37195:302 .atomic-aggregate=yes .origin=igp \n       debug.fwp-ptr=0x202C2360"
+  ]
+}

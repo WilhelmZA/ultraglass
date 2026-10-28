@@ -46,7 +46,9 @@ def rpki_state(
 
     cache = use_state("cache")
     state = 3
-    ro = f"{prefix!s}@{asn!s}"
+    # A provider switch must not reuse a different validator's result.
+    provider = backend if backend != "routinator" else f"{backend}:{rpki_server_url.rstrip('/')}"
+    ro = f"{provider}:{prefix!s}@{asn!s}"
 
     cached = cache.get_map(CACHE_KEY, ro)
     if cached is not None:

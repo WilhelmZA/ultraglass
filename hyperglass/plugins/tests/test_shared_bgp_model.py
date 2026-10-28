@@ -21,12 +21,13 @@ PARSERS = [
     (parse_frr, "frr_bgp_route.json"),
     (parse_juniper, "juniper_route_indirect.xml"),
     (parse_huawei, None),
+    (parse_huawei, Path(__file__).parent / "fixtures/huawei-vrp/route4.txt"),
+    (parse_huawei, Path(__file__).parent / "fixtures/huawei-vrp/community4.txt"),
 ]
+PARSER_IDS = ["arista", "frr", "juniper", "huawei-synthetic", "huawei-detail", "huawei-brief"]
 
 
-@pytest.mark.parametrize(
-    "parser,filename", PARSERS, ids=["arista", "frr", "juniper", "huawei-synthetic"]
-)
+@pytest.mark.parametrize("parser,filename", PARSERS, ids=PARSER_IDS)
 @pytest.mark.parametrize("mode", ["deny", "permit", "name"])
 @pytest.mark.parametrize("backend", ["cloudflare", "routinator"])
 def test_vendor_community_and_rpki_policy(monkeypatch, parser, filename, mode, backend):
@@ -62,9 +63,7 @@ def test_vendor_community_and_rpki_policy(monkeypatch, parser, filename, mode, b
         assert call.kwargs["rpki_server_url"] == "https://rpki.example.test"
 
 
-@pytest.mark.parametrize(
-    "parser,filename", PARSERS, ids=["arista", "frr", "juniper", "huawei-synthetic"]
-)
+@pytest.mark.parametrize("parser,filename", PARSERS, ids=PARSER_IDS)
 @pytest.mark.parametrize("mode", ["inline", "async"])
 def test_vendor_enrichment_dispatch(monkeypatch, parser, filename, mode):
     from hyperglass.state import use_state
