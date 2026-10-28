@@ -42,7 +42,9 @@ Low-RAM machines can also cap the table size:
 PREFIXES=50000 ./lab-up.sh frr     # inject 50k prefixes per family instead of the full ~1.1M
 ```
 
-Ultraglass UI: http://127.0.0.1:8001. Query a device by name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei. Run `./scripts/smoke-test.py` for every query type against every running device.
+Two Ultraglass instances run against the same devices so every query can be cross-checked. http://127.0.0.1:8001 (`configs/ultraglass/`) sets `structured_output: true` on every device, so each platform returns whatever structured parsers it has. http://127.0.0.1:8002 (`configs/ultraglass-text/`) sets `structured_output: false` on every device and has no `structured` block, so every query returns raw device text. Each instance uses its own Redis database (1 and 2), so neither can serve the other's cached result. BIRD, OpenBGPD and VyOS have structured traceroute only; their BGP queries return text on both instances.
+
+Query a device by name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei. Run `./scripts/smoke-test.py` for every query type against every running device.
 
 Run `python3 scripts/verify-issues.py --api http://127.0.0.1:8001/api --output /path/to/evidence lab-arista lab-frr lab-bird lab-mikrotik` to check mixed-vendor directive resolution and rejected command-injection inputs. The script retains complete API responses in `results.json`. Keep `logging.samples.enable` enabled to capture device output. Run against an isolated test instance when comparing code versions so cached results cannot mask a regression.
 
@@ -50,7 +52,7 @@ Run `python3 scripts/verify-browser.py --url http://127.0.0.1:8001 --output /pat
 
 Run `python3 scripts/verify-policies.py --routinator https://routinator.nlnetlabs.nl --output /path/to/policy-results.json` with development dependencies installed to replay captured EOS, FRR, and Huawei routes against live RPKI and enrichment providers. The 36 cases cover community deny/permit/name modes, Cloudflare/Routinator, and inline/deferred enrichment. This replay checks model data; it does not replace browser or live-device query validation.
 
-Set `ULTRAGLASS_LAB_API=http://127.0.0.1:8002/api` when running `pytest tests/` against an isolated API instance. The default remains port 8001.
+Set `ULTRAGLASS_LAB_API=http://127.0.0.1:8003/api` when running `pytest tests/` against an isolated API instance (8002 is the text instance). The default remains port 8001.
 
 ## Devices
 
@@ -65,6 +67,7 @@ Set `ULTRAGLASS_LAB_API=http://127.0.0.1:8002/api` when running `pytest tests/` 
 | arista | arista_eos | 192.168.250.17 | admin / admin | cEOS 4.36.3M, full table, structured output |
 | huawei | huawei (VRP) | 192.168.250.18 | admin / admin | CE12800 V200R005 (vrnetlab qemu), capped table, structured output |
 | ultraglass | — | 192.168.250.2 | — | this repo's image, port 8001 |
+| ultraglass-text | — | 192.168.250.4 | — | same image, all text, port 8002 |
 | redis | — | 192.168.250.3 | — | cache only, no persistence |
 
 Juniper, Cisco and Nokia SR OS are not built here: their images are VM-based or licensed, and the Intel-only nested-VMX vendors (Juniper vMX/vJunos, Cisco XRv9k/n9kv) will not boot on an AMD host. Add each as a `vr-*` node once its image is in place, give it a `10.250.N.1/31` link to a new `core:ethN` with a matching GoBGP neighbor, and uncomment its entry in `configs/ultraglass/devices.yaml`.

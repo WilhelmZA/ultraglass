@@ -14,6 +14,7 @@ topology:
       kind: linux
       image: ultraglass-lab/core:latest
       mgmt-ipv4: 192.168.250.10
+      mgmt-ipv6: fd00:250:ffff::10
       binds:
         - configs/core/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro
         - data:/data:ro
@@ -119,6 +120,26 @@ topology:
         - configs/ultraglass:/etc/hyperglass
       ports:
         - 127.0.0.1:8001:8001
+
+    # Same image and devices with structured output off everywhere, so every
+    # query can be cross-checked against plain device text. Own Redis DB so
+    # neither instance can serve the other's cached result.
+    ultraglass-text:
+      kind: linux
+      image: ultraglass-lab/ultraglass:dev
+      mgmt-ipv4: 192.168.250.4
+      env:
+        HYPERGLASS_APP_PATH: /etc/hyperglass
+        HYPERGLASS_HOST: 0.0.0.0
+        HYPERGLASS_PORT: "8002"
+        HYPERGLASS_REDIS_HOST: 192.168.250.3
+        HYPERGLASS_REDIS_DB: "2"
+        HYPERGLASS_DISABLE_UI: "false"
+        HYPERGLASS_CONTAINER: "true"
+      binds:
+        - configs/ultraglass-text:/etc/hyperglass
+      ports:
+        - 127.0.0.1:8002:8002
 
   links:
     - endpoints: ["core:eth1", "frr:eth1"]
