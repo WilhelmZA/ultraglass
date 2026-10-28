@@ -24,6 +24,7 @@ NAMED = {
         "lab-huawei",
         "lab-bird",
         "lab-openbgpd",
+        "lab-vyos",
         "lab-mikrotik",
     },
 }

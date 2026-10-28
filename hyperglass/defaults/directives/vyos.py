@@ -184,12 +184,12 @@ VyOS_BGPCommunityTable = BuiltinDirective(
             condition="*",
             action="permit",
             commands=[
-                'vtysh -c "show bgp ipv4 unicast community {target} json"',
-                'vtysh -c "show bgp ipv6 unicast community {target} json"',
+                'vtysh -c "show bgp ipv4 unicast community {target} json detail"',
+                'vtysh -c "show bgp ipv6 unicast community {target} json detail"',
             ],
             vrf_commands=[
-                'vtysh -c "show bgp vrf {vrf} ipv4 unicast community {target} json"',
-                'vtysh -c "show bgp vrf {vrf} ipv6 unicast community {target} json"',
+                'vtysh -c "show bgp vrf {vrf} ipv4 unicast community {target} json detail"',
+                'vtysh -c "show bgp vrf {vrf} ipv6 unicast community {target} json detail"',
             ],
         )
     ],
