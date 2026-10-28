@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useConfig } from '~/context';
 import { fetchWithTimeout } from '~/util';
 
 import type {
@@ -34,7 +35,14 @@ interface WtfIsMyIP {
 const URL_IP4 = 'https://ipv4.json.myip.wtf';
 const URL_IP6 = 'https://ipv6.json.myip.wtf';
 
-function transform(wtf: WtfIsMyIP): WtfIndividual {
+// In `server` mode, Ultraglass returns the address it received the request from.
+const SERVER_IP4 = '/api/myip?family=4';
+const SERVER_IP6 = '/api/myip?family=6';
+
+function transform(wtf: WtfIsMyIP | { ip: string }): WtfIndividual {
+  if ('ip' in wtf) {
+    return { ip: wtf.ip, isp: '', location: '', country: '' };
+  }
   const { YourFuckingIPAddress, YourFuckingISP, YourFuckingLocation, YourFuckingCountryCode } = wtf;
   return {
     ip: YourFuckingIPAddress,
@@ -74,12 +82,14 @@ const common: UseQueryOptions<WtfIndividual, unknown, WtfIndividual, string[]> =
 };
 
 export function useWtf(): Wtf {
+  const { web } = useConfig();
+  const server = web.myIp === 'server';
   const ipv4 = useQuery<WtfIndividual, unknown, WtfIndividual, string[]>({
-    queryKey: [URL_IP4],
+    queryKey: [server ? SERVER_IP4 : URL_IP4],
     ...common,
   });
   const ipv6 = useQuery<WtfIndividual, unknown, WtfIndividual, string[]>({
-    queryKey: [URL_IP6],
+    queryKey: [server ? SERVER_IP6 : URL_IP6],
     ...common,
   });
 

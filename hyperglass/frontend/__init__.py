@@ -5,6 +5,7 @@ import os
 import re
 import json
 import math
+import hashlib
 import shutil
 import typing as t
 import asyncio
@@ -161,6 +162,61 @@ def _prepare_ui_build_dir(app_path: Path) -> Path:
         ui_node_modules.symlink_to(package_node_modules, target_is_directory=True)
     (ui_dir / ".npmrc").write_text(f"store-dir={PACKAGE_PNPM_STORE}\n")
     return ui_dir
+
+
+# Google serves woff2 files only to current browsers.
+_FONT_USER_AGENT = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/130.0.0.0 Safari/537.36"
+)
+
+
+def google_font_url(family: str, weights: t.Sequence[int] = (300, 400, 700)) -> str:
+    """Build the Google Fonts stylesheet URL the UI used to load in the browser."""
+    name = family.split(", ")[0].strip().replace("'", "").replace('"', "")
+    return "https://fonts.googleapis.com/css?family={}:{}&display=swap".format(
+        "+".join(name.split(" ")), ",".join(str(w) for w in weights)
+    )
+
+
+def self_host_fonts(fonts: t.Dict[str, str], ui_dir: Path) -> bool:
+    """Download the configured Google fonts into the UI so browsers never contact Google.
+
+    Writes `public/fonts/<kind>.css` and the font files it references. Returns False, and
+    leaves no partial fonts behind, if the download fails; the UI then links Google Fonts.
+    """
+    # Third Party
+    import httpx
+
+    font_dir = ui_dir / "public" / "fonts"
+    shutil.rmtree(font_dir, ignore_errors=True)
+    font_dir.mkdir(parents=True)
+
+    try:
+        with httpx.Client(timeout=10, headers={"user-agent": _FONT_USER_AGENT}) as client:
+            for kind, family in fonts.items():
+                stylesheet = client.get(google_font_url(family))
+                stylesheet.raise_for_status()
+
+                def download(match: re.Match) -> str:
+                    url = match.group(1)
+                    name = hashlib.sha256(url.encode()).hexdigest()[:16] + Path(url).suffix
+                    response = client.get(url)
+                    response.raise_for_status()
+                    (font_dir / name).write_bytes(response.content)
+                    return f"url(/fonts/{name})"
+
+                css = re.sub(
+                    r"url\((https://fonts\.gstatic\.com/[^)]+)\)", download, stylesheet.text
+                )
+                (font_dir / f"{kind}.css").write_text(css)
+    except httpx.HTTPError as err:
+        log.bind(error=str(err)).warning("Unable to self-host fonts, the UI will use Google Fonts")
+        shutil.rmtree(font_dir, ignore_errors=True)
+        return False
+
+    log.bind(path=str(font_dir)).debug("Self-hosted UI fonts")
+    return True
 
 
 def get_ui_build_timeout() -> t.Optional[int]:
@@ -457,9 +513,6 @@ async def build_frontend(  # noqa: C901
     full: bool = False,
 ) -> bool:
     """Perform full frontend UI build process."""
-    # Standard Library
-    import hashlib
-
     # Project
     from hyperglass.constants import __version__
 
@@ -539,6 +592,8 @@ async def build_frontend(  # noqa: C901
         try:
             if not (ui_dir / "node_modules").is_symlink():
                 initialize_result = await node_initial(timeout, dev_mode, ui_dir)
+            fonts = params.web.theme.fonts
+            self_host_fonts({"body": fonts.body, "mono": fonts.mono}, ui_dir)
             build_result = await build_ui(app_path=app_path, ui_path=ui_dir)
         except Exception as err:
             dot_env_file.write_text("\n".join(f"{k}={v}" for k, v in env_config.items()))

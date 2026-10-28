@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Stack, Text, VStack, useDisclosure } from '@chakra-ui/react';
 import { Prompt } from '~/components';
 import { useConfig } from '~/context';
@@ -30,9 +30,23 @@ export const UserIP = (props: UserIPProps): JSX.Element => {
   const show4 = useMemo(() => !ipv4.isError && ipv4.data?.ip !== null, [ipv4]);
   const show6 = useMemo(() => !ipv6.isError && ipv6.data?.ip !== null, [ipv6]);
 
+  // The external lookup sends the visitor's address to a third party, so ask first.
+  const [confirmed, setConfirmed] = useState(web.myIp !== 'external');
+
   function handleOpen(): void {
     onOpen();
+    if (confirmed) {
+      query();
+    }
+  }
+
+  function handleConfirm(): void {
+    setConfirmed(true);
     query();
+  }
+
+  if (web.myIp === 'off') {
+    return <></>;
   }
 
   return (
@@ -45,56 +59,67 @@ export const UserIP = (props: UserIPProps): JSX.Element => {
       onOpen={handleOpen}
       {...disclosure}
     >
-      <VStack w="100%" spacing={4} justify="center">
-        {hasResult && (
+      {!confirmed ? (
+        <VStack w="100%" spacing={4} justify="center">
           <Text fontSize="sm" textAlign="center">
-            {web.text.ipSelect}
+            {web.text.ipLookupNotice}
           </Text>
-        )}
-        <Stack spacing={2}>
-          {show4 && (
-            <Button
-              size="sm"
-              fontSize="xs"
-              fontFamily="mono"
-              colorScheme="primary"
-              isDisabled={ipv4.isError}
-              isLoading={ipv4.isLoading}
-              justifyContent="space-between"
-              onClick={() => {
-                ipv4?.data?.ip && setTarget(ipv4.data.ip);
-                disclosure.onClose();
-              }}
-              rightIcon={<DynamicIcon icon={{ fa: 'FaArrowCircleRight' }} boxSize="18px" />}
-            >
-              {ipv4?.data?.ip ?? noIPv4}
-            </Button>
-          )}
-          {show6 && (
-            <Button
-              size="sm"
-              fontSize="xs"
-              fontFamily="mono"
-              colorScheme="secondary"
-              isDisabled={ipv6.isError}
-              isLoading={ipv6.isLoading}
-              justifyContent="space-between"
-              onClick={() => {
-                ipv6?.data?.ip && setTarget(ipv6.data.ip);
-                disclosure.onClose();
-              }}
-              rightIcon={<DynamicIcon icon={{ fa: 'FaArrowCircleRight' }} boxSize="18px" />}
-            >
-              {ipv6?.data?.ip ?? noIPv6}
-            </Button>
-          )}
-          {!hasResult && (
-            <Text fontSize="sm" textAlign="center" color={errorColor}>
-              {web.text.ipError}
+          <Button size="sm" colorScheme="primary" onClick={handleConfirm}>
+            {web.text.ipLookupConfirm}
+          </Button>
+        </VStack>
+      ) : (
+        <VStack w="100%" spacing={4} justify="center">
+          {hasResult && (
+            <Text fontSize="sm" textAlign="center">
+              {web.text.ipSelect}
             </Text>
           )}
-        </Stack>
-      </VStack>
+          <Stack spacing={2}>
+            {show4 && (
+              <Button
+                size="sm"
+                fontSize="xs"
+                fontFamily="mono"
+                colorScheme="primary"
+                isDisabled={ipv4.isError}
+                isLoading={ipv4.isLoading}
+                justifyContent="space-between"
+                onClick={() => {
+                  ipv4?.data?.ip && setTarget(ipv4.data.ip);
+                  disclosure.onClose();
+                }}
+                rightIcon={<DynamicIcon icon={{ fa: 'FaArrowCircleRight' }} boxSize="18px" />}
+              >
+                {ipv4?.data?.ip ?? noIPv4}
+              </Button>
+            )}
+            {show6 && (
+              <Button
+                size="sm"
+                fontSize="xs"
+                fontFamily="mono"
+                colorScheme="secondary"
+                isDisabled={ipv6.isError}
+                isLoading={ipv6.isLoading}
+                justifyContent="space-between"
+                onClick={() => {
+                  ipv6?.data?.ip && setTarget(ipv6.data.ip);
+                  disclosure.onClose();
+                }}
+                rightIcon={<DynamicIcon icon={{ fa: 'FaArrowCircleRight' }} boxSize="18px" />}
+              >
+                {ipv6?.data?.ip ?? noIPv6}
+              </Button>
+            )}
+            {!hasResult && (
+              <Text fontSize="sm" textAlign="center" color={errorColor}>
+                {web.text.ipError}
+              </Text>
+            )}
+          </Stack>
+        </VStack>
+      )}
     </Prompt>
   );
 };

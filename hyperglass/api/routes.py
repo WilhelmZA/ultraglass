@@ -5,6 +5,7 @@ import re
 import json
 import time
 import socket
+import ipaddress
 import asyncio
 import typing as t
 from uuid import uuid4
@@ -42,6 +43,7 @@ __all__ = (
     "aspath_enrich",
     "query_enrichment",
     "dns",
+    "myip",
 )
 
 # MikroTik occasionally answers a BGP query before its routing table has finished
@@ -120,24 +122,24 @@ async def aspath_enrich(data: dict) -> dict:
     return {"success": True, "asn_organizations": results}
 
 
+def _client_address(request: Request) -> str:
+    """Identify the client behind a reverse proxy, as the webhook logging does."""
+    forwarded = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+    if request.headers.get("x-real-ip"):
+        return request.headers["x-real-ip"]
+    if forwarded:
+        return forwarded
+    return request.client.host if request.client else "anonymous"
+
+
 # DNS record types in the DNS-over-HTTPS JSON format the UI already reads.
 _DNS_TYPES = {"A": (socket.AF_INET, 1), "AAAA": (socket.AF_INET6, 28)}
 _HOSTNAME = re.compile(
     r"(?=.{1,253}\.?$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}\.?"
 )
-
-
-def _dns_client(request: Request) -> str:
-    """Identify the client behind a reverse proxy, as the webhook logging does."""
-    forwarded = request.headers.get("x-forwarded-for")
-    if request.headers.get("x-real-ip"):
-        return request.headers["x-real-ip"]
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "anonymous"
-
-
-_DNS_RATE_LIMIT = RateLimitConfig(rate_limit=("minute", 120), identifier_for_request=_dns_client)
+_DNS_RATE_LIMIT = RateLimitConfig(
+    rate_limit=("minute", 120), identifier_for_request=_client_address
+)
 
 
 @get("/api/dns", middleware=[_DNS_RATE_LIMIT.middleware], include_in_schema=False)
@@ -160,6 +162,18 @@ async def dns(name: str, type: str = "A") -> dict:
     addresses = dict.fromkeys(record[4][0] for record in records)
     answer = [{"name": name, "type": type_code, "TTL": 0, "data": a} for a in addresses]
     return {"Status": 0, "Question": question, "Answer": answer}
+
+
+@get("/api/myip", include_in_schema=False)
+async def myip(request: Request, family: int = 4) -> dict:
+    """Return the requesting client's address, for the My IP button in `server` mode."""
+    try:
+        address = ipaddress.ip_address(_client_address(request))
+    except ValueError:
+        return {"ip": None}
+    if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped is not None:
+        address = address.ipv4_mapped
+    return {"ip": str(address) if address.version == family else None}
 
 
 @get("/api/query/{query_id:str}/enrichment")

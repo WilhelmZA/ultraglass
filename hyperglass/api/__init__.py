@@ -19,6 +19,7 @@ from .events import check_redis
 from .routes import (
     dns,
     info,
+    myip,
     query,
     device,
     devices,
@@ -54,6 +55,7 @@ HANDLERS = [
     aspath_enrich,
     query_enrichment,
     dns,
+    myip,
 ]
 
 if not STATE.settings.disable_ui:

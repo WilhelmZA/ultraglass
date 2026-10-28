@@ -45,6 +45,8 @@ interface _Text {
   no_ip: string;
   ip_select: string;
   ip_button: string;
+  ip_lookup_notice: string;
+  ip_lookup_confirm: string;
 }
 
 interface _Greeting {
@@ -96,6 +98,7 @@ interface _Web {
   text: _Text;
   theme: _ThemeConfig;
   location_display_mode: 'auto' | 'gallery' | 'dropdown' | string;
+  my_ip: 'external' | 'server' | 'off';
   highlight: _Highlight[];
 }
 

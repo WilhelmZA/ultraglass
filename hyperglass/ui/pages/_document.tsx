@@ -41,10 +41,16 @@ class MyDocument extends Document<DocumentExtra> {
     //   },
     // } = await getHyperglassConfig(hyperglassUrl);
 
-    fonts = {
-      body: googleFontUrl(config.web.theme.fonts.body),
-      mono: googleFontUrl(config.web.theme.fonts.mono),
-    };
+    // The UI build downloads the fonts into public/fonts, so browsers do not contact Google.
+    // If that download failed, fall back to Google Fonts.
+    const selfHosted =
+      fs.existsSync('public/fonts/body.css') && fs.existsSync('public/fonts/mono.css');
+    fonts = selfHosted
+      ? { body: '/fonts/body.css', mono: '/fonts/mono.css' }
+      : {
+          body: googleFontUrl(config.web.theme.fonts.body),
+          mono: googleFontUrl(config.web.theme.fonts.mono),
+        };
     defaultColorMode = config.web.theme.defaultColorMode;
 
     return { customJs, customHtml, fonts, defaultColorMode, ...initialProps };
@@ -61,9 +67,13 @@ class MyDocument extends Document<DocumentExtra> {
           <meta name="og:image" content="/images/opengraph.jpg" />
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="630" />
-          <link rel="dns-prefetch" href="//fonts.gstatic.com" />
-          <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          {this.props.fonts.body.startsWith('https://') && (
+            <>
+              <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+              <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+              <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+            </>
+          )}
           <link href={this.props.fonts.mono} rel="stylesheet" />
           <link href={this.props.fonts.body} rel="stylesheet" />
           {favicons.map(favicon => (

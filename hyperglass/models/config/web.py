@@ -122,6 +122,9 @@ class Text(HyperglassModel):
     no_ip: str = "No {protocol} Address"
     ip_select: str = "Select an IP Address"
     ip_button: str = "My IP"
+    # Shown before the external lookup when `web.my_ip` is `external`.
+    ip_lookup_notice: str = "This sends your IP address to myip.wtf to look it up."
+    ip_lookup_confirm: str = "Look up my IP"
 
     @field_validator("cache_prefix")
     def validate_cache_prefix(cls: "Text", value: str) -> str:
@@ -242,6 +245,9 @@ class Web(HyperglassModel):
     text: Text = Text()
     theme: Theme = Theme()
     location_display_mode: LocationDisplayMode = "auto"
+    # `external` looks up the visitor's address with myip.wtf, `server` reads it from the
+    # request to Ultraglass, and `off` hides the My IP button.
+    my_ip: t.Literal["external", "server", "off"] = "external"
     custom_javascript: t.Optional[FilePath] = None
     custom_html: t.Optional[FilePath] = None
     highlight: t.List[HighlightPattern] = []

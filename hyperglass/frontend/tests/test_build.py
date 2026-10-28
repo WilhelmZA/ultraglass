@@ -122,7 +122,14 @@ def test_failed_build_does_not_record_build_id(
     class Web:
         logo = Logo()
         opengraph = type("OpenGraph", (), {"image": package_ui / "opengraph.png"})()
-        theme = type("Theme", (), {"colors": type("Colors", (), {"black": "#000000"})()})()
+        theme = type(
+            "Theme",
+            (),
+            {
+                "colors": type("Colors", (), {"black": "#000000"})(),
+                "fonts": type("Fonts", (), {"body": "Nunito", "mono": "Fira Code"})(),
+            },
+        )()
 
     class Params:
         web = Web()
@@ -142,6 +149,7 @@ def test_failed_build_does_not_record_build_id(
     monkeypatch.setattr("hyperglass.frontend.build_ui", fail_build)
     monkeypatch.setattr("hyperglass.frontend.node_initial", skip_node_initial)
     monkeypatch.setattr("hyperglass.frontend.generate_favicons", lambda *args: ())
+    monkeypatch.setattr("hyperglass.frontend.self_host_fonts", lambda *args: False)
 
     with pytest.raises(RuntimeError, match="build failed"):
         asyncio.run(
