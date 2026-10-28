@@ -12,7 +12,10 @@ import sys
 import time
 import urllib.request
 
-INSTANCES = {"structured": ("http://127.0.0.1:8001/api", "1"), "text": ("http://127.0.0.1:8002/api", "2")}
+INSTANCES = {
+    "structured": ("http://127.0.0.1:8001/api", "1"),
+    "text": ("http://127.0.0.1:8002/api", "2"),
+}
 API, REDIS_DB = INSTANCES["structured"]
 # Device name without "lab-" -> platform, where they differ.
 PLATFORMS = {
