@@ -63,7 +63,7 @@ class Device(HyperglassModelWithId, extra="allow"):
     proxy: t.Optional[Proxy] = None
     display_name: t.Optional[str] = None
     port: int = 22
-    http: HttpConfiguration = HttpConfiguration()
+    http: t.Optional[HttpConfiguration] = None
     platform: str
     structured_output: t.Optional[bool] = None
     directives: Directives = Directives()
