@@ -18,10 +18,16 @@ QUERIES = (("BGP AS Path", "_64999_"), ("BGP Community", "65000:777"))
 # Device output that carries communities for each query; see verify-policy-matrix.py.
 NAMED = {
     "BGP AS Path": {"lab-bird", "lab-openbgpd", "lab-mikrotik"},
-    "BGP Community": {"lab-huawei", "lab-bird", "lab-openbgpd", "lab-mikrotik"},
+    "BGP Community": {
+        "lab-arista",
+        "lab-frr",
+        "lab-huawei",
+        "lab-bird",
+        "lab-openbgpd",
+        "lab-mikrotik",
+    },
 }
 NO_PATH = {"BGP Community": {"lab-huawei"}}
-TEXT_ONLY = {"lab-frr"}  # issue #67
 
 
 def column(panel, name):
@@ -38,10 +44,6 @@ def check_panel(page, device, kind):
         toggle.click()
     panel = item.locator(".chakra-accordion__panel")
     expect(panel).to_be_visible()
-    if device in TEXT_ONLY:
-        expect(panel).to_contain_text("64999", timeout=15000)
-        return {"device": device, "query": kind, "render": "text"}
-
     expect(panel.locator("table")).to_be_visible(timeout=15000)
     row = panel.locator("tbody tr").filter(has_text=PREFIX).first
     expect(row).to_be_visible()

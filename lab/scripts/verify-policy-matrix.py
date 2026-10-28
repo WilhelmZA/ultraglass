@@ -22,14 +22,12 @@ from pathlib import Path
 
 TEST_PREFIXES = {"1.0.0.0/24", "2606:4700:4700::/48"}
 # Device output that carries no communities, so the policy has nothing to act on.
-# EOS `show ip bgp regexp` and Huawei brief AS-path output omit them. FRR summary JSON,
-# used by VyOS, omits them for both queries (documented). EOS community: issue #66.
-NO_ASPATH_COMMUNITIES = {"lab-arista", "lab-huawei", "lab-vyos"}
-NO_COMMUNITY_COMMUNITIES = {"lab-arista", "lab-vyos"}
+# EOS `show ip bgp regexp`, Huawei brief AS-path output and FRR `regexp` JSON omit them.
+# VyOS uses FRR summary JSON for both queries (documented).
+NO_ASPATH_COMMUNITIES = {"lab-arista", "lab-huawei", "lab-frr", "lab-vyos"}
+NO_COMMUNITY_COMMUNITIES = {"lab-vyos"}
 # Huawei brief community output omits the AS path, so RPKI and organisations cannot apply.
 NO_COMMUNITY_ASPATH = {"lab-huawei"}
-# Devices whose AS-path and community queries return text only: FRR, issue #67.
-TEXT_ONLY = {"lab-frr"}
 # Ultraglass resolves a vendor directive id to each device's equivalent by name.
 QUERIES = (
     ("BGP AS Path", "__hyperglass_arista_eos_bgp_aspath_table__", "_64999_"),
@@ -83,18 +81,16 @@ def main():
             response = post(args.url, body)
             assert response["level"] == "success", (device, kind, response)
             output = response["output"]
-            if device in TEXT_ONLY:
-                assert isinstance(output, str) and "64999" in output, (device, kind, output)
-                row = {"device": device, "query": kind, "output": "text"}
-                results.append(row)
-                print(json.dumps(row), flush=True)
-                continue
             assert isinstance(output, dict), (device, kind, "text output")
             has_path = not (kind == "BGP Community" and device in NO_COMMUNITY_ASPATH)
             if args.mode == "async" and has_path:
                 output = wait_for_enrichment(args.url, response)
             routes = [r for r in output["routes"] if r["prefix"] in TEST_PREFIXES]
             assert routes, (device, kind, [r["prefix"] for r in output["routes"]])
+            # Every device holds both test routes, except Huawei, which the lab feeds a
+            # bounded IPv4-only subset.
+            if device != "lab-huawei":
+                assert {r["prefix"] for r in routes} == TEST_PREFIXES, (device, kind, routes)
             organization = output.get("asn_organizations", {}).get("13335", {}).get("name")
             if has_path:
                 for route in routes:
