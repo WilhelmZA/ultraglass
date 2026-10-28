@@ -9,6 +9,18 @@ Console, file, HTTP, and/or syslog logging configuration.
 | `max_size`  | String | 50MB          | Maximum log file size before being overwritten. |
 | `session_log` | Boolean | false | Write every SSH session, with each command and its output, to `<directory>/<device id>-<YYYYMMDD>.log`. Netmiko redacts the device password and secret. |
 
+### SSH session logs
+
+```yaml filename="config.yaml" copy
+logging:
+    directory: /var/log/ultraglass
+    session_log: true
+```
+
+Ultraglass appends sessions to a per-device file dated in UTC. Ensure the application can write to the directory. Password redaction does not remove internal addresses or sensitive command output. Review session logs before sharing them and manage their retention separately.
+
+For devices that reject automatic paging or terminal-width commands, set `disable_paging: false` in `devices.yaml`. Directives must then prevent paging themselves, for example with a platform-supported `| no-more` suffix.
+
 ### Syslog
 
 | Parameter | Type   | Default Value | Description             |

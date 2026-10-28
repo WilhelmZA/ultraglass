@@ -2,7 +2,7 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.2.2**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.3.1**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
@@ -10,17 +10,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+This section describes merged changes on `main`, not a published release.
+
 ### Fixed
 
 - Parse Huawei IPv4 brief columns and IPv6 brief blocks for AS-path and community queries. Remove literal target quotes that VRP misinterprets. Reject incomplete tables and recognized VRP command errors (#20).
 - Treat Huawei BGP validity as distinct from RPKI validity. Preserve missing AS paths and communities instead of inventing attributes (#20, #22).
 - Separate RPKI cached results by backend and Routinator server URL (#22).
 - Set the EOS lab neighbour-wide prefix limits so full-table sessions do not remain in `Idle(MaxPath)` (#23).
+- Deliver HTTP logging webhooks, including receivers on non-default ports (#37).
+- Preserve EOS large communities and handle empty, local, and inaccessible FRR BGP responses (#38, #39).
+- Parse AS-dot ASNs and omit confederation segments from public AS paths (#40, #41).
+- Reject `platform: http` devices without an `http` configuration block (#42).
+- Merge duplicate ASN nodes and space the combined AS-path chart (#43).
+- Derive traceroute statistics from probe samples and honour MikroTik text-output mode (#57, #58).
 
 ### Added
 
 - Add captured Huawei, EOS, FRR, and MikroTik parser regression fixtures, including complete traceroute output (#25).
 - Add repeatable browser validation for mixed structured/text devices and live-provider policy replay (#22, #23).
+- Add opt-in structured BGP output for VyOS 1.4+, OpenBGPD, and BIRD (#54, #55, #56).
+- Add native VRF forms for built-in queries on EOS, FRRouting, Huawei VRP, MikroTik RouterOS, and VyOS 1.4+ (#50).
+- Add the `vyos_1_3` platform with version-specific commands and text-only BGP output (#51).
+- Add fixed-choice directive variables, UI select fields, and API `queryVariables` validation (#52).
+- Add per-device `disable_paging` and optional daily SSH session logs through `logging.session_log` (#44, #45).
+- Add server-side hostname resolution through `web.dns_provider.name: server` and `/api/dns` (#48).
+- Add `web.my_ip` modes `external`, `server`, and `off`. External lookups require visitor confirmation (#49).
+
+### Changed
+
+- Keep query selections when returning from results through the browser Back button or the in-page button (#46, #47).
+- Serve configured Google Fonts locally after downloading them during the UI build. Failed downloads retain the Google Fonts fallback (#49).
 
 ## 3.3.1 - 2026-10-27
 

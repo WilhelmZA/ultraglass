@@ -25,6 +25,23 @@ Ultraglass uses [Netmiko](https://github.com/ktbyers/netmiko) to interact with d
 
 Use `vyos` for VyOS 1.4 and later. Use `vyos_1_3` for VyOS 1.3, which uses the older `show ip bgp` / `show ipv6 bgp` commands and has no traceroute source option. Both connect with the Netmiko `vyos` driver. Structured output on `vyos_1_3` covers traceroute only; BGP results stay as text.
 
+### Structured output
+
+Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured output by default. BIRD, OpenBGPD, VyOS, and Huawei VRPv8 require `structured_output: true` for structured BGP results.
+
+| Platform | Structured BGP source | Limitations |
+| :------- | :-------------------- | :---------- |
+| BIRD | `show route all` text | Route age and router RPKI state remain unknown. |
+| OpenBGPD | `bgpctl -j show rib detail` JSON | Router RPKI state comes from daemon origin validation. |
+| VyOS 1.4+ | FRR JSON through `vtysh` | AS-path and community summary results omit communities and route age. |
+| VyOS 1.3 | Not supported | Use text BGP results, even with structured traceroute enabled. |
+
+Structured traceroute also parses standard numbered CLI output from EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, and TNSR. Cisco, Nokia, TNSR, and both VyOS platform keys require `structured_output: true`. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation; remaining coverage is tracked in issues [#22](https://github.com/WilhelmZA/ultraglass/issues/22), [#25](https://github.com/WilhelmZA/ultraglass/issues/25), and [#35](https://github.com/WilhelmZA/ultraglass/issues/35).
+
+### VRF queries
+
+Built-in VRF forms support EOS, FRRouting, Huawei VRP, MikroTik RouterOS, and VyOS 1.4+. FRRouting exposes only BGP queries when `vrf` is set. See [device VRF configuration](/configuration/devices.mdx#vrf-queries).
+
 ## Other Platforms
 
 | Platform          | Key    |                          Natively Supported                          |

@@ -37,6 +37,8 @@ A rule is a way of saying "if a query target matches the rule's conditions, run 
 | `condition` | String          |               | Regular expression to match or IP prefix in which the value being evaluated must be contained. |
 | `action`    | String          | permit        | `permit` or `deny` the directive target when this rule is matched.                             |
 | `commands`  | List of Strings |               | Commands to run when this rule matches. `{target}` is replaced with the query target.          |
+| `vrf_command` | String | | Single command form used when the device has `vrf` set. Use `{vrf}` for the validated VRF name. |
+| `vrf_commands` | List of Strings | | Multiple-command alternative to `vrf_command`. |
 
 ### IP Rule
 
@@ -223,3 +225,5 @@ show-bgp-summary:
 ```
 
 With no selection, the command is `show bgp summary`. With both selected, the command is `show bgp summary instance inet group party_x`. The API accepts the selection as `queryVariables`, for example `{"queryVariables": {"group": "party_x"}}`.
+
+Set `required: true` to reject queries without a selection. Ultraglass rejects unknown variable keys and values outside `items`. Variable selections form part of the query cache key, so different selections do not share cached results.

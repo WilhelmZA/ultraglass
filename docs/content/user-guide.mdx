@@ -35,34 +35,41 @@ The deployment may restrict target formats or networks. A rejected target means 
 
 ### Submit the query
 
+Some query types show additional select fields. Select only the options you need; fields marked as required must have a value.
+
 Select **Submit** to run the query. The page shows the response when the device finishes, or an error message when the query cannot complete.
+
+Use the browser Back button or the in-page back control to return to the form with your last query selections. Select the title link to clear the form.
 
 ## Hostname resolution
 
-When you enter a hostname instead of an address, Ultraglass can resolve it in the browser using DNS-over-HTTPS. The resolver returns available IPv4 and IPv6 addresses, and you choose which address to query.
+When you enter a hostname instead of an address, Ultraglass resolves it through the configured DNS provider. The resolver returns available IPv4 and IPv6 addresses, and you choose which address to query.
 
-<Callout type="info">Browser-based resolution means the Ultraglass server does not need to resolve the hostname on your behalf. The configured resolver determines which addresses are returned.</Callout>
+<Callout type="info">Public DNS-over-HTTPS providers receive requests from your browser. In server mode, Ultraglass resolves the hostname using the server's resolver instead.</Callout>
 
 1. Enter a hostname such as `google.com`.
 2. Select **Submit**.
 3. Choose an IPv4 or IPv6 address from the resolution dialog.
 4. Confirm the selected address and run the query.
 
-If no address is returned, check the hostname, the configured DNS-over-HTTPS provider, and any browser or network policy that may block the resolver request.
+If no address is returned, check the hostname, the configured DNS provider, and any browser or network policy that blocks the resolver request.
 
 ## Use My IP
 
-The **My IP** control detects your public IPv4 and IPv6 addresses and offers them as query targets. It is useful when checking how a looking glass reaches your current network.
+The **My IP** control offers your detected address as a query target. The administrator can use external detection, server detection, or hide the control.
 
 1. Select **My IP** beside the target field.
-2. Choose the address version you want to test.
-3. Submit the query as usual.
+2. Confirm the lookup if the notice says it sends your IP address to myip.wtf.
+3. Choose an available address.
+4. Submit the query as usual.
 
-The detected address is the address visible to the configured detection service. It may differ from an address assigned to your device when you are behind NAT, a VPN, or a corporate proxy.
+External detection can return IPv4 and IPv6 addresses. Server detection returns only the address family used for your request and does not contact myip.wtf. The detected address can differ from your device address behind NAT, a VPN, or a corporate proxy.
 
 ## Read results
 
 The result panel may include raw device output, parsed tables, route metadata, AS path links, traceroute hop details, or a query error. Structured output is available only when both the deployment and the selected device support it.
+
+Traceroute tables preserve device-reported statistics. Where those statistics are absent, Ultraglass derives Last, Best, and Worst from available probe RTTs. It derives Loss only when the parser knows the number of sent probes. A missing RTT alone does not establish packet loss.
 
 Cached results show a cache indicator and the time at which the result was created. A cached response is still a response from a previous query. Run the query again when you need current device output.
 

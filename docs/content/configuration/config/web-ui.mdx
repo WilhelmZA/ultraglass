@@ -14,12 +14,23 @@ Ultraglass provides extensive customisation options for the look and feel of the
 
 ### DNS over HTTPS
 
-[DNS over HTTPS](https://www.rfc-editor.org/rfc/rfc8484) is used to look up an FQDN query target from the perspective of the user's browser.
+By default, the browser resolves hostname targets using [DNS over HTTPS](https://www.rfc-editor.org/rfc/rfc8484). Set `web.dns_provider.name: server` to use the Ultraglass server's resolver instead.
 
 | Parameter           | Type   | Default Value                          | Description                                                                 |
 | :------------------ | :----- | :------------------------------------- | :-------------------------------------------------------------------------- |
 | `dns_provider.name` | String | cloudflare                             | If `cloudflare` or `google` are provided, no URL is necessary. Use `server` to resolve hostnames on the Ultraglass server through `/api/dns` (A and AAAA, limited to 120 requests a minute per client), for networks that block public DNS-over-HTTPS. |
 | `dns_provider.url`  | String | `https://cloudflare-dns.com/dns-query` | Provide a custom DNS over HTTPS URL if you'd like to use your own resolver. |
+
+```yaml filename="config.yaml" copy
+web:
+    dns_provider:
+        name: server
+    my_ip: server
+```
+
+This configuration resolves hostname targets through `/api/dns` and detects visitor addresses through `/api/myip`. These two features do not contact public DNS-over-HTTPS providers or myip.wtf. Font downloads and optional enrichment services have separate network requirements.
+
+Server DNS supports A and AAAA records. Its endpoint allows 120 requests per minute per client. Server My IP returns only the address family used for the request. Configure your reverse proxy to overwrite client-address headers with verified values; both endpoints use forwarded client addresses when present.
 
 ### Logo
 

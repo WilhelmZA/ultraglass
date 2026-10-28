@@ -21,7 +21,11 @@ Ultraglass is a maintained fork of [hyperglass](https://github.com/thatmattlove/
 
 Ultraglass includes built-in support for Arista EOS, BIRD, Cisco IOS, Cisco NX-OS, Cisco IOS-XR, FRRouting, Huawei VRP, Juniper Junos, MikroTik, Nokia SR OS, OpenBGPD, TNSR, and VyOS. Netmiko provides the underlying device connectivity, so other supported platforms can be configured when their commands and output match the required query types.
 
-Structured BGP route output is available for Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik RouterOS. Huawei VRPv8 requires explicit `structured_output: true`. Structured traceroute supports FRRouting, Huawei, MikroTik, and standard numbered CLI formats from EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, and TNSR. BIRD, OpenBGPD, VyOS, TNSR, Cisco, and Nokia require explicit `structured_output: true`. Unrecognized traceroute formats retain their text output.
+Structured BGP route output is available for Arista EOS, BIRD, FRRouting, Huawei VRP, Juniper Junos, MikroTik RouterOS, OpenBGPD, and VyOS 1.4+. BIRD, OpenBGPD, VyOS, and Huawei VRPv8 require explicit `structured_output: true`. Structured traceroute supports FRRouting, Huawei, MikroTik, and standard numbered CLI formats from EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, and TNSR. BIRD, OpenBGPD, VyOS, TNSR, Cisco, and Nokia require explicit `structured_output: true`. Unrecognized traceroute formats retain their text output. Use `vyos_1_3` for VyOS 1.3; its BGP results remain text-only.
+
+Built-in VRF queries support Arista EOS, FRRouting, Huawei VRP, MikroTik RouterOS, and VyOS 1.4+. Configure `vrf` on each device entry. Custom directives can offer fixed-choice variables through additional select fields.
+
+Hostname targets can use public DNS-over-HTTPS or the server resolver through `web.dns_provider.name: server`. My IP requests require confirmation before contacting myip.wtf; use `web.my_ip: server` to avoid that lookup, or `off` to hide the control.
 
 BIRD AS-path queries accept ASN sequences with `^`, `$`, and `_` anchors. OpenBGPD accepts an ASN, `_ASN_`, `_ASN$`, or `^ASN_`. Unsupported expressions return an input error. RouterOS 7 full-table AS-path and community scans can exceed 90 seconds; configure `request_timeout` for the table size and device capacity. EOS queries enter enable mode; set `driver_config.secret` when an enable password is required.
 
