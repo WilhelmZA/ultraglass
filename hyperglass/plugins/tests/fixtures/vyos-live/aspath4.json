@@ -1,0 +1,130 @@
+{
+ "vrfId": 0,
+ "vrfName": "default",
+ "tableVersion": 1095025,
+ "routerId": "10.250.5.1",
+ "defaultLocPrf": 100,
+ "localAS": 65005,
+ "routes": {
+  "1.0.0.0/24": [
+   {
+    "valid": true,
+    "bestpath": true,
+    "selectionReason": "Older Path",
+    "pathFrom": "external",
+    "prefix": "1.0.0.0",
+    "prefixLen": 24,
+    "network": "1.0.0.0/24",
+    "version": 396211,
+    "weight": 0,
+    "peerId": "10.250.5.0",
+    "path": "65000 37239 13335",
+    "origin": "IGP",
+    "nexthops": [
+     {
+      "ip": "10.250.5.0",
+      "hostname": "core",
+      "afi": "ipv4",
+      "used": true
+     }
+    ]
+   }
+  ],
+  "1.1.1.0/24": [
+   {
+    "valid": true,
+    "bestpath": true,
+    "selectionReason": "Older Path",
+    "pathFrom": "external",
+    "prefix": "1.1.1.0",
+    "prefixLen": 24,
+    "network": "1.1.1.0/24",
+    "version": 396271,
+    "weight": 0,
+    "peerId": "10.250.5.0",
+    "path": "65000 37239 13335",
+    "origin": "IGP",
+    "nexthops": [
+     {
+      "ip": "10.250.5.0",
+      "hostname": "core",
+      "afi": "ipv4",
+      "used": true
+     }
+    ]
+   }
+  ],
+  "5.10.214.0/24": [
+   {
+    "valid": true,
+    "bestpath": true,
+    "selectionReason": "Older Path",
+    "pathFrom": "external",
+    "prefix": "5.10.214.0",
+    "prefixLen": 24,
+    "network": "5.10.214.0/24",
+    "version": 403635,
+    "weight": 0,
+    "peerId": "10.250.5.0",
+    "path": "65000 37239 13335",
+    "origin": "IGP",
+    "nexthops": [
+     {
+      "ip": "10.250.5.0",
+      "hostname": "core",
+      "afi": "ipv4",
+      "used": true
+     }
+    ]
+   }
+  ],
+  "5.10.215.0/24": [
+   {
+    "valid": true,
+    "bestpath": true,
+    "selectionReason": "Older Path",
+    "pathFrom": "external",
+    "prefix": "5.10.215.0",
+    "prefixLen": 24,
+    "network": "5.10.215.0/24",
+    "version": 403636,
+    "weight": 0,
+    "peerId": "10.250.5.0",
+    "path": "65000 37239 13335",
+    "origin": "IGP",
+    "nexthops": [
+     {
+      "ip": "10.250.5.0",
+      "hostname": "core",
+      "afi": "ipv4",
+      "used": true
+     }
+    ]
+   }
+  ],
+  "5.83.149.0/24": [
+   {
+    "valid": true,
+    "bestpath": true,
+    "selectionReason": "Older Path",
+    "pathFrom": "external",
+    "prefix": "5.83.149.0",
+    "prefixLen": 24,
+    "network": "5.83.149.0/24",
+    "version": 405220,
+    "weight": 0,
+    "peerId": "10.250.5.0",
+    "path": "65000 37239 13335",
+    "origin": "IGP",
+    "nexthops": [
+     {
+      "ip": "10.250.5.0",
+      "hostname": "core",
+      "afi": "ipv4",
+      "used": true
+     }
+    ]
+   }
+  ]
+ }
+}

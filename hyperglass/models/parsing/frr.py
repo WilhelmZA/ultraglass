@@ -58,7 +58,8 @@ class FRRPath(_FRRBase):
     med: int = 0
     weight: int = 0
     valid: bool
-    last_update: int
+    # Summary output (AS path and community queries) has no update time.
+    last_update: t.Optional[int] = None
     bestpath: bool
     community: t.List[str]
     nexthops: t.List[FRRNextHop]
@@ -66,26 +67,36 @@ class FRRPath(_FRRBase):
 
     @model_validator(mode="before")
     def validate_path(cls, values):
-        """Extract meaningful data from FRR response."""
+        """Extract meaningful data from FRR detail or summary responses."""
         new = values.copy()
-        # Local prefixes have an empty segment list. Confederation segments are
-        # internal to the confederation and are not part of the displayed path.
-        segments = values["aspath"].get("segments", [])
-        new["aspath"] = parse_as_path(
-            [
-                asn
-                for segment in segments
-                if not segment.get("type", "").startswith("as-confed")
-                for asn in segment.get("list", [])
-            ]
-        )
+        if "aspath" in values:
+            # Local prefixes have an empty segment list. Confederation segments are
+            # internal to the confederation and are not part of the displayed path.
+            segments = values["aspath"].get("segments", [])
+            new["aspath"] = parse_as_path(
+                [
+                    asn
+                    for segment in segments
+                    if not segment.get("type", "").startswith("as-confed")
+                    for asn in segment.get("list", [])
+                ]
+            )
+        else:
+            # Summary output carries the AS path as a string.
+            new["aspath"] = parse_as_path(values.get("path", ""))
         if "aggregatorAs" in values:
             new["aggregatorAs"] = parse_asn(values["aggregatorAs"]) or 0
         community = values.get("community", {"list": []})
         new["community"] = community["list"]
-        new["lastUpdate"] = values["lastUpdate"]["epoch"]
+        if "lastUpdate" in values:
+            new["lastUpdate"] = values["lastUpdate"]["epoch"]
         bestpath = values.get("bestpath", {})
-        new["bestpath"] = bestpath.get("overall", False)
+        if isinstance(bestpath, dict):
+            bestpath = bestpath.get("overall", False)
+        new["bestpath"] = bestpath
+        if "peer" not in values:
+            peer_id = values.get("peerId", "")
+            new["peer"] = {"peerId": peer_id, "routerId": peer_id}
         return new
 
 
@@ -95,17 +106,16 @@ class FRRBGPTable(_FRRBase):
     prefix: str
     paths: t.List[FRRPath] = []
 
-    def bgp_table(self):
+    def bgp_table(self) -> BGPRouteTable:
         """Convert the FRR-specific fields to standard parsed data model."""
+        return frr_bgp_table([self])
 
-        # TODO: somehow, get the actual VRF
-        vrf = "default"
-
+    def routes(self) -> t.List[t.Dict[str, t.Any]]:
+        """Convert each FRR path to standard route fields."""
         routes = []
         for route in self.paths:
             now = datetime.now(UTC).timestamp()
-            then = route.last_update
-            age = int(now - then)
+            age = 0 if route.last_update is None else int(now - route.last_update)
             routes.append(
                 {
                     "prefix": self.prefix,
@@ -125,13 +135,23 @@ class FRRBGPTable(_FRRBase):
                     "rpki_state": 3,
                 }
             )
+        return routes
 
-        serialized = BGPRouteTable(
-            vrf=vrf,
-            count=len(routes),
-            routes=routes,
-            winning_weight="high",
-        )
 
-        log.bind(platform="frr", response=repr(serialized)).debug("Serialized response")
-        return serialized
+def frr_bgp_table(tables: t.Sequence[FRRBGPTable]) -> BGPRouteTable:
+    """Combine FRR prefixes into one standard BGP table."""
+
+    # TODO: somehow, get the actual VRF
+    vrf = "default"
+
+    routes = [route for table in tables for route in table.routes()]
+
+    serialized = BGPRouteTable(
+        vrf=vrf,
+        count=len(routes),
+        routes=routes,
+        winning_weight="high",
+    )
+
+    log.bind(platform="frr", response=repr(serialized)).debug("Serialized response")
+    return serialized

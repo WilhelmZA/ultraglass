@@ -26,7 +26,9 @@ def construct(platform, kind, target):
     return Construct(device, query).queries()
 
 
-@pytest.mark.parametrize("platform", ["bird", "frr", "openbgpd", "mikrotik_routeros", "arista_eos"])
+@pytest.mark.parametrize(
+    "platform", ["bird", "frr", "openbgpd", "vyos", "mikrotik_routeros", "arista_eos"]
+)
 @pytest.mark.parametrize("kind", ["bgp_aspath", "bgp_community"])
 @pytest.mark.parametrize(
     "target", ['13335"; id; #', "$(id)", "`id`", "13335\nid", "13335\r", "13335\\", "13335\x00"]
@@ -42,6 +44,22 @@ def test_reject_command_injection(platform, kind, target):
 def test_frr_preserves_regex_as_one_shell_argument(target):
     commands = construct("frr", "bgp_aspath", target)
     assert shlex.split(commands[0]) == ["vtysh", "-c", f"show bgp ipv4 unicast regexp {target}"]
+
+
+@pytest.mark.parametrize("target", ["_13335$", "^(13335|65001)$"])
+def test_vyos_quotes_regex_as_one_shell_argument(target):
+    assert shlex.split(construct("vyos", "bgp_aspath", target)[0]) == [
+        "show",
+        "bgp",
+        "ipv4",
+        "regexp",
+        target,
+    ]
+    assert shlex.split(construct("vyos", "bgp_aspath_table", target)[0]) == [
+        "vtysh",
+        "-c",
+        f"show bgp ipv4 unicast regexp {target} json",
+    ]
 
 
 @pytest.mark.parametrize(
