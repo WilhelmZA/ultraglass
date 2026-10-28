@@ -25,7 +25,7 @@ Structured BGP route output is available for Arista EOS, BIRD, Cisco IOS, FRRout
 
 Built-in VRF queries support Arista EOS, FRRouting, Huawei VRP, MikroTik RouterOS, and VyOS 1.4+. Configure `vrf` on each device entry. Custom directives can offer fixed-choice variables through additional select fields.
 
-Hostname targets can use public DNS-over-HTTPS or the server resolver through `web.dns_provider.name: server`. My IP requests require confirmation before contacting myip.wtf; use `web.my_ip: server` to avoid that lookup, or `off` to hide the control.
+Hostname targets can use public DNS-over-HTTPS or the server resolver through `web.dns_provider.name: server`. My IP uses the address the server sees by default, with no third-party lookup. Set `web.my_ip: external` to ask myip.wtf for both address families after visitor confirmation, or `off` to hide the control.
 
 BIRD AS-path queries accept ASN sequences with `^`, `$`, and `_` anchors. OpenBGPD accepts an ASN, `_ASN_`, `_ASN$`, or `^ASN_`. Unsupported expressions return an input error. RouterOS 7 full-table AS-path and community scans can exceed 90 seconds; configure `request_timeout` for the table size and device capacity. EOS queries enter enable mode; set `driver_config.secret` when an enable password is required.
 

@@ -247,7 +247,7 @@ class Web(HyperglassModel):
     location_display_mode: LocationDisplayMode = "auto"
     # `external` looks up the visitor's address with myip.wtf, `server` reads it from the
     # request to Ultraglass, and `off` hides the My IP button.
-    my_ip: t.Literal["external", "server", "off"] = "external"
+    my_ip: t.Literal["external", "server", "off"] = "server"
     custom_javascript: t.Optional[FilePath] = None
     custom_html: t.Optional[FilePath] = None
     highlight: t.List[HighlightPattern] = []

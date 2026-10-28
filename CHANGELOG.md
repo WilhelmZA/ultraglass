@@ -20,7 +20,7 @@ These features need tester attention. Each line names the configuration key that
 - Fixed-choice directive variables: directive `variables` (#52).
 - VyOS 1.3: device `platform: vyos_1_3` (#51).
 - Server-side hostname resolution: `web.dns_provider.name: server` (#48).
-- My IP button modes: `web.my_ip` set to `external`, `server` or `off` (#49).
+- My IP button modes: `web.my_ip` set to `server` (default), `external` or `off` (#49, #90).
 - Self-hosted fonts: no key; the UI build downloads the configured `web.theme.fonts` (#49).
 - Cisco IOS structured BGP output: device `structured_output: true` on `platform: cisco_ios` (#83, #84).
 - SSH session logs: `logging.session_log` (#45).
@@ -61,6 +61,7 @@ Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/Wi
 
 - Keep query selections when returning from results through the browser Back button or the in-page button (#46, #47).
 - Serve configured Google Fonts locally after downloading them during the UI build. Failed downloads retain the Google Fonts fallback (#49).
+- `web.my_ip` now defaults to `server`, so a stock install sends no visitor address to a third party. A 3.3.1 install that relied on the external myip.wtf lookup now gets server detection, which returns only the address family of the request. Set `web.my_ip: external` to keep the external lookup, with its consent step (#90).
 - Updated the Python package, runtime metadata and UI package to 3.4.0-rc.1. Prerelease tags publish a GitHub prerelease and leave the `latest` image tag on the last stable release (#87).
 
 ## 3.3.1 - 2026-10-27

@@ -6,8 +6,8 @@ logging:
   samples:
     enable: true
 web:
-  # Defaults, stated explicitly: Cloudflare DNS over HTTPS and the external "My IP"
-  # lookup with visitor confirmation (#48, #49). The structured instance uses server.
+  # Cloudflare DNS over HTTPS (the default) and the opt-in external "My IP" lookup with
+  # visitor confirmation (#48, #49, #90). The structured instance uses server for both.
   dns_provider:
     name: cloudflare
   my_ip: external

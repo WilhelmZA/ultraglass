@@ -34,5 +34,7 @@ def test_my_ip_option():
     # Project
     from hyperglass.models.config.web import Web
 
-    assert Web().my_ip == "external"
+    # Server detection is the default, so no third party is contacted (#90).
+    assert Web().my_ip == "server"
+    assert Web(my_ip="external").my_ip == "external"
     assert Web(my_ip="off").my_ip == "off"

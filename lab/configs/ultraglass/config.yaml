@@ -17,8 +17,8 @@ structured:
     enrich_traceroute: true
     enrich_bgproute: true
 web:
-  # Resolve hostnames and "My IP" on the server (#48, #49). The text instance keeps
-  # the defaults, so both paths stay testable.
+  # Resolve hostnames on the server (#48). "My IP" uses the default, server detection
+  # (#49, #90). The text instance uses Cloudflare DNS and the external lookup, so both
+  # paths stay testable.
   dns_provider:
     name: server
-  my_ip: server
