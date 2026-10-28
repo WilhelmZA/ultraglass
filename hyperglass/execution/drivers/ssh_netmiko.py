@@ -5,6 +5,7 @@ https://github.com/ktbyers/netmiko
 
 # Standard Library
 import math
+from datetime import UTC, datetime
 from typing import Iterable
 
 # Third Party
@@ -85,6 +86,17 @@ class NetmikoConnection(SSHConnection):
             **self.device.driver_config,
         }
 
+        if params.logging.session_log:
+            date = datetime.now(UTC).strftime("%Y%m%d")
+            driver_kwargs["session_log"] = str(
+                params.logging.directory / f"{self.device.id}-{date}.log"
+            )
+            driver_kwargs["session_log_file_mode"] = "append"
+
+        if not self.device.disable_paging:
+            # Connect after replacing the paging and terminal width commands.
+            driver_kwargs["auto_connect"] = False
+
         if "_telnet" in self.device.platform:
             # Telnet devices with a low delay factor (default) tend to
             # throw login errors.
@@ -109,6 +121,10 @@ class NetmikoConnection(SSHConnection):
             """Execute blocking netmiko operations in a separate thread."""
             try:
                 nm_connect_direct = ConnectHandler(**driver_kwargs)
+                if not self.device.disable_paging:
+                    nm_connect_direct.disable_paging = lambda *args, **kwargs: ""
+                    nm_connect_direct.set_terminal_width = lambda *args, **kwargs: ""
+                    nm_connect_direct._open()
                 return collect_commands(
                     nm_connect_direct, self.device.platform, self.query, params.request_timeout
                 )

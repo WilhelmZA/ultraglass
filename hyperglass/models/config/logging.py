@@ -107,3 +107,6 @@ class Logging(HyperglassModel):
     syslog: t.Optional[Syslog] = None
     http: t.Optional[Http] = None
     samples: QuerySamples = Field(default_factory=QuerySamples)
+    # Write each SSH session to "<directory>/<device id>-<YYYYMMDD>.log". Netmiko
+    # redacts the device password and secret. Disabled by default.
+    session_log: bool = False
