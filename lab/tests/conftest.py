@@ -9,13 +9,14 @@ Tests for a device that is not running are skipped, so `./lab-up.sh frr`
 followed by `pytest tests/ -k frr` works.
 """
 import json
+import os
 import subprocess
 import urllib.error
 import urllib.request
 
 import pytest
 
-API = "http://127.0.0.1:8001/api"
+API = os.environ.get("ULTRAGLASS_LAB_API", "http://127.0.0.1:8001/api")
 
 
 def _get(path, timeout=10):

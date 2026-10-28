@@ -4,6 +4,10 @@ hyperglass/hyperglass/static
 TODO*
 .env
 
+# Local working notes
+/lab/ISSUE-TRIAGE.md
+/lab/REMEDIATION-*.md
+
 test.py
 .DS_Store
 .idea

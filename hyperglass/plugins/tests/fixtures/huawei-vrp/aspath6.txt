@@ -1,0 +1,12 @@
+ BGP Local router ID is 10.250.8.1
+ Status codes: * - valid, > - best, d - damped, h - history,
+               i - internal, s - suppressed, S - Stale
+ Origin      : i - IGP, e - EGP, ? - incomplete
+
+
+ Total Number of Routes: 1
+ *>     Network  : 2606:4700::                              PrefixLen : 44
+        NextHop  : FD00:250:8::                             LocPrf    :
+        MED      :                                          PrefVal   : 0
+        Label    :
+        Path/Ogn : 65000 37497 13335i
