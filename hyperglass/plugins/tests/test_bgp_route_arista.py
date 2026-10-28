@@ -79,3 +79,10 @@ def test_asdot_as_path_keeps_origin():
     result = parse_arista((sample,))
 
     assert result.routes[0].as_path == [65000, 4259840100]
+
+
+def test_captured_large_community():
+    sample = (Path(__file__).parent / "fixtures" / "arista_large_community.json").read_text()
+    result = parse_arista((sample,))
+
+    assert result.routes[0].communities == ["65000:100", "65000:1:1"]

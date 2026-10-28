@@ -137,7 +137,10 @@ class AristaBGPTable(_AristaBase):
                 # block. Therefore, we must verify it exists before including its data.
                 communities = []
                 if route.route_detail is not None:
-                    communities = route.route_detail.community_list
+                    communities = [
+                        *route.route_detail.community_list,
+                        *route.route_detail.large_community_list,
+                    ]
 
                 # iBGP paths contain an empty AS_PATH array. If the AS_PATH is empty, we
                 # set the source_as to the router's local-as.
