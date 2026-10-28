@@ -61,6 +61,7 @@ def parse_standard_traceroute(text: str, target: str, source: str) -> Traceroute
                 rtt1=rtts[0],
                 rtt2=rtts[1],
                 rtt3=rtts[2],
+                sent_count=min(len(probes), 3),
             )
         )
     if not hops:
