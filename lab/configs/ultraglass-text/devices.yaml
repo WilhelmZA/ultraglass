@@ -1,0 +1,97 @@
+devices:
+  - name: lab-frr
+    address: 192.168.250.11
+    group: Linux
+    credential:
+      username: lg
+      password: lg
+    platform: frr
+    structured_output: false
+    attrs:
+      source4: 10.250.1.1
+      source6: fd00:250:1::1
+
+  - name: lab-bird
+    address: 192.168.250.12
+    group: Linux
+    credential:
+      username: root
+      password: lg
+    platform: bird
+    structured_output: false
+    attrs:
+      source4: 10.250.2.1
+      source6: fd00:250:2::1
+
+  - name: lab-openbgpd
+    address: 192.168.250.13
+    group: Linux
+    credential:
+      username: root
+      password: lg
+    platform: openbgpd
+    structured_output: false
+    attrs:
+      source4: 10.250.3.1
+      source6: fd00:250:3::1
+
+  - name: lab-mikrotik
+    address: 192.168.250.14
+    group: MikroTik
+    credential:
+      username: admin
+      password: admin
+    platform: mikrotik_routeros
+    structured_output: false
+    attrs:
+      source4: 10.250.4.1
+      source6: fd00:250:4::1
+
+  - name: lab-vyos
+    address: 192.168.250.15
+    group: VyOS
+    credential:
+      username: admin
+      password: admin
+    platform: vyos
+    structured_output: false
+    attrs:
+      source4: 10.250.5.1
+      source6: fd00:250:5::1
+
+  # vJunos needs nested Intel VMX and cannot boot on the AMD lab host.
+  # Uncomment once a Junos node is running.
+  # - name: lab-junos
+  #   address: 192.168.250.16
+  #   group: Juniper
+  #   credential:
+  #     username: admin
+  #     password: admin@123
+  #   platform: juniper
+  #   attrs:
+  #     source4: 10.250.6.1
+  #     source6: fd00:250:6::1
+
+  - name: lab-arista
+    address: 192.168.250.17
+    group: Arista
+    credential:
+      username: admin
+      password: admin
+    platform: arista_eos
+    structured_output: false
+    attrs:
+      source4: 10.250.7.1
+      source6: fd00:250:7::1
+
+  - name: lab-huawei
+    address: 192.168.250.18
+    group: Huawei
+    credential:
+      username: admin
+      password: admin
+    platform: huawei
+    structured_output: false
+    attrs:
+      source4: 10.250.8.1
+      source6: fd00:250:8::1
