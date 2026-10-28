@@ -1,5 +1,5 @@
 import { Flex } from '@chakra-ui/react';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { isSafari } from 'react-device-detect';
 import { If, Then } from 'react-if';
 import { Debugger, Footer, Greeting, Header, ResetButton } from '~/components';
@@ -25,16 +25,35 @@ const Main = motionChakra('main', {
 
 export const Layout = (props: FlexProps): JSX.Element => {
   const { developerMode } = useConfig();
-  const { setStatus, reset } = useFormState(
-    useCallback(({ setStatus, reset }) => ({ setStatus, reset }), []),
-  );
+  const { status, back } = useFormState(useCallback(({ status, back }) => ({ status, back }), []));
 
   const containerRef = useRef<HTMLDivElement>({} as HTMLDivElement);
 
+  // Give the results view its own history entry, so the browser Back button returns to the form.
+  useEffect(() => {
+    if (status === 'results' && window.history.state?.ultraglass !== 'results') {
+      window.history.pushState({ ...window.history.state, ultraglass: 'results' }, '');
+    }
+  }, [status]);
+
+  useEffect(() => {
+    function handlePopState() {
+      if (useFormState.getState().status === 'results') {
+        back();
+      }
+    }
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [back]);
+
   async function handleReset() {
     containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setStatus('form');
-    reset();
+    if (window.history.state?.ultraglass === 'results') {
+      // Leave the results entry so Back and Forward stay in step with the view.
+      window.history.back();
+    } else {
+      back();
+    }
   }
 
   return (

@@ -66,6 +66,7 @@ interface FormStateType<Opt extends SingleOption = SingleOption> {
   setTarget(update: Partial<Target>): void;
   getDirective(): Directive | null;
   reset(): Promise<void>;
+  back(): void;
   setFormValue<K extends keyof FormValues>(field: K, value: FormValues[K]): void;
   locationChange(
     locations: string[],
@@ -203,6 +204,16 @@ const formState: StateCreator<FormStateType> = (set, get) => ({
       }
     }
     return null;
+  },
+
+  back(): void {
+    // Return to the form and keep the last query, so it can be changed and resubmitted.
+    const { form } = get();
+    set({ loading: false, responses: {}, status: 'form', resolvedIsOpen: false });
+    for (const queryLocation of form.queryLocation) {
+      const query = { queryLocation, queryTarget: form.queryTarget, queryType: form.queryType };
+      queryClient.removeQueries({ queryKey: ['/api/query', query] });
+    }
   },
 
   async reset(): Promise<void> {

@@ -172,7 +172,12 @@ export const LookingGlassForm = (): JSX.Element => {
   useEffect(() => {
     register('queryLocation', { required: true });
     register('queryType', { required: true });
-  }, [register]);
+    // Restore the previous query after returning from results.
+    const { form } = useFormState.getState();
+    setValue('queryLocation', form.queryLocation);
+    setValue('queryType', form.queryType);
+    setValue('queryTarget', form.queryTarget);
+  }, [register, setValue]);
 
   return (
     <FormProvider {...formInstance}>
