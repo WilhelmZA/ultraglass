@@ -1,0 +1,9 @@
+BGP routing table entry for 2606:4700:4700::/48, version 267317
+Paths: (1 available, best #1, table default)
+  Not advertised to any peer
+  65000 64999 13335
+    FD00:250:9:: from FD00:250:9:: (10.250.0.1)
+      Origin IGP, localpref 100, valid, external, best
+      Community: 65000:777
+      Large Community: 65000:777:1
+      Updated on Oct 28 2026 20:46:23 UTC

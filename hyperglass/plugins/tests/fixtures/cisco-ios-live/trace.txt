@@ -1,0 +1,12 @@
+Type escape sequence to abort.
+Tracing the route to 1.1.1.1
+VRF info: (vrf in name/id, vrf out name/id)
+  1 10.250.9.0 [AS 37497] 0 msec 0 msec
+  2 192.168.250.1 [AS 37497] 0 msec 0 msec
+  3 192.168.1.1 [AS 37497] 1 msec 1 msec
+  4 103.247.3.17 [AS 58511] 15 msec 15 msec
+  5 103.30.216.163 [AS 37497] [MPLS: Labels 4956/16 Exp 1] 16 msec 17 msec
+  6 100.127.0.65 [AS 37497] 14 msec 15 msec
+  7 100.127.0.64 [AS 37497] 16 msec 13 msec
+  8 103.26.70.17 [AS 37497] 21 msec 17 msec
+  9 1.1.1.1 [AS 13335] 19 msec 16 msec

@@ -136,12 +136,14 @@ class JuniperRouteTableEntry(JuniperBase):
 
     @field_validator("communities", mode="before")
     def validate_communities(cls, value):
-        """Flatten community list."""
+        """Flatten community list and drop Junos' `large:` prefix (#82)."""
         if value is not None:
             flat = value.get("community", [])
         else:
             flat = []
-        return flat
+        if isinstance(flat, str):
+            flat = [flat]
+        return [c.removeprefix("large:") for c in flat]
 
 
 class JuniperRouteTable(JuniperBase):

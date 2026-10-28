@@ -14,7 +14,9 @@ import pytest
 # Project
 from hyperglass.plugins._builtin.bgp_route_frr import parse_frr
 from hyperglass.plugins._builtin.bgp_route_arista import parse_arista
+from hyperglass.plugins._builtin.bgp_route_juniper import parse_juniper
 from hyperglass.plugins._builtin.bgp_routestr_mikrotik import parse_mikrotik
+from hyperglass.plugins._builtin.trace_route_standard import parse_standard_traceroute
 
 FIXTURES = Path(__file__).parent / "fixtures"
 PREFIXES = {4: "1.0.0.0/24", 6: "2606:4700:4700::/48"}
@@ -69,3 +71,35 @@ def test_frr_community_detail(platform, family):
     assert [route.prefix for route in table.routes] == [PREFIXES[family]]
     assert table.routes[0].as_path == [65000, 64999, 13335]
     assert table.routes[0].communities == ["65000:777", "65000:777:1"]
+
+
+@pytest.mark.parametrize("family", (4, 6))
+@pytest.mark.parametrize("kind", ("aspath", "community"))
+def test_juniper(kind, family):
+    """Junos large communities lose the `large:` prefix (#82)."""
+    table = parse_juniper([(FIXTURES / "juniper-live" / f"{kind}{family}.xml").read_text()])
+    assert [route.prefix for route in table.routes] == [PREFIXES[family]]
+    assert table.routes[0].as_path == [65000, 64999, 13335]
+    assert table.routes[0].communities == ["65000:777", "65000:777:1"]
+
+
+@pytest.mark.parametrize("family", (4, 6))
+def test_juniper_route(family):
+    table = parse_juniper([(FIXTURES / "juniper-live" / f"route{family}.xml").read_text()])
+    assert {route.prefix for route in table.routes} == {PREFIXES[family]}
+    for route in table.routes:
+        assert not any(c.startswith("large:") for c in route.communities)
+    test_routes = [r for r in table.routes if 64999 in r.as_path]
+    assert test_routes
+    assert test_routes[0].communities == ["65000:777", "65000:777:1"]
+
+
+@pytest.mark.parametrize(
+    "folder,source", (("juniper-live", "lab-junos"), ("cisco-ios-live", "lab-iol"))
+)
+def test_traceroute(folder, source):
+    table = parse_standard_traceroute(
+        (FIXTURES / folder / "trace.txt").read_text(), "1.1.1.1", source
+    )
+    assert len(table.hops) == 9
+    assert table.hops[-1].ip_address == "1.1.1.1"

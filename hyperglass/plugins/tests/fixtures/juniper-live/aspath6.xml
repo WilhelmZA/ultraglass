@@ -1,0 +1,72 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/26.2R1.7/junos">
+    <route-information xmlns="http://xml.juniper.net/junos/26.2R0/junos-routing">
+        <!-- keepalive -->
+        <route-table>
+            <table-name>inet6.0</table-name>
+            <destination-count>261513</destination-count>
+            <total-route-count>280487</total-route-count>
+            <active-route-count>261513</active-route-count>
+            <holddown-route-count>0</holddown-route-count>
+            <hidden-route-count>0</hidden-route-count>
+            <rt junos:style="detail">
+                <rt-destination>2606:4700:4700::</rt-destination>
+                <rt-prefix-length>48</rt-prefix-length>
+                <rt-entry-count junos:format="12 entries">12</rt-entry-count>
+                <rt-announced-count>1</rt-announced-count>
+                <rt-state></rt-state>
+                <rt-entry>
+                    <active-tag>*</active-tag>
+                    <current-active/>
+                    <last-active/>
+                    <protocol-name>BGP</protocol-name>
+                    <preference>170</preference>
+                    <preference2>-101</preference2>
+                    <nhh junos:indent="16">
+                        <nh-type>Router</nh-type>
+                        <nh-index>594</nh-index>
+                        <nh-address>0x95bdf90</nh-address>
+                        <nh-reference-count>541993</nh-reference-count>
+                        <nh-session-id>321</nh-session-id>
+                        <nh-kernel-id>0</nh-kernel-id>
+                    </nhh>
+                    <gateway>fd00:250:6::</gateway>
+                    <nh junos:indent="16">
+                        <nh-string>Next hop</nh-string>
+                        <to>fd00:250:6::</to>
+                        <via>ge-0/0/0.0</via>
+                        <selected-next-hop/>
+                        <session>321</session>
+                    </nh>
+                    <rt-entry-state>Active Ext</rt-entry-state>
+                    <local-as>65006</local-as>
+                    <peer-as>65000</peer-as>
+                    <age junos:seconds="14">14</age>
+                    <validation-state>unverified</validation-state>
+                    <task-name>BGP_65000.fd00:250:6::</task-name>
+                    <announce-bits>1</announce-bits>
+                    <announce-tasks>0-KRT </announce-tasks>
+                    <as-path>AS path: 65000 64999 13335 I
+                    </as-path>
+                    <bgp-path-attributes>
+                        <attr-as-path-effective>
+                            <aspath-effective-string>AS path: </aspath-effective-string>
+                            <attr-value>65000 64999 13335 I</attr-value>
+                        </attr-as-path-effective>
+                    </bgp-path-attributes>
+                    <communities>
+                        <community>65000:777</community>
+                        <community>large:65000:777:1</community>
+                    </communities>
+                    <bgp-rt-flag>Accepted</bgp-rt-flag>
+                    <local-preference>100</local-preference>
+                    <peer-id>10.250.0.1</peer-id>
+                    <path-id>17</path-id>
+                    <thread-name>junos-main</thread-name>
+                </rt-entry>
+            </rt>
+        </route-table>
+    </route-information>
+    <cli>
+        <banner></banner>
+    </cli>
+</rpc-reply>
