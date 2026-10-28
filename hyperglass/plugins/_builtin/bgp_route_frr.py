@@ -36,6 +36,10 @@ def parse_frr(output: t.Sequence[str]) -> "OutputDataModel":
 
             _log.debug("Pre-parsed data", data=parsed)
 
+            # A target that is not in the RIB returns an empty object.
+            if not parsed:
+                continue
+
             validated = FRRBGPTable(**parsed)
             bgp_table = validated.bgp_table()
 
@@ -58,7 +62,7 @@ def parse_frr(output: t.Sequence[str]) -> "OutputDataModel":
 
         except ValidationError as err:
             _log.critical(err)
-            raise ParsingError(err.errors()) from err
+            raise ParsingError("Error parsing response data") from err
 
     return result
 

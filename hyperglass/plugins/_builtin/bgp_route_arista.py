@@ -61,7 +61,7 @@ def parse_arista(output: t.Sequence[str]) -> "OutputDataModel":
 
         except ValidationError as err:
             _log.critical(err)
-            raise ParsingError(err.errors()) from err
+            raise ParsingError("Error parsing response data") from err
 
     return result
 

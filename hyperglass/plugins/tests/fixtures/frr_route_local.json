@@ -1,0 +1,47 @@
+{
+  "prefix":"192.0.2.0/24",
+  "version":1097269,
+  "advertisedTo":{
+    "10.250.1.0":{
+      "hostname":"core"
+    }
+  },
+  "paths":[
+    {
+      "aspath":{
+        "string":"Local",
+        "segments":[],
+        "length":0
+      },
+      "origin":"IGP",
+      "metric":0,
+      "weight":32768,
+      "valid":true,
+      "version":1097269,
+      "sourced":true,
+      "local":true,
+      "bestpath":{
+        "overall":true,
+        "selectionReason":"First path received"
+      },
+      "lastUpdate":{
+        "epoch":1793162069,
+        "string":"Wed Oct 28 04:34:29 2026\n"
+      },
+      "nexthops":[
+        {
+          "ip":"0.0.0.0",
+          "hostname":"frr",
+          "afi":"ipv4",
+          "metric":0,
+          "accessible":true,
+          "used":true
+        }
+      ],
+      "peer":{
+        "peerId":"0.0.0.0",
+        "routerId":"10.250.1.1"
+      }
+    }
+  ]
+}

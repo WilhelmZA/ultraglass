@@ -32,9 +32,10 @@ class FRRNextHop(_FRRBase):
 
     ip: str
     afi: str
-    metric: int
-    accessible: bool
-    used: bool
+    # Multipath and inaccessible next hops can omit these fields.
+    metric: int = 0
+    accessible: bool = False
+    used: bool = False
 
 
 class FRRPeer(_FRRBase):
@@ -42,7 +43,8 @@ class FRRPeer(_FRRBase):
 
     peer_id: str
     router_id: str
-    type: FRRPeerType
+    # Locally sourced paths have no peer type.
+    type: t.Optional[FRRPeerType] = None
 
 
 class FRRPath(_FRRBase):
@@ -66,7 +68,9 @@ class FRRPath(_FRRBase):
     def validate_path(cls, values):
         """Extract meaningful data from FRR response."""
         new = values.copy()
-        new["aspath"] = parse_as_path(values["aspath"]["segments"][0]["list"])
+        # Local prefixes have an empty segment list.
+        segments = values["aspath"].get("segments", [])
+        new["aspath"] = parse_as_path([asn for s in segments for asn in s.get("list", [])])
         if "aggregatorAs" in values:
             new["aggregatorAs"] = parse_asn(values["aggregatorAs"]) or 0
         community = values.get("community", {"list": []})
