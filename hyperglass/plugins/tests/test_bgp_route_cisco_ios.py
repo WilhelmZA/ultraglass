@@ -7,7 +7,8 @@ from pathlib import Path
 import pytest
 
 # Project
-from hyperglass.exceptions.private import ParsingError
+from hyperglass.exceptions.private import ParsingError, InputValidationError
+from hyperglass.defaults.directives.cisco_ios import CiscoIOS_BGPRoute, CiscoIOS_BGPRouteTable
 from hyperglass.plugins._builtin.bgp_route_cisco_ios import parse_cisco_ios
 
 FIXTURES = Path(__file__).parent / "fixtures" / "cisco-ios-live"
@@ -101,3 +102,13 @@ def test_not_in_table():
 def test_command_error():
     with pytest.raises(ParsingError):
         parse_cisco_ios(["                ^\n% Invalid input detected at '^' marker."])
+
+
+@pytest.mark.parametrize("directive", (CiscoIOS_BGPRoute, CiscoIOS_BGPRouteTable))
+def test_ipv6_route_needs_prefix(directive):
+    """IOS has no longest-match BGP lookup for an IPv6 address (#84)."""
+    rule = directive.rules[1]
+    assert rule.validate_target("2606:4700::/32", multiple=False) is True
+    with pytest.raises(InputValidationError):
+        rule.validate_target("2606:4700:4700::1", multiple=False)
+    assert directive.rules[0].validate_target("1.0.0.1", multiple=False) is True

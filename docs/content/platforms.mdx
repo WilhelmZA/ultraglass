@@ -32,7 +32,7 @@ Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured
 | Platform | Structured BGP source | Limitations |
 | :------- | :-------------------- | :---------- |
 | BIRD | `show route all` text | Route age and router RPKI state remain unknown. |
-| Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Router RPKI state is read when the router validates origins. |
+| Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Router RPKI state is read when the router validates origins. IPv6 route queries need a prefix, because IOS has no longest-match BGP lookup for an IPv6 address. |
 | OpenBGPD | `bgpctl -j show rib detail` JSON | Router RPKI state comes from daemon origin validation. |
 | VyOS 1.4+ | FRR JSON through `vtysh` | AS-path and community summary results omit communities and route age. |
 | VyOS 1.3 | Not supported | Use text BGP results, even with structured traceroute enabled. |

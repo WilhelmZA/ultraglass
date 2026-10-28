@@ -25,6 +25,7 @@ This section describes merged changes on `main`, not a published release.
 - Merge duplicate ASN nodes and space the combined AS-path chart (#43).
 - Derive traceroute statistics from probe samples and honour MikroTik text-output mode (#57, #58).
 - Remove the `large:` prefix from Junos large communities, so community names and policies match them (#82).
+- Reject IPv6 address targets for Cisco IOS BGP route queries with an input error. IOS can look up an IPv6 route only by its prefix (#84).
 
 ### Added
 

@@ -36,6 +36,8 @@ CiscoIOS_BGPRoute = BuiltinDirective(
         RuleWithIPv6(
             condition="::/0",
             action="permit",
+            # IOS has no longest-match BGP lookup for an IPv6 address; it needs the prefix.
+            le=127,
             command="show bgp ipv6 unicast {target} | exclude pathid:|Epoch",
         ),
     ],
@@ -131,6 +133,8 @@ CiscoIOS_BGPRouteTable = BuiltinDirective(
         RuleWithIPv6(
             condition="::/0",
             action="permit",
+            # IOS has no longest-match BGP lookup for an IPv6 address; it needs the prefix.
+            le=127,
             command="show bgp ipv6 unicast {target} | exclude pathid:|Epoch",
         ),
     ],
