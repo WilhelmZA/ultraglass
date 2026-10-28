@@ -19,6 +19,7 @@ PLATFORMS = (
     "bird",
     "openbgpd",
     "vyos",
+    "vyos_1_3",
     "tnsr",
     "nokia_sros",
 )

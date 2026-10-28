@@ -19,6 +19,7 @@ from hyperglass.constants import (
     DRIVER_MAP,
     SCRAPE_HELPERS,
     LINUX_PLATFORMS,
+    NETMIKO_DEVICE_TYPES,
     OPT_IN_STRUCTURED_OUTPUT,
     SUPPORTED_STRUCTURED_OUTPUT,
 )
@@ -152,7 +153,7 @@ class Device(HyperglassModelWithId, extra="allow"):
         """
         if self.platform in LINUX_PLATFORMS:
             return "linux_ssh"
-        return self.platform
+        return NETMIKO_DEVICE_TYPES.get(self.platform, self.platform)
 
     def _validate_directive_attrs(self) -> None:
         # Set of all keys except for built-in key `target`.

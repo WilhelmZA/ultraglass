@@ -45,6 +45,7 @@ OPT_IN_STRUCTURED_OUTPUT = (
     "bird",
     "openbgpd",
     "vyos",
+    "vyos_1_3",
     "tnsr",
 )
 
@@ -108,7 +109,13 @@ DRIVER_MAP = {
     "bird": "netmiko",
     "frr": "netmiko",
     "openbgpd": "netmiko",
+    "vyos_1_3": "netmiko",
     "http": "hyperglass_http_client",
+}
+
+# Platforms with their own built-in directives that use another Netmiko device type.
+NETMIKO_DEVICE_TYPES = {
+    "vyos_1_3": "vyos",
 }
 
 LINUX_PLATFORMS = (

@@ -120,6 +120,7 @@ class Construct:
             "frr",
             "openbgpd",
             "vyos",
+            "vyos_1_3",
         ):
             # Split the trusted template first. Quote complete arguments after substitution.
             return shlex.join(
