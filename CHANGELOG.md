@@ -42,6 +42,7 @@ Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/Wi
 - Derive traceroute statistics from probe samples and honour MikroTik text-output mode (#57, #58).
 - Remove the `large:` prefix from Junos large communities, so community names and policies match them (#82).
 - Reject IPv6 address targets for Cisco IOS BGP route queries with an input error. IOS can look up an IPv6 route only by its prefix (#84).
+- Start when `NO_PROXY` lists an IPv6 network such as `fd00::/64`. httpx cannot parse these entries, so Ultraglass now removes them at startup and logs a warning (#91).
 
 ### Added
 
