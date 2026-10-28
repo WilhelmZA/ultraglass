@@ -2,15 +2,31 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.3.1**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.4.0-rc.1**, a release candidate. The latest stable release is **3.3.1**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.4.0-rc.1 - 2026-10-29
 
-This section describes merged changes on `main`, not a published release.
+**This is a release candidate for 3.4.0.** It is published for testing and is not for production. Run it in a lab or staging deployment, not in front of users.
+
+Pull the release candidate by its version tag: `wilhelmza/ultraglass:3.4.0-rc.1` or `ghcr.io/wilhelmza/ultraglass:3.4.0-rc.1`. The `latest` tag stays on 3.3.1 on both registries.
+
+These features need tester attention. Each line names the configuration key that enables it:
+
+- VRF queries: device `vrf` (#50).
+- Fixed-choice directive variables: directive `variables` (#52).
+- VyOS 1.3: device `platform: vyos_1_3` (#51).
+- Server-side hostname resolution: `web.dns_provider.name: server` (#48).
+- My IP button modes: `web.my_ip` set to `external`, `server` or `off` (#49).
+- Self-hosted fonts: no key; the UI build downloads the configured `web.theme.fonts` (#49).
+- Cisco IOS structured BGP output: device `structured_output: true` on `platform: cisco_ios` (#83, #84).
+- SSH session logs: `logging.session_log` (#45).
+- Paging control: device `disable_paging` (#44).
+
+Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass/issues). Put `3.4.0-rc.1` in the issue title.
 
 ### Fixed
 
@@ -44,6 +60,7 @@ This section describes merged changes on `main`, not a published release.
 
 - Keep query selections when returning from results through the browser Back button or the in-page button (#46, #47).
 - Serve configured Google Fonts locally after downloading them during the UI build. Failed downloads retain the Google Fonts fallback (#49).
+- Updated the Python package, runtime metadata and UI package to 3.4.0-rc.1. Prerelease tags publish a GitHub prerelease and leave the `latest` image tag on the last stable release (#87).
 
 ## 3.3.1 - 2026-10-27
 

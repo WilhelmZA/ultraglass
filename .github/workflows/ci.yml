@@ -28,6 +28,10 @@ permissions:
 
 env:
   DOCKERHUB_REPOSITORY: wilhelmza/ultraglass
+  # A version with a hyphen (v3.4.0-rc.1, v3.4.0-beta.2) is a prerelease. Prereleases
+  # publish their semver image tag and a GitHub prerelease. Only stable versions move
+  # the `latest` image tag and become the latest GitHub release.
+  PRERELEASE: ${{ (startsWith(github.ref, 'refs/tags/v') && contains(github.ref_name, '-')) || (github.event_name == 'workflow_dispatch' && contains(inputs.version, '-')) }}
 
 jobs:
   backend:
@@ -182,10 +186,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: docker.io/${{ env.DOCKERHUB_REPOSITORY }}
+          flavor: |
+            latest=false
           tags: |
             type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
             type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.publish && inputs.version != '' }}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
+            type=raw,value=latest,enable=${{ env.PRERELEASE != 'true' && (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish)) }}
 
       - name: Build and publish Docker image
         id: dockerhub
@@ -207,10 +213,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/wilhelmza/ultraglass
+          flavor: |
+            latest=false
           tags: |
             type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
             type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.publish && inputs.version != '' }}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
+            type=raw,value=latest,enable=${{ env.PRERELEASE != 'true' && (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish)) }}
 
       - name: Build and publish GitHub Container Registry image
         id: ghcr
@@ -275,10 +283,15 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ github.ref_name }}
         run: |
+          if [ "$PRERELEASE" = "true" ]; then
+            release_type=--prerelease
+          else
+            release_type=--latest
+          fi
           gh release create "$VERSION" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$VERSION" \
             --notes-file "${{ steps.notes.outputs.file }}" \
-            --latest \
+            "$release_type" \
             --verify-tag \
             dist/*
