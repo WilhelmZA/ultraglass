@@ -25,6 +25,16 @@ Ultraglass uses [Netmiko](https://github.com/ktbyers/netmiko) to interact with d
 
 Use `vyos` for VyOS 1.4 and later. Use `vyos_1_3` for VyOS 1.3, which uses the older `show ip bgp` / `show ipv6 bgp` commands and has no traceroute source option. Both connect with the Netmiko `vyos` driver. Structured output on `vyos_1_3` covers traceroute only; BGP results stay as text.
 
+### Cisco IOS BGP communities
+
+The built-in Cisco IOS community query filters with the colon form, for example `show bgp ipv4 unicast community 65000:777`. Configure the router to use the colon form with this global configuration command:
+
+```text
+ip bgp-community new-format
+```
+
+Without it, colon-form community queries fail on the router, and route results show each community as one decimal number (`2437611822` instead of `37195:302`). Ultraglass does not change router configuration, so the router operator must apply the command. The lab's IOSv 15.9 and IOS XE 17.18 routers both set it.
+
 ### Structured output
 
 Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured output by default. BIRD, Cisco IOS, OpenBGPD, VyOS, and Huawei VRPv8 require `structured_output: true` for structured BGP results.
