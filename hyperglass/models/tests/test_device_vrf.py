@@ -9,7 +9,8 @@ from pydantic import ValidationError
 
 # Project
 from hyperglass.exceptions.private import ConfigError
-from hyperglass.models.config.devices import Device
+from hyperglass.models.directive import Directive
+from hyperglass.models.config.devices import Device, directive_attr_keys
 from hyperglass.execution.drivers._construct import Construct
 
 ATTRS = {"source4": "192.0.2.1", "source6": "2001:db8::1"}
@@ -90,3 +91,45 @@ def test_vrf_unsupported_platform():
 def test_vrf_name_is_validated(vrf):
     with pytest.raises(ValidationError):
         _device("arista_eos", vrf=vrf)
+
+
+def test_vrf_device_needs_no_attrs_for_unused_commands():
+    """FRR VRF commands reference no attribute, so no source address is required (#95)."""
+    device = Device(
+        name="lab",
+        address="192.0.2.10",
+        credential={"username": "lg", "password": "lg"},
+        platform="frr",
+        vrf="LAB",
+    )
+    assert device.vrf == "LAB"
+
+
+def test_default_device_still_needs_attrs():
+    with pytest.raises((ConfigError, ValidationError), match="source[46]"):
+        Device(
+            name="lab",
+            address="192.0.2.10",
+            credential={"username": "lg", "password": "lg"},
+            platform="frr",
+        )
+
+
+def test_attr_keys_follow_the_commands_the_device_runs():
+    """VRF devices count VRF commands, where a rule has them (#95)."""
+    directive = Directive(
+        id="lab-ping",
+        name="Ping",
+        rules=[
+            {
+                "condition": "0.0.0.0/0",
+                "command": "ping {target} source {source4}",
+                "vrf_command": "ping vrf {vrf} {target} source {loopback}",
+            },
+            {"condition": "::/0", "command": "ping {target} source {source6}"},
+        ],
+        field={"description": "IP Address"},
+    )
+    assert directive_attr_keys([directive], vrf=False) == {"source4", "source6"}
+    # The IPv6 rule has no VRF form, so a VRF device would run its default command.
+    assert directive_attr_keys([directive], vrf=True) == {"loopback", "source6"}

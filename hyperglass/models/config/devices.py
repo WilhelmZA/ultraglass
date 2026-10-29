@@ -30,7 +30,7 @@ from ..main import MultiModel, HyperglassModel, HyperglassModelWithId
 from ..util import check_legacy_fields
 from .proxy import Proxy
 from ..fields import SupportedDriver
-from ..directive import Directives
+from ..directive import Directive, Directives
 from .credential import Credential
 from .http_client import HttpConfiguration
 
@@ -49,6 +49,23 @@ class DirectiveOptions(HyperglassModel, extra="ignore"):
     """Per-device directive options."""
 
     builtins: t.Union[bool, t.List[str]] = True
+
+
+def directive_attr_keys(directives: t.Iterable[Directive], *, vrf: bool) -> t.Set[str]:
+    """Return the device attributes the device's commands reference.
+
+    A VRF device runs a rule's VRF commands where the rule has them, as `Construct` does,
+    so only those commands count (#95). `target`, `vrf` and directive variables are
+    filled in at query time, not from `attrs`.
+    """
+    return {
+        key
+        for directive in directives
+        for rule in directive.rules
+        for command in (rule.vrf_commands if vrf and rule.vrf_commands else rule.commands)
+        for key in get_fmt_keys(command)
+        if key not in ("target", "vrf") and key not in directive.variables
+    }
 
 
 class Device(HyperglassModelWithId, extra="allow"):
@@ -156,15 +173,7 @@ class Device(HyperglassModelWithId, extra="allow"):
         return NETMIKO_DEVICE_TYPES.get(self.platform, self.platform)
 
     def _validate_directive_attrs(self) -> None:
-        # Set of all keys except for built-in key `target`.
-        keys = {
-            key
-            for directive in self.directives
-            for rule in directive.rules
-            for command in rule.commands
-            for key in get_fmt_keys(command)
-            if key != "target" and key not in directive.variables
-        }
+        keys = directive_attr_keys(self.directives, vrf=getattr(self, "vrf", None) is not None)
 
         attrs = {k: v for k, v in self.attrs.items() if k in keys}
 
