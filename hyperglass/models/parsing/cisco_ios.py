@@ -22,7 +22,9 @@ RPKI_STATES = {"valid": 1, "invalid": 0, "not found": 2, "not-found": 2, "V": 1,
 NXOS_PATH = re.compile(r"^ {2}Path type: ")
 NXOS_AS_PATH = re.compile(r"^ {2}AS-Path: (?P<path>[^,]*)")
 # A summary-table path starts with a status code; footer lines such as `Processed` do not.
-STATUS_CODES = "*sdhrSxVIN"
+# A path that is not valid has no `*`, so its first code can be a path type (`i`, `e`),
+# an IOS path flag (`m`, `b`, `f`, `a`, `c`, `t`, `L`) or an NX-OS one (`c`, `l`, `a`, `I`).
+STATUS_CODES = "*>sdhrSxVINieclmbfatL"
 # Status-column offset and status-code RPKI letters per platform. IOS prints a path's
 # status one character right of the header. NX-OS uses `I` for an injected path and
 # IOS-XR uses `N` for a next-hop discard, so only IOS status codes carry RPKI state.

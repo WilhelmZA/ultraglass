@@ -60,8 +60,8 @@ Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured
 | :------- | :-------------------- | :---------- |
 | BIRD | `show route all` text | Route age and router RPKI state remain unknown. |
 | Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Router RPKI state is read when the router validates origins. IPv6 route queries need a prefix, because IOS has no longest-match BGP lookup for an IPv6 address. |
-| Cisco IOS-XR | `show bgp` text | AS-path and community summary results omit communities and route age. Router RPKI state is read when the router validates origins. |
-| Cisco NX-OS | `show bgp` text | AS-path and community summary results omit communities and route age. Router RPKI state remains unknown. IPv6 route queries need a prefix, because NX-OS has no longest-match BGP lookup for an IPv6 address. |
+| Cisco IOS-XR | `show bgp` text | AS-path and community summary results omit communities. Route age remains unknown. Router RPKI state is read when the router validates origins. |
+| Cisco NX-OS | `show bgp` text | AS-path and community summary results omit communities. Route age and router RPKI state remain unknown. IPv6 route queries need a prefix, because NX-OS has no longest-match BGP lookup for an IPv6 address. |
 | Extreme EXOS | `show bgp routes detail` text | Route age, originator and router RPKI state remain unknown. EXOS does not print large communities. |
 | Extreme VOSS | Not supported | VOSS marks no best path, so BGP results stay as text. |
 | OpenBGPD | `bgpctl -j show rib detail` JSON | Router RPKI state comes from daemon origin validation. |

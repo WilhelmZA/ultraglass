@@ -206,3 +206,32 @@ def test_nxos_summary_long_network():
     assert route.next_hop == "fd00:251:6::"
     assert route.as_path == [65000, 64999, 13335]
     assert route.weight == 0
+
+
+# Crafted from the IOS and IOS-XR headers: a path that is not valid has no `*`.
+IOS_INVALID_PATH = """     Network          Next Hop            Metric LocPrf Weight Path
+ *>   1.1.1.0/24       10.251.5.0                             0 65000 13335 ?
+   i                   10.251.5.9                    100      0 65001 13335 ?
+"""
+XR_INVALID_PATH = """   Network            Next Hop            Metric LocPrf Weight Path
+*> 8.8.8.0/24         10.251.4.0              50             0 65000 3356 15169 ? N
+ i                    10.251.4.9                    100      0 65001 1299 15169 ? N
+
+Processed 1 prefixes, 2 paths
+"""
+
+
+@pytest.mark.parametrize(
+    ("platform", "text", "next_hops"),
+    [
+        ("cisco_ios", IOS_INVALID_PATH, ("10.251.5.0", "10.251.5.9")),
+        ("cisco_xr", XR_INVALID_PATH, ("10.251.4.0", "10.251.4.9")),
+    ],
+)
+def test_summary_table_keeps_path_without_valid_flag(platform, text, next_hops):
+    """A path whose status starts with a path type, not `*`, is still a path."""
+    best, other = parse_cisco_ios([text], platform).routes
+    assert best.prefix == other.prefix
+    assert (best.active, other.active) == (True, False)
+    assert (best.next_hop, other.next_hop) == next_hops
+    assert other.local_preference == 100
