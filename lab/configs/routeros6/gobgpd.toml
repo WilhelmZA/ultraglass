@@ -1,0 +1,20 @@
+# Two-prefix fixture, separate from the full-table core.
+[global.config]
+  as = 65000
+  router-id = "10.251.8.0"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.251.8.1"
+    peer-as = 65028
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:251:8::1"
+    peer-as = 65028
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"

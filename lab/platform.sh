@@ -12,14 +12,14 @@ case "$ACTION" in
             --format 'table {{.Names}}\t{{.Status}}'
         exit 0 ;;
     stop)
-        for N in sonic exos voss xrd iosv nexus timos probe; do
+        for N in sonic exos voss xrd iosv nexus timos routeros6 os9 probe; do
             if [ "$(docker inspect -f '{{.State.Running}}' "$PREFIX-$N" 2>/dev/null || true)" = true ]; then
                 docker stop "$PREFIX-$N"
             fi
         done
         exit 0 ;;
     start) ;;
-    *) echo "Usage: sh platform.sh start sonic|exos|voss|xrd|iosv|nexus|timos | stop | status" >&2; exit 1 ;;
+    *) echo "Usage: sh platform.sh start sonic|exos|voss|xrd|iosv|nexus|timos|routeros6|os9 | stop | status" >&2; exit 1 ;;
 esac
 
 case "$NODE" in
@@ -30,7 +30,9 @@ case "$NODE" in
     iosv) IMAGE=ultraglass-lab/cisco_vios:15.9.3M6; LIMIT_MB=2048 ;;
     nexus) IMAGE=ultraglass-lab/cisco_n9kv:9300-lite-10.4.8.M; LIMIT_MB=10240 ;;
     timos) IMAGE=ultraglass-lab/nokia_sros:15.0.R3; LIMIT_MB=10240 ;;
-    *) echo "Pick sonic, exos, voss, xrd, iosv, nexus or timos" >&2; exit 1 ;;
+    routeros6) IMAGE=ultraglass-lab/mikrotik_routeros:6.49.19; LIMIT_MB=2048 ;;
+    os9) IMAGE=ultraglass-lab/dell_os9:9.13.0.0; LIMIT_MB=2048 ;;
+    *) echo "Pick sonic, exos, voss, xrd, iosv, nexus, timos, routeros6 or os9" >&2; exit 1 ;;
 esac
 docker image inspect "$IMAGE" >/dev/null 2>&1 || {
     if [ "$NODE" = xrd ]; then
@@ -39,6 +41,10 @@ docker image inspect "$IMAGE" >/dev/null 2>&1 || {
         echo "Build the image first: sh scripts/build-iosv.sh /path/to/iosv.qcow2" >&2
     elif [ "$NODE" = nexus ]; then
         echo "Build the image first: sh scripts/build-nexus.sh /path/to/nexus.qcow2" >&2
+    elif [ "$NODE" = os9 ]; then
+        echo "Build the image first: sh scripts/build-os9.sh /path/to/ftos.iso" >&2
+    elif [ "$NODE" = routeros6 ]; then
+        echo "Build the image first: sh scripts/build-routeros6.sh /path/to/chr.vmdk" >&2
     elif [ "$NODE" = timos ]; then
         echo "Build the image first: sh scripts/build-timos.sh /path/to/timos.qcow2" >&2
     else
@@ -54,7 +60,7 @@ if [ "$NODE" = xrd ]; then
     }
 fi
 case "$NODE" in
-    sonic|exos|voss|xrd|iosv|nexus|timos) docker image inspect ultraglass-lab/core:latest >/dev/null ;;
+    sonic|exos|voss|xrd|iosv|nexus|timos|routeros6|os9) docker image inspect ultraglass-lab/core:latest >/dev/null ;;
 esac
 if [ "$NODE" = timos ] && [ ! -s data/platforms/timos.license ]; then
     echo "Place the TiMOS license at lab/data/platforms/timos.license first." >&2
@@ -62,7 +68,7 @@ if [ "$NODE" = timos ] && [ ! -s data/platforms/timos.license ]; then
 fi
 
 # Stop only the optional platforms. Keep the existing full-table lab untouched.
-for N in sonic exos voss xrd iosv nexus timos; do
+for N in sonic exos voss xrd iosv nexus timos routeros6 os9; do
     if [ "$N" != "$NODE" ] && [ "$(docker inspect -f '{{.State.Running}}' "$PREFIX-$N" 2>/dev/null || true)" = true ]; then
         docker stop "$PREFIX-$N"
     fi
@@ -103,7 +109,7 @@ node = sys.argv[1]
 topology = yaml.safe_load(Path('ultraglass-platforms.clab.yml').read_text())
 nodes = topology['topology']['nodes']
 topology['topology']['nodes'] = {name: nodes[name] for name in ('probe', node)}
-if node in ('sonic', 'exos', 'voss', 'xrd', 'iosv', 'nexus', 'timos'):
+if node in ('sonic', 'exos', 'voss', 'xrd', 'iosv', 'nexus', 'timos', 'routeros6', 'os9'):
     nodes['probe'].update(
         image='ultraglass-lab/core:latest', memory='256MiB',
         entrypoint='gobgpd', cmd='-f /etc/gobgp/gobgpd.toml -t toml',
@@ -122,13 +128,13 @@ topology['topology']['links'] = [
     link for link in topology['topology']['links']
     if any(endpoint.startswith(node + ':') for endpoint in link['endpoints'])
 ]
-number = {'sonic': 1, 'exos': 2, 'voss': 3, 'xrd': 4, 'iosv': 5, 'nexus': 6, 'timos': 7}[node]
-address = '10.251.3.2/30' if node == 'voss' else f'10.251.{number}.0/31'
+number = {'sonic': 1, 'exos': 2, 'voss': 3, 'xrd': 4, 'iosv': 5, 'nexus': 6, 'timos': 7, 'routeros6': 8, 'os9': 9}[node]
+address = f'10.251.{number}.2/30' if node in ('voss', 'routeros6', 'os9') else f'10.251.{number}.0/31'
 # VOSS takes no IPv6 prefix longer than /64 without a boot flag, and ::0 of a /64 is
 # the subnet-router anycast address.
-address6 = 'fd00:251:3::2/64' if node == 'voss' else f'fd00:251:{number}::/127'
+address6 = f'fd00:251:{number}::2/64' if node in ('voss', 'routeros6', 'os9') else f'fd00:251:{number}::/127'
 nodes['probe']['exec'] = [f'ip address replace {address} dev eth{number}']
-if node in ('sonic', 'exos', 'voss', 'xrd', 'iosv', 'nexus', 'timos'):
+if node in ('sonic', 'exos', 'voss', 'xrd', 'iosv', 'nexus', 'timos', 'routeros6', 'os9'):
     nodes['probe']['exec'] += [
         f'ip address replace {address6} dev eth{number}',
         'ip address replace 1.1.1.1/32 dev lo',

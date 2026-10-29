@@ -113,6 +113,34 @@ topology:
         QEMU_CPU: core2duo
         QEMU_MEMORY: "8192"
 
+    routeros6:
+      kind: mikrotik_ros
+      image: ultraglass-lab/mikrotik_routeros:6.49.19
+      mgmt-ipv4: 192.168.250.28
+      memory: 2GiB
+      cpu: 1
+      startup-config: configs/routeros6/startup.rsc
+      enforce-startup-config: true
+      credentials:
+        username: admin
+        password: Lab-Router9
+      env:
+        QEMU_MEMORY: "1024"
+
+    os9:
+      kind: generic_vm
+      image: ultraglass-lab/dell_os9:9.13.0.0
+      mgmt-ipv4: 192.168.250.29
+      memory: 2GiB
+      cpu: 1
+      binds:
+        - configs/os9/startup.cfg:/config/startup.cfg:ro
+      credentials:
+        username: admin
+        password: Lab-Router9
+      env:
+        QEMU_MEMORY: "1024"
+
   links:
     - endpoints: ["probe:eth1", "sonic:eth1"]
     - endpoints: ["probe:eth2", "exos:eth1"]
@@ -121,3 +149,5 @@ topology:
     - endpoints: ["probe:eth5", "iosv:eth1"]
     - endpoints: ["probe:eth6", "nexus:eth1"]
     - endpoints: ["probe:eth7", "timos:eth1"]
+    - endpoints: ["probe:eth8", "routeros6:eth1"]
+    - endpoints: ["probe:eth9", "os9:eth1"]

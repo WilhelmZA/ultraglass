@@ -36,6 +36,8 @@ sh scripts/build-cisco-iol.sh /path/to/reference-platform.iso
 sh scripts/build-iosv.sh /path/to/iosv.qcow2
 sh scripts/build-nexus.sh /path/to/nexus.qcow2
 sh scripts/build-timos.sh /path/to/timos.qcow2
+sh scripts/build-routeros6.sh /path/to/chr.vmdk
+sh scripts/build-os9.sh /path/to/ftos.iso
 sh scripts/import-xrd.sh /path/to/image.tgz
 sh scripts/build-platform.sh sonic
 sh scripts/build-platform.sh exos
@@ -97,15 +99,17 @@ sh platform.sh status
 sh platform.sh stop
 ```
 
-Supported names are `sonic`, `exos`, `voss`, `xrd`, `iosv`, `nexus` and `timos`. The helper replaces the previous companion deployment before starting the selected appliance. It reserves 12 GiB for the host in addition to the appliance and probe limits.
+Supported names are `sonic`, `exos`, `voss`, `xrd`, `iosv`, `nexus`, `timos`, `routeros6` and `os9`. The helper replaces the previous companion deployment before starting the selected appliance. It reserves 12 GiB for the host in addition to the appliance and probe limits.
 
 Fresh VM deployments discard appliance-local changes. Put repeatable settings in the startup configuration. XRd retains its committed configuration in `data/platforms/clab-ultraglass-platforms/xrd/xr-storage`.
 
 Wait for VM container health before running queries. Check SSH access, the data interface and BGP state after boot.
 
+OS9 remains an experimental console appliance. Connect to `192.168.250.29:5000` with Telnet. Its container health confirms configuration loading only; SSH and data links are not operational.
+
 ### Companion BGP feed
 
-SONiC, EXOS, VOSS, XRd, IOSv, Nexus and TiMOS have a separate GoBGP probe. It advertises `1.1.1.0/24` and `2606:4700::/44`, with AS path `65000 13335` and community `37195:302`. Ping and traceroute targets `1.1.1.1` and `2606:4700::1111` terminate on the probe. This feed does not connect to the main core.
+Each optional appliance has a separate GoBGP probe. It advertises `1.1.1.0/24` and `2606:4700::/44`, with AS path `65000 13335` and community `37195:302`. Ping and traceroute targets `1.1.1.1` and `2606:4700::1111` terminate on the probe. This feed does not connect to the main core.
 
 | Appliance | Link number | Router AS |
 |---|---|---|
@@ -116,8 +120,12 @@ SONiC, EXOS, VOSS, XRd, IOSv, Nexus and TiMOS have a separate GoBGP probe. It ad
 | IOSv | 5 | 65025 |
 | Nexus | 6 | 65026 |
 | TiMOS | 7 | 65027 |
+| RouterOS | 8 | 65028 |
+| Dell OS9 | 9 | 65029 |
 
 The appliance uses `10.251.N.1/31` and `fd00:251:N::1/127`. The probe uses `.0` and `::` on that link. VOSS takes no IPv6 prefix longer than `/64`, so it uses `10.251.3.1/30` and `fd00:251:3::1/64`, and the probe uses `10.251.3.2` and `fd00:251:3::2`. IPv6 does not pass on the VOSS VM data port.
+
+RouterOS and Dell OS9 use `/30` and `/64` fixture links. Their probe addresses end in `.2` and `::2`.
 
 Both probe sessions start disabled on each deployment. Enable them after enabling the appliance neighbors:
 
@@ -135,6 +143,8 @@ After testing, disable both probe sessions and shut down both appliance neighbor
 ### Platform setup notes
 
 - IOSv uses `ip bgp-community new-format` for colon-form community queries. Its lab traceroute directive sends only the destination for IPv6.
+- The optional RouterOS appliance enables its IPv6 package and reboots during first-time setup. Wait for both fixture peers to appear before testing.
+- On RouterOS, enable the appliance peers with `/routing bgp peer enable [find name~"fixture"]`. Use `disable` after testing. Configuration changes save automatically.
 - Cisco IOS IPv6 BGP lookups require a prefix, such as `2606:4700::/44`.
 - IOL reads its partial configuration on first boot, then uses NVRAM. Run `sh scripts/save-cisco-iol.sh` after direct Containerlab deployment.
 - Junos forwarding requires an online FPC. Check `show chassis fpc` after boot.
@@ -166,6 +176,8 @@ After testing, disable both probe sessions and shut down both appliance neighbor
 | XRd | 192.168.250.24 | clab / clab@123 |
 | IOSv | 192.168.250.25 | admin / Lab-Router9 |
 | Nexus | 192.168.250.26 | admin / Lab-Router9 |
+| Optional RouterOS | 192.168.250.28 | admin / Lab-Router9 |
+| Dell OS9 | 192.168.250.29 | admin / Lab-Router9 |
 | Companion probe | 192.168.250.30 | Docker exec |
 
 The structured application is at `http://127.0.0.1:8001`; the text application is at `http://127.0.0.1:8002`. They use separate Redis databases. Structured results depend on the platform's available parsers.
