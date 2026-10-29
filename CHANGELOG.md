@@ -2,11 +2,76 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.4.0-rc.3**, a release candidate. The latest stable release is **3.3.1**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 3.4.0 - 2026-10-29
+
+This release widens platform coverage and query options. Built-in queries run inside a VRF on EOS, FRRouting, Huawei VRP, MikroTik RouterOS and VyOS. Structured BGP output is available, opt-in, on Cisco IOS and IOS XE, VyOS 1.4+, OpenBGPD and BIRD, and FRRouting AS-path and community queries now return tables. Custom directives take fixed-choice variables. Hostnames resolve on the server, the My IP button no longer sends visitor addresses to a third party by default, and the UI serves its fonts itself. Devices can declare `os_version` so built-in directives pick commands that older software accepts, and MikroTik routers on slow links return BGP output. It also fixes the traceroute statistics, AS-path chart, Huawei parsing, webhook delivery and startup problems reported against 3.3.1.
+
+3.4.0 supersedes release candidates 3.4.0-rc.1, rc.2 and rc.3, whose sections below record what each candidate added. Every change was validated against the containerlab lab in `lab/`, which now runs FRRouting, BIRD, OpenBGPD, MikroTik, Arista EOS, VyOS, Huawei, Junos, Cisco IOL, IOSv, IOS-XR and NX-OS, with captured device output kept as parser regression fixtures.
+
+Images: `wilhelmza/ultraglass:3.4.0` and `ghcr.io/wilhelmza/ultraglass:3.4.0`. The `latest` tag on both registries now points to 3.4.0.
+
+### Upgrading from 3.3.1
+
+A 3.3.1 configuration starts unchanged. Every new option is opt-in. These behaviours differ from 3.3.1 without a configuration change:
+
+- `web.my_ip` defaults to `server`, so a stock install detects the visitor's address itself and sends nothing to myip.wtf. Set `web.my_ip: external` to keep the external lookup, which now asks the visitor first, or `off` to remove the button (#49, #90).
+- MikroTik devices use a netmiko `global_delay_factor` of 1 instead of 0.1. A BGP query that returns no routes is retried at 3, 6 and 10, and the log names the device and the value that worked. Set `driver_config: {global_delay_factor: N}` on the device to pin it (#106).
+- Each device key the configuration model does not know logs a startup warning with the nearest valid key. A misspelt key such as `driver_args` was ignored before; it is still ignored, and now reported. Read the startup log after upgrading (#107).
+- A Cisco IOS BGP route query for a bare IPv6 address returns an input error, because IOS looks up an IPv6 route only by prefix. IPv4 addresses work as before (#84).
+- Cisco IOS community queries use the colon form and need `ip bgp-community new-format` on the router (#111).
+- Junos large communities no longer carry the `large:` prefix, so community names and policies that matched the prefixed form need updating (#82).
+
+Docker installs check out `v3.4.0` as described in the [upgrade guide](https://github.com/WilhelmZA/ultraglass/blob/main/docs/content/installation/upgrading.mdx).
+
+### Added
+
+- Native VRF forms for built-in queries on Arista EOS, FRRouting, Huawei VRP, MikroTik RouterOS and VyOS 1.4+, through the device `vrf` key. Built-in queries without a VRF form on the platform are not offered for the device. A device's attributes are checked against the commands it runs in the VRF, so FRR VRF devices need no `source4` or `source6` (#50, #95).
+- Fixed-choice directive variables. A directive declares `variables` with allowed values, the UI shows a select field for each, and the API validates `queryVariables` (#52).
+- Opt-in structured BGP output for Cisco IOS and IOS XE, with route detail, communities, large communities, router IDs and route age. AS-path and community queries use the summary table (#83, #84).
+- Opt-in structured BGP output for VyOS 1.4+, OpenBGPD and BIRD (#54, #55, #56).
+- Structured AS-path and community output for FRRouting (#67).
+- The `vyos_1_3` platform, with VyOS 1.3 commands and text-only BGP output (#51).
+- Device `os_version`, and directive rule `fallback_command` with an optional `fallback_os_version` version filter. A rule's fallback runs directly on matching versions, or when the device rejects the primary command, with a warning that names the device (#109).
+- Server-side hostname resolution through `web.dns_provider.name: server` and `/api/dns`, rate-limited per forwarded client address (#48).
+- `web.my_ip` modes `server`, `external` and `off`. The external lookup asks the visitor before it runs and falls back to server detection when it fails (#49, #90).
+- Per-device `disable_paging` for login policies that reject paging commands, and daily SSH session logs through `logging.session_log` (#44, #45).
+- Captured device output as parser regression fixtures for Huawei, EOS, FRRouting, MikroTik, VyOS, Junos, Cisco IOL, IOSv, IOS-XR and NX-OS, with complete traceroute output (#25, #82, #83, #99, #100).
+- Repeatable lab validation: a policy matrix check over every device and query type, a browser check for AS-path and community results, and a smoke test over both lab instances (#22, #23, #88).
+- Automatic GitHub releases on version tags. A tag with a hyphen, such as `v3.4.0-rc.1`, publishes a prerelease and leaves the `latest` image tag on the last stable release (#87).
+
+### Fixed
+
+- Parse Huawei IPv4 brief columns and IPv6 brief blocks for AS-path and community queries. Remove literal target quotes that VRP misinterprets. Reject incomplete tables and recognised VRP command errors (#20).
+- Treat Huawei BGP validity as distinct from RPKI validity. Preserve missing AS paths and communities instead of inventing attributes (#20, #22).
+- Separate cached RPKI results by backend and Routinator server URL (#22).
+- Deliver HTTP logging webhooks, including to receivers on non-default ports (#37).
+- Preserve EOS large communities, and handle empty, local and inaccessible FRRouting BGP responses (#38, #39).
+- Keep communities in EOS and VyOS community results, and large communities in FRRouting and VyOS results (#66, #70, #71).
+- Parse AS-dot ASNs and omit confederation segments from public AS paths (#40, #41).
+- Merge duplicate ASN nodes in the AS-path chart and space the combined chart (#43).
+- Reject `platform: http` devices without an `http` block as a configuration error (#42).
+- Derive traceroute loss, sent, last, best and worst from probe samples, and honour `structured_output: false` for MikroTik traceroute (#57, #58).
+- Remove the `large:` prefix from Junos large communities, so community names and policies match them (#82).
+- Keep an open AS path tooltip open when async enrichment arrives, and show the organisation name in it (#86).
+- Start when `NO_PROXY` lists an IPv6 network such as `fd00::/64`. The entries are removed at startup with a warning (#91).
+- Read MikroTik BGP output on slow links, with a platform default delay factor, retries at higher factors and a warning that names the value that worked. A device's `driver_config` value is applied on telnet platforms too; the telnet default used to overwrite it (#106).
+- Warn at startup about each unknown device key, with the nearest valid key (#107).
+- Run Cisco IOS IPv6 traceroute on classic IOS. Releases before IOS XE 16 reject options after an IPv6 destination, so those routers get the destination-only command, chosen by `os_version` or on rejection (#109).
+- Set the EOS lab neighbour-wide prefix limits so full-table sessions do not remain in `Idle(MaxPath)` (#23).
+
+### Changed
+
+- `web.my_ip` defaults to `server` (#90).
+- Query selections survive the browser Back button and the in-page back control (#46, #47).
+- The UI build downloads the configured Google Fonts and serves them locally. A failed download keeps the Google Fonts fallback (#49).
+- Cisco IOS documentation covers the `ip bgp-community new-format` prerequisite for community queries (#111).
+- Updated the Python package, runtime metadata, UI package, upgrade guide and issue templates to 3.4.0.
 
 ## 3.4.0-rc.3 - 2026-10-29
 
