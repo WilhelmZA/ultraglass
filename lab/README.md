@@ -30,7 +30,7 @@ MikroTik and Arista images are built separately (see their sections below). Buil
 ```sh
 ./lab-up.sh                        # whole lab (all vendors), injects the table
 ./lab-up.sh frr                    # ONE device only: core + redis + ultraglass + frr
-./lab-up.sh --image wilhelmza/ultraglass:3.4.0-rc.1   # run a published image instead of the dev build
+./lab-up.sh --image wilhelmza/ultraglass:3.4.0-rc.2   # run a published image instead of the dev build
 ./lab-down.sh                      # stop and remove everything (built images are kept)
 ./lab-status.sh                    # containers + BGP session state
 ```
@@ -181,7 +181,7 @@ Both Ultraglass instances already list `lab-arista-vrf` and `lab-frr-vrf`. For a
 
 ## 3.4.0 release candidate features (issue #88)
 
-Both Ultraglass instances are configured so each feature merged since 3.3.1 has a working example. Run a release candidate with `./lab-up.sh --image wilhelmza/ultraglass:3.4.0-rc.1`. The structured instance is http://127.0.0.1:8001 and the text instance is http://127.0.0.1:8002. Enable the core BGP sessions for Arista, FRR and Cisco IOL first (see [BGP session control](#bgp-session-control)).
+Both Ultraglass instances are configured so each feature merged since 3.3.1 has a working example. Run a release candidate with `./lab-up.sh --image wilhelmza/ultraglass:3.4.0-rc.2`. The structured instance is http://127.0.0.1:8001 and the text instance is http://127.0.0.1:8002. Enable the core BGP sessions for Arista, FRR and Cisco IOL first (see [BGP session control](#bgp-session-control)).
 
 - **VRF locations (#50).** Config: `vrf: LAB` on `lab-arista-vrf` and `lab-frr-vrf` in both `devices.yaml` files. Test: select `lab-arista-vrf`, query BGP Route `198.51.100.1`. The result shows `198.51.100.0/24` from VRF `LAB`. Query the same target on `lab-arista`; the default VRF does not hold it. `lab-frr-vrf` offers BGP queries only, because FRR has no VRF form for ping or traceroute.
 - **Directive variables (#52).** Config: `lab-bgp-summary` in both `directives.yaml` files, attached to `lab-arista`. Test: select `lab-arista` and BGP Summary. The form shows an Address Family select (required) and a VRF select (optional). Choose IPv4 for `show ip bgp summary`, or IPv4 and LAB for `show ip bgp summary vrf LAB`. Over the API, send `"queryType": "lab-bgp-summary", "queryTarget": "null", "queryVariables": {"family": "ipv6"}`. A directive without a field still needs a target; the UI sends `null`. A missing `family` or a value outside the list returns an input error.

@@ -5,7 +5,7 @@
 #   ./lab-up.sh frr             just one device: core + redis + both ultraglass + frr
 #   ./lab-up.sh mikrotik        devices: frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2
 #   PREFIXES=50000 ./lab-up.sh frr   cap the table for low-RAM machines
-#   ./lab-up.sh --image wilhelmza/ultraglass:3.4.0-rc.1 [device]
+#   ./lab-up.sh --image wilhelmza/ultraglass:3.4.0-rc.2 [device]
 #                               run a published Ultraglass image instead of the
 #                               local dev build (ultraglass-lab/ultraglass:dev)
 #
