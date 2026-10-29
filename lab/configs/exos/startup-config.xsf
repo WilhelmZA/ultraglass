@@ -1,0 +1,5 @@
+create vlan LAB tag 101
+configure vlan Default delete ports 1
+configure vlan LAB add ports 1 untagged
+configure vlan LAB ipaddress 10.251.2.1 255.255.255.254
+enable ipforwarding vlan LAB

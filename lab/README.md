@@ -27,6 +27,8 @@ MikroTik and Arista images are built separately (see their sections below). Buil
 
 ## Start and stop
 
+For on-demand SONiC, EXOS and VOSS appliances, use [platform.sh](PLATFORMS.md). This companion topology runs one additional appliance at a time, enforces memory limits, and leaves full-table BGP unconfigured.
+
 ```sh
 ./lab-up.sh                        # whole lab (all vendors), injects the table
 ./lab-up.sh frr                    # ONE device only: core + redis + ultraglass + frr
