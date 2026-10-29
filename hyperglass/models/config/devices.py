@@ -1,7 +1,9 @@
 """Validate router configuration variables."""
 
 # Standard Library
+import os
 import re
+import difflib
 import typing as t
 from pathlib import Path
 from ipaddress import IPv4Address, IPv6Address
@@ -100,7 +102,30 @@ class Device(HyperglassModelWithId, extra="allow"):
         if "id" not in kw:
             kw = self._with_id(kw)
         super().__init__(**kw)
+        self._warn_unknown_keys()
         self._validate_directive_attrs()
+
+    def _warn_unknown_keys(self) -> None:
+        """Warn about keys the model does not know, which are otherwise silently ignored (#107)."""
+        known = list(
+            {
+                key: None
+                for name, field in type(self).model_fields.items()
+                for key in (name, field.alias)
+                if key is not None
+            }
+        )
+        for key in self.model_extra or {}:
+            suggestion = sorted(
+                difflib.get_close_matches(key, known, n=2, cutoff=0.6),
+                key=lambda match: -len(os.path.commonprefix((key, match))),
+            )
+            log.bind(device=self.name, key=key, suggestion=suggestion or None).warning(
+                "Device {!r} has unknown key {!r}, which is ignored{}",
+                self.name,
+                key,
+                f"; did you mean {' or '.join(repr(s) for s in suggestion)}?" if suggestion else "",
+            )
 
     @property
     def _target(self):
