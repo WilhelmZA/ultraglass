@@ -2,13 +2,29 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.5.0-rc.1**, a release candidate. The latest stable release is **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.5.0-rc.2**, a release candidate. The latest stable release is **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.5.0-rc.2 - 2026-10-30
+
+**This is a release candidate for 3.5.0.** It is published for testing and is not for production. Run it in a lab or staging deployment, not in front of users.
+
+Pull the release candidate by its version tag: `wilhelmza/ultraglass:3.5.0-rc.2` or `ghcr.io/wilhelmza/ultraglass:3.5.0-rc.2`. The `latest` tag stays on 3.4.0 on both registries.
+
+This candidate changes a default. Structured output is now opt-in on every platform. Arista EOS, FRRouting, Huawei VRP, Juniper Junos and MikroTik devices that leave `structured_output` unset return text after upgrading. Set `structured_output: true` on each device that should keep the table view.
+
+These platforms need tester attention. Each line names the configuration key that enables it:
+
+- Cisco IOS-XR: device `platform: cisco_xr`, with `structured_output: true` for parsed BGP tables (#113).
+- Cisco NX-OS: device `platform: cisco_nxos`, with `structured_output: true` for parsed BGP tables (#110).
+- Extreme EXOS: device `platform: extreme_exos`, with `structured_output: true` for parsed BGP tables (#73).
+- Extreme VOSS (VSP and Fabric Engine): device `platform: extreme_vsp` (#73).
+- Community SONiC: device `platform: sonic`, with `structured_output: true` for parsed BGP and traceroute tables (#76).
+
+Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass/issues). Put `3.5.0-rc.2` in the issue title.
 
 ### Added
 
@@ -23,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 
 - Structured output is opt-in on every platform. Arista EOS, FRRouting, Huawei VRP, Juniper Junos, MikroTik RouterOS and SwitchOS devices without `structured_output` now return text. Set `structured_output: true` on those devices to keep the table view (#125).
+- Updated the Python package, runtime metadata and UI package to 3.5.0-rc.2.
 
 ## 3.5.0-rc.1 - 2026-10-29
 
