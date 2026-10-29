@@ -1,3 +1,4 @@
+import { createContext, useContext } from 'react';
 import { Flex } from '@chakra-ui/react';
 import { Table } from '~/components';
 import { TracerouteCell } from './traceroute-cell';
@@ -22,17 +23,28 @@ const tracerouteColumns: TracerouteTableColumn[] = [
   { Header: 'Worst', accessor: 'worst_rtt', align: 'right', hidden: false },
 ];
 
+// A stable cell component, so async enrichment updates cells in place instead of
+// remounting them. See BGPTable (#86).
+const TracerouteTableData = createContext<TracerouteResult | null>(null);
+
+const TracerouteTableCell = (props: TracerouteCellRenderProps): JSX.Element | null => {
+  const data = useContext(TracerouteTableData);
+  return data === null ? null : <TracerouteCell data={props} rawData={data} />;
+};
+
 export const TracerouteTable = (props: TracerouteTableProps): JSX.Element => {
   const { children: data, ...rest } = props;
 
   return (
     <Flex my={8} justify="center" maxW="100%" w="100%" {...rest}>
-      <Table<TracerouteHop>
-        columns={tracerouteColumns}
-        bordersHorizontal
-        data={data.hops}
-        Cell={(d: TracerouteCellRenderProps) => <TracerouteCell data={d} rawData={data} />}
-      />
+      <TracerouteTableData.Provider value={data}>
+        <Table<TracerouteHop>
+          columns={tracerouteColumns}
+          bordersHorizontal
+          data={data.hops}
+          Cell={TracerouteTableCell}
+        />
+      </TracerouteTableData.Provider>
     </Flex>
   );
 };

@@ -9,7 +9,6 @@ advertise the lab test routes described in verify-policy-matrix.py.
 
 import argparse
 import json
-import time
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright, expect
@@ -39,25 +38,6 @@ def column(panel, name):
     return next(i for i, text in enumerate(headers) if text.strip() == name)
 
 
-def hover_until_visible(page, target, tooltip, timeout=60):
-    """Hover until a tooltip shows.
-
-    Async enrichment can still be pending when a panel opens. A tooltip hovered before
-    the organisation name arrives stays closed until the pointer leaves and returns.
-    """
-    deadline = time.monotonic() + timeout
-    while True:
-        target.hover()
-        try:
-            expect(tooltip).to_be_visible(timeout=2000)
-            return
-        except AssertionError:
-            if time.monotonic() > deadline:
-                raise
-            page.mouse.move(0, 0)
-            page.wait_for_timeout(1000)
-
-
 def check_panel(page, device, kind):
     """Open a device panel and check the test route row."""
     item = page.locator(".chakra-accordion__item").filter(has=page.get_by_text(device, exact=True))
@@ -73,8 +53,10 @@ def check_panel(page, device, kind):
     result = {"device": device, "query": kind, "render": "table"}
 
     if device not in NO_PATH.get(kind, set()):
+        row.get_by_role("link", name="13335", exact=True).hover()
         tooltip = page.get_by_role("tooltip").filter(has_text="13335 - ")
-        hover_until_visible(page, row.get_by_role("link", name="13335", exact=True), tooltip)
+        # Async enrichment can still be pending; the open tooltip updates in place (#86).
+        expect(tooltip).to_be_visible(timeout=60000)
         result["asn_tooltip"] = tooltip.inner_text()
         page.mouse.move(0, 0)
         expect(page.get_by_role("tooltip")).to_have_count(0, timeout=10000)
