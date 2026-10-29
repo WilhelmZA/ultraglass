@@ -1,0 +1,10 @@
+Sending ping in context grt with source IP 10.251.3.1
+PING 1.1.1.1: 56 data bytes
+64 bytes from 1.1.1.1: icmp_seq=0. time=1.145 ms
+64 bytes from 1.1.1.1: icmp_seq=1. time=0.772 ms
+64 bytes from 1.1.1.1: icmp_seq=2. time=0.709 ms
+64 bytes from 1.1.1.1: icmp_seq=3. time=1.946 ms
+64 bytes from 1.1.1.1: icmp_seq=4. time=1.060 ms
+----1.1.1.1 PING Statistics----
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip (ms)  min/avg/max = 0.709/1.126/1.946

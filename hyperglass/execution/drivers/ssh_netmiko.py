@@ -82,7 +82,8 @@ def collect_commands(
     When the device rejects a command that has a fallback, run the fallback instead.
     """
     try:
-        if platform == "arista_eos":
+        # VOSS runs traceroute only in privileged mode.
+        if platform in ("arista_eos", "extreme_vsp"):
             connection.enable()
         responses = []
         for index, query in enumerate(queries):

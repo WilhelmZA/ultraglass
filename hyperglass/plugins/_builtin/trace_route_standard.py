@@ -23,6 +23,7 @@ PLATFORMS = (
     "tnsr",
     "nokia_sros",
     "extreme_exos",
+    "extreme_vsp",
 )
 
 

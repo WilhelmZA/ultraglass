@@ -10,3 +10,17 @@ exit
 interface GigabitEthernet 1/1
 default-vlan-id 101
 exit
+interface vlan 101
+ipv6 interface enable
+ipv6 interface address fd00:251:3::1/64
+exit
+router bgp 65023 enable
+router bgp
+neighbor 10.251.3.2
+neighbor 10.251.3.2 remote-as 65000
+neighbor 10.251.3.2 enable
+neighbor fd00:251:3::2
+neighbor fd00:251:3::2 remote-as 65000
+neighbor fd00:251:3::2 address-family ipv6
+neighbor fd00:251:3::2 enable
+exit

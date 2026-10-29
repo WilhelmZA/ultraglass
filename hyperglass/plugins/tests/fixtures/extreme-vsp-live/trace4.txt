@@ -1,0 +1,3 @@
+Sending traceroute in context grt 
+traceroute to 1.1.1.1, 30 hops max, 56 byte packets
+ 1  1.1.1.1  1.550 ms 0.943 ms 1.080 ms

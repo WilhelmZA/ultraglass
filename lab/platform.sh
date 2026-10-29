@@ -124,14 +124,17 @@ topology['topology']['links'] = [
 ]
 number = {'sonic': 1, 'exos': 2, 'voss': 3, 'xrd': 4, 'iosv': 5, 'nexus': 6, 'timos': 7}[node]
 address = '10.251.3.2/30' if node == 'voss' else f'10.251.{number}.0/31'
+# VOSS takes no IPv6 prefix longer than /64 without a boot flag, and ::0 of a /64 is
+# the subnet-router anycast address.
+address6 = 'fd00:251:3::2/64' if node == 'voss' else f'fd00:251:{number}::/127'
 nodes['probe']['exec'] = [f'ip address replace {address} dev eth{number}']
 if node in ('sonic', 'exos', 'voss', 'xrd', 'iosv', 'nexus', 'timos'):
     nodes['probe']['exec'] += [
-        f'ip address replace fd00:251:{number}::/127 dev eth{number}',
+        f'ip address replace {address6} dev eth{number}',
         'ip address replace 1.1.1.1/32 dev lo',
         'ip address replace 2606:4700::1111/128 dev lo',
         f'gobgp global rib add 1.1.1.0/24 nexthop {address.split("/")[0]} aspath 13335 community 37195:302',
-        f'gobgp global rib add -a ipv6 2606:4700::/44 nexthop fd00:251:{number}:: aspath 13335 community 37195:302',
+        f'gobgp global rib add -a ipv6 2606:4700::/44 nexthop {address6.split("/")[0]} aspath 13335 community 37195:302',
         f'gobgp neighbor 10.251.{number}.1 disable',
         f'gobgp neighbor fd00:251:{number}::1 disable',
     ]
