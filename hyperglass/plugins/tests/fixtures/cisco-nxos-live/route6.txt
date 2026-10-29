@@ -1,0 +1,13 @@
+BGP routing table information for VRF default, address family IPv6 Unicast
+BGP routing table entry for 2606:4700::/44, version 3
+Paths: (1 available, best #1)
+Flags: (0x8000001a) (high32 00000000) on xmit-list, is in u6rib, is best u6rib route, is in HW
+
+  Advertised path-id 1
+  Path type: external, path is valid, is best path, no labeled nexthop, in rib
+  AS-Path: 65000 13335 , path sourced external to AS
+    fd00:251:6:: (metric 0) from fd00:251:6:: (10.251.6.0)
+      Origin incomplete, MED not set, localpref 100, weight 0
+      Community: 37195:302
+
+  Path-id 1 not advertised to any peer

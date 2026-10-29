@@ -1,0 +1,10 @@
+PING6 2606:4700::1111 (2606:4700::1111) from fd00:251:6::1: 56 data bytes
+64 bytes from 2606:4700::1111: icmp_seq=0 time=3.248 ms
+64 bytes from 2606:4700::1111: icmp_seq=1 time=2.523 ms
+64 bytes from 2606:4700::1111: icmp_seq=2 time=2.295 ms
+64 bytes from 2606:4700::1111: icmp_seq=3 time=2.414 ms
+64 bytes from 2606:4700::1111: icmp_seq=4 time=1.978 ms
+
+--- 2606:4700::1111 ping6 statistics ---
+5 packets transmitted, 5 packets received, 0.00% packet loss
+round-trip min/avg/max = 1.978/2.491/3.248 ms

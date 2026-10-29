@@ -1,0 +1,2 @@
+traceroute to 2606:4700::1111 (2606:4700::1111) from fd00:251:6::1, 30 hops max, 24 byte packets
+ 1  2606:4700::1111  3.242 ms  2.647 ms  2.207 ms

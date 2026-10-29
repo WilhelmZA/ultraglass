@@ -1,0 +1,4 @@
+Type escape sequence to abort.
+Tracing the route to 1.1.1.1
+VRF info: (vrf in name/id, vrf out name/id)
+  1 1.1.1.1 [AS 13335] 1 msec 0 msec

@@ -1,0 +1,6 @@
+Thu Oct 29 01:54:32.080 UTC
+
+Type escape sequence to abort.
+Tracing the route to 2606:4700::1111
+
+ 1  2606:4700::1111 1 msec 1 msec

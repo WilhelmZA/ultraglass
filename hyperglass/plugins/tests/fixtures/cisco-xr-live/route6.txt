@@ -1,0 +1,16 @@
+Thu Oct 29 01:56:07.543 UTC
+BGP routing table entry for 2606:4700::/44
+Versions:
+  Process           bRIB/RIB   SendTblVer
+  Speaker                  4            4
+Last Modified: Oct 29 01:54:26.802 for 00:01:40
+Paths: (1 available, best #1)
+  Not advertised to any peer
+  Path #1: Received by speaker 0
+  Not advertised to any peer
+  65000 13335
+    fd00:251:4:: from fd00:251:4:: (10.251.4.0)
+      Origin incomplete, localpref 100, valid, external, best, group-best
+      Received Path ID 0, Local Path ID 1, version 4
+      Community: 37195:302
+      Origin-AS validity: (disabled)
