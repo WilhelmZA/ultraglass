@@ -8,6 +8,12 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+
+- Each published image carries its release notes link in the `org.opencontainers.image.documentation` label, and every stable release refreshes the Docker Hub overview with the README, a release table and the latest release notes. The overview can also be refreshed by hand from the workflow's manual run.
+
 ## 3.4.0 - 2026-10-29
 
 This release widens platform coverage and query options. Built-in queries run inside a VRF on EOS, FRRouting, Huawei VRP, MikroTik RouterOS and VyOS. Structured BGP output is available, opt-in, on Cisco IOS and IOS XE, VyOS 1.4+, OpenBGPD and BIRD, and FRRouting AS-path and community queries now return tables. Custom directives take fixed-choice variables. Hostnames resolve on the server, the My IP button no longer sends visitor addresses to a third party by default, and the UI serves its fonts itself. Devices can declare `os_version` so built-in directives pick commands that older software accepts, and MikroTik routers on slow links return BGP output. It also fixes the traceroute statistics, AS-path chart, Huawei parsing, webhook delivery and startup problems reported against 3.3.1.

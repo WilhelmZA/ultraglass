@@ -21,6 +21,11 @@ on:
         description: Image version when publishing manually, without the leading v
         required: false
         type: string
+      dockerhub_description:
+        description: Update the Docker Hub overview from the README and the GitHub releases
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -186,6 +191,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: docker.io/${{ env.DOCKERHUB_REPOSITORY }}
+          labels: |
+            org.opencontainers.image.documentation=${{ startsWith(github.ref, 'refs/tags/v') && format('https://github.com/{0}/releases/tag/{1}', github.repository, github.ref_name) || format('https://github.com/{0}/blob/main/CHANGELOG.md', github.repository) }}
           flavor: |
             latest=false
           tags: |
@@ -213,6 +220,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/wilhelmza/ultraglass
+          labels: |
+            org.opencontainers.image.documentation=${{ startsWith(github.ref, 'refs/tags/v') && format('https://github.com/{0}/releases/tag/{1}', github.repository, github.ref_name) || format('https://github.com/{0}/blob/main/CHANGELOG.md', github.repository) }}
           flavor: |
             latest=false
           tags: |
@@ -295,3 +304,55 @@ jobs:
             "$release_type" \
             --verify-tag \
             dist/*
+
+  dockerhub-description:
+    name: Update Docker Hub overview
+    needs:
+      - release
+    if: ${{ always() && ((startsWith(github.ref, 'refs/tags/v') && needs.release.result == 'success') || (github.event_name == 'workflow_dispatch' && inputs.dockerhub_description)) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build the overview from the README and the GitHub releases
+        id: overview
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          repo="$GITHUB_REPOSITORY"
+          raw="https://raw.githubusercontent.com/$repo/main"
+          blob="https://github.com/$repo/blob/main"
+          out="$RUNNER_TEMP/overview.md"
+          # Docker Hub renders the overview without repository context, so relative links become absolute.
+          sed -E \
+            -e "s#\]\(([^)#:]+\.(svg|png|jpg|gif))\)#](${raw}/\1)#g" \
+            -e "s#\]\(([^)#:]+)\)#](${blob}/\1)#g" \
+            README.md > "$out"
+          latest="$(gh api "repos/$repo/releases/latest" --jq .tag_name)"
+          version="${latest#v}"
+          {
+            printf '\n## Releases\n\n'
+            printf 'Latest stable release: **%s**. Pull `%s:%s` or `ghcr.io/%s:%s`. The `latest` tag on both registries points to it.\n\n' "$version" "$DOCKERHUB_REPOSITORY" "$version" "$DOCKERHUB_REPOSITORY" "$version"
+            printf 'Every version has release notes on [GitHub Releases](https://github.com/%s/releases) and in the [changelog](%s/CHANGELOG.md). Release candidates are tagged by version, such as `3.4.0-rc.3`, and never move `latest`. Each image carries its release notes link in the `org.opencontainers.image.documentation` label.\n\n' "$repo" "$blob"
+            printf '| Version | Date | Notes |\n|---|---|---|\n'
+            gh api "repos/$repo/releases?per_page=10" --jq '.[] | select(.draft | not) | "| \(.tag_name | ltrimstr("v")) | \(.published_at[:10]) | [\(if .prerelease then "pre-release notes" else "release notes" end)](\(.html_url)) |"'
+            printf '\n## %s release notes\n\n' "$version"
+            gh api "repos/$repo/releases/latest" --jq .body
+          } >> "$out"
+          size="$(wc -c < "$out")"
+          if [ "$size" -gt 25000 ]; then
+            echo "Overview is $size bytes; Docker Hub allows 25000. Shorten the README or the release notes."
+            exit 1
+          fi
+          echo "file=$out" >> "$GITHUB_OUTPUT"
+
+      - name: Push the overview to Docker Hub
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ env.DOCKERHUB_REPOSITORY }}
+          readme-filepath: ${{ steps.overview.outputs.file }}
