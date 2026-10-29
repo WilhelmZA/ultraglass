@@ -19,6 +19,7 @@ topology:
         - ip address add 10.251.1.0/31 dev eth1
         - ip address add 10.251.2.0/31 dev eth2
         - ip address add 10.251.3.2/30 dev eth3
+        - ip address add 10.251.4.0/31 dev eth4
 
     sonic:
       kind: sonic-vm
@@ -59,7 +60,64 @@ topology:
         QEMU_CPU: core2duo
         QEMU_MEMORY: "2048"
 
+    xrd:
+      kind: cisco_xrd
+      image: ultraglass-lab/cisco_xrd:24.2.11
+      mgmt-ipv4: 192.168.250.24
+      memory: 4GiB
+      cpu: 2
+      startup-config: configs/xrd/startup.cfg
+
+    iosv:
+      kind: cisco_vios
+      image: ultraglass-lab/cisco_vios:15.9.3M6
+      mgmt-ipv4: 192.168.250.25
+      memory: 2GiB
+      cpu: 2
+      startup-config: configs/iosv/startup.cfg
+      credentials:
+        username: admin
+        password: Lab-Router9
+      env:
+        QEMU_CPU: core2duo
+        QEMU_MEMORY: "1024"
+
+    nexus:
+      kind: cisco_n9kv
+      image: ultraglass-lab/cisco_n9kv:9300-lite-10.4.8.M
+      mgmt-ipv4: 192.168.250.26
+      memory: 10GiB
+      cpu: 4
+      startup-config: configs/nexus/startup.cfg
+      credentials:
+        username: admin
+        password: Lab-Router9
+      env:
+        QEMU_MEMORY: "8192"
+
+    timos:
+      kind: nokia_sros
+      type: vsr-i
+      config-mode: classic
+      inject-ssh-keys: false
+      image: ultraglass-lab/nokia_sros:15.0.R3
+      mgmt-ipv4: 192.168.250.27
+      memory: 10GiB
+      cpu: 2
+      startup-config: configs/timos/startup.cfg
+      license: data/platforms/timos.license
+      credentials:
+        username: admin
+        password: Lab-Router9
+      env:
+        QEMU_CPU: core2duo
+        QEMU_MEMORY: "8192"
+
   links:
     - endpoints: ["probe:eth1", "sonic:eth1"]
     - endpoints: ["probe:eth2", "exos:eth1"]
     - endpoints: ["probe:eth3", "voss:eth1"]
+    - endpoints: ["probe:eth4", "xrd:Gi0-0-0-0"]
+    - endpoints: ["probe:eth5", "iosv:eth1"]
+    - endpoints: ["probe:eth6", "nexus:eth1"]
+    - endpoints: ["probe:eth7", "timos:eth1"]

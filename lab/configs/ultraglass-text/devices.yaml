@@ -122,6 +122,45 @@ devices:
       source4: 10.250.10.1
       source6: fd00:250:10::1
 
+  - name: lab-xrd
+    address: 192.168.250.24
+    group: Cisco
+    credential:
+      username: clab
+      password: clab@123
+    platform: cisco_xr
+    structured_output: false
+    attrs:
+      source4: 10.251.4.1
+      source6: fd00:251:4::1
+
+  - name: lab-iosv
+    address: 192.168.250.25
+    group: Cisco
+    credential:
+      username: admin
+      password: Lab-Router9
+    platform: cisco_ios
+    structured_output: false
+    directives:
+      - builtins: [bgp, ping]
+      - lab-iosv-traceroute
+    attrs:
+      source4: 10.251.5.1
+      source6: fd00:251:5::1
+
+  - name: lab-nexus
+    address: 192.168.250.26
+    group: Cisco
+    credential:
+      username: admin
+      password: Lab-Router9
+    platform: cisco_nxos
+    structured_output: false
+    attrs:
+      source4: 10.251.6.1
+      source6: fd00:251:6::1
+
   # VRF locations (#50). Arista and FRR hold VRF LAB from their startup configs, with
   # 198.51.100.0/24 and 2001:db8:100::/48 originated into BGP. FRR in a VRF offers BGP
   # queries only.

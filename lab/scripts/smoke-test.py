@@ -22,6 +22,9 @@ PLATFORMS = {
     "junos": "juniper",
     "iol": "cisco_ios",
     "ioll2": "cisco_ios",
+    "xrd": "cisco_xr",
+    "iosv": "cisco_ios",
+    "nexus": "cisco_nxos",
     "arista": "arista_eos",
     "arista-vrf": "arista_eos",
     "frr-vrf": "frr",
@@ -85,14 +88,26 @@ def main():
         platform = device.removeprefix("lab-")
         platform = PLATFORMS.get(platform, platform)
         for directive in ids:
+            if device == "lab-iosv" and directive == "__hyperglass_cisco_ios_traceroute__":
+                continue
             if not directive.startswith(f"__hyperglass_{platform}_"):
                 continue
             kind = directive[len(f"__hyperglass_{platform}_"):-2].removesuffix("_table")
-            for target in TARGETS.get(kind, []):
+            targets = TARGETS.get(kind, [])
+            if device in ("lab-xrd", "lab-iosv", "lab-nexus") and kind in ("ping", "traceroute"):
+                targets = ["1.1.1.1", "2606:4700::1111"]
+            for target in targets:
+                if device == "lab-xrd":
+                    # XRd rate-limits new SSH connections; each API query opens one.
+                    time.sleep(2)
                 if platform == "cisco_ios" and kind == "bgp_route" and ":" in target:
                     target = "2606:4700::/44"
                 level, shape, runtime, _ = query(device, directive, target)
                 print(f"{device:14} {kind:14} {target:18} {str(level):8} {runtime:6.1f}s  {shape}")
+        if device == "lab-iosv":
+            for target in ("1.1.1.1", "2606:4700::1111"):
+                level, shape, runtime, _ = query(device, "lab-iosv-traceroute", target)
+                print(f"{device:14} {'traceroute':14} {target:18} {str(level):8} {runtime:6.1f}s  {shape}")
 
 
 if __name__ == "__main__":

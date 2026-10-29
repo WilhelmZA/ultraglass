@@ -22,3 +22,16 @@ lab-bgp-summary:
       items:
         - name: LAB
           value: LAB
+
+lab-iosv-traceroute:
+  name: Traceroute
+  field:
+    description: IP Address, Prefix, or Hostname
+  rules:
+    - condition: 0.0.0.0/0
+      action: permit
+      command: traceroute {target} timeout 1 probe 2 source {source4}
+    - condition: ::/0
+      action: permit
+      # IOSv 15.9 accepts no trailing options for an IPv6 traceroute.
+      command: traceroute ipv6 {target}
