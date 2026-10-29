@@ -1,4 +1,4 @@
-"""Parse Cisco IOS and IOS XE `show bgp` text output."""
+"""Parse Cisco IOS, IOS XE, IOS-XR and NX-OS `show bgp` text output."""
 
 # Standard Library
 import re
@@ -11,11 +11,26 @@ from hyperglass.log import log
 from hyperglass.util import parse_as_path
 from hyperglass.models.data import BGPRouteTable
 
-ENTRY = re.compile(r"^BGP routing table entry for (?P<prefix>\S+?),")
+ENTRY = re.compile(r"^BGP routing table entry for (?P<prefix>[^\s,]+)")
 NEXT_HOP = re.compile(r"^ {4}(?P<next_hop>\S+).* from (?P<peer>\S+) \((?P<rid>[^)]+)\)")
 UPDATED = re.compile(r"Updated on (?P<time>\w{3} +\d+ \d{4} \d\d:\d\d:\d\d) (?P<tz>\S+)")
-RPKI_DETAIL = re.compile(r"RPKI State (?P<state>valid|invalid|not found)")
-RPKI_STATES = {"valid": 1, "invalid": 0, "not found": 2, "V": 1, "I": 0, "N": 2}
+RPKI_DETAIL = re.compile(
+    r"(?:RPKI State|Origin-AS validity:) (?P<state>valid|invalid|not found|not-found)"
+)
+RPKI_STATES = {"valid": 1, "invalid": 0, "not found": 2, "not-found": 2, "V": 1, "I": 0, "N": 2}
+# NX-OS starts each path of a detail entry with its type and prints the AS path below it.
+NXOS_PATH = re.compile(r"^ {2}Path type: ")
+NXOS_AS_PATH = re.compile(r"^ {2}AS-Path: (?P<path>[^,]*)")
+# A summary-table path starts with a status code; footer lines such as `Processed` do not.
+STATUS_CODES = "*sdhrSxVIN"
+# Status-column offset and status-code RPKI letters per platform. IOS prints a path's
+# status one character right of the header. NX-OS uses `I` for an injected path and
+# IOS-XR uses `N` for a next-hop discard, so only IOS status codes carry RPKI state.
+TABLE_LAYOUT = {
+    "cisco_ios": {"shift": 1, "rpki": True},
+    "cisco_xr": {"shift": 0, "rpki": False},
+    "cisco_nxos": {"shift": 0, "rpki": False},
+}
 # An empty result is a normal answer; any other `%` line is a command error.
 NOT_FOUND = "% Network not in table"
 
@@ -70,6 +85,8 @@ def _apply_attributes(route: t.Dict[str, t.Any], line: str) -> None:
             route["local_preference"] = int(value)
         elif key == "weight":
             route["weight"] = int(value)
+        elif key == "MED" and value.isdigit():
+            route["med"] = int(value)
         elif key == "best":
             route["active"] = True
 
@@ -112,18 +129,27 @@ def parse_detail(output: str) -> t.List[t.Dict[str, t.Any]]:
             routes.append(route)
             route["as_path"] = parse_as_path(line.split(", ")[0])
             continue
+        if NXOS_PATH.match(line):
+            route = _new_route(prefix)
+            routes.append(route)
+            route["active"] = "is best path" in line
+            continue
+        if route is not None and (match := NXOS_AS_PATH.match(line)):
+            route["as_path"] = parse_as_path(match.group("path"))
+            continue
         if route is not None:
             _apply_path_line(route, line)
     return [_finish(route) for route in routes]
 
 
-def parse_table(output: str) -> t.List[t.Dict[str, t.Any]]:
+def parse_table(output: str, platform: str = "cisco_ios") -> t.List[t.Dict[str, t.Any]]:
     """Convert the `show bgp <afi> unicast` summary table to standard route fields.
 
     The summary table carries no communities. IOS moves a long network onto its own
     line and continues the path on the next line, which aligns with the header. A line
-    that starts with a status code sits one character right of the header.
+    that starts with a status code sits one character right of the header on IOS.
     """
+    layout = TABLE_LAYOUT[platform]
     routes = []
     columns = None
     prefix = ""
@@ -141,8 +167,10 @@ def parse_table(output: str) -> t.List[t.Dict[str, t.Any]]:
             continue
         if columns is None or not line.strip():
             continue
-        status = line[: columns["network"] + 1]
-        shift = 1 if status.strip() else 0
+        status = line[: columns["network"] + layout["shift"]]
+        if status.strip() and status.strip()[0] not in STATUS_CODES:
+            continue
+        shift = layout["shift"] if status.strip() else 0
         col = {name: index + shift for name, index in columns.items()}
         if status.strip():
             # A status code starts a path. Further paths of a prefix leave the network blank.
@@ -152,7 +180,8 @@ def parse_table(output: str) -> t.List[t.Dict[str, t.Any]]:
                 prefix = _classful(network[0])
             route = _new_route(prefix)
             route["active"] = ">" in status
-            route["rpki_state"] = next((RPKI_STATES[c] for c in status if c in "VIN"), 3)
+            if layout["rpki"]:
+                route["rpki_state"] = next((RPKI_STATES[c] for c in status if c in "VIN"), 3)
             routes.append(route)
             if has_network and col["network"] + len(network[0]) >= col["next_hop"]:
                 # A long network takes the whole line.
@@ -176,19 +205,21 @@ def parse_table(output: str) -> t.List[t.Dict[str, t.Any]]:
     return [_finish(route) for route in routes]
 
 
-def parse_cisco_ios_routes(output: str) -> t.List[t.Dict[str, t.Any]]:
-    """Convert one IOS `show bgp` response, in either form, to standard route fields."""
+def parse_cisco_ios_routes(output: str, platform: str = "cisco_ios") -> t.List[t.Dict[str, t.Any]]:
+    """Convert one Cisco `show bgp` response, in either form, to standard route fields."""
     for line in output.splitlines():
         stripped = line.strip()
         if stripped.startswith("%") and stripped != NOT_FOUND:
-            raise ValueError(f"Cisco IOS command error: {stripped}")
+            raise ValueError(f"Cisco command error: {stripped}")
     if "BGP routing table entry for" in output:
         return parse_detail(output)
-    return parse_table(output)
+    return parse_table(output, platform)
 
 
-def cisco_ios_bgp_table(routes: t.List[t.Dict[str, t.Any]]) -> BGPRouteTable:
-    """Combine parsed Cisco IOS routes into one standard BGP table."""
+def cisco_ios_bgp_table(
+    routes: t.List[t.Dict[str, t.Any]], platform: str = "cisco_ios"
+) -> BGPRouteTable:
+    """Combine parsed Cisco routes into one standard BGP table."""
     serialized = BGPRouteTable(
         vrf="default",
         count=len(routes),
@@ -196,5 +227,5 @@ def cisco_ios_bgp_table(routes: t.List[t.Dict[str, t.Any]]) -> BGPRouteTable:
         winning_weight="high",
     )
 
-    log.bind(platform="cisco_ios", response=repr(serialized)).debug("Serialized response")
+    log.bind(platform=platform, response=repr(serialized)).debug("Serialized response")
     return serialized

@@ -1,4 +1,4 @@
-"""Parse Cisco IOS Text Response to Structured Data."""
+"""Parse Cisco IOS, IOS-XR and NX-OS Text Responses to Structured Data."""
 
 # Standard Library
 import typing as t
@@ -23,18 +23,20 @@ if t.TYPE_CHECKING:
     from .._output import OutputType
 
 
-def parse_cisco_ios(output: t.Sequence[str]) -> "OutputDataModel":
-    """Parse Cisco IOS `show bgp` responses."""
+def parse_cisco_ios(output: t.Sequence[str], platform: str = "cisco_ios") -> "OutputDataModel":
+    """Parse Cisco `show bgp` responses."""
     _log = log.bind(plugin=BGPRoutePluginCiscoIOS.__name__)
 
     try:
-        routes = [route for response in output for route in parse_cisco_ios_routes(response)]
+        routes = [
+            route for response in output for route in parse_cisco_ios_routes(response, platform)
+        ]
 
         # A target or filter with no matching routes returns no paths.
         if not routes:
             return None
 
-        return cisco_ios_bgp_table(routes)
+        return cisco_ios_bgp_table(routes, platform)
 
     except (ValueError, ValidationError) as err:
         _log.critical(err)
@@ -42,18 +44,18 @@ def parse_cisco_ios(output: t.Sequence[str]) -> "OutputDataModel":
 
 
 class BGPRoutePluginCiscoIOS(OutputPlugin):
-    """Coerce a Cisco IOS route table in text format to a standard BGP Table structure."""
+    """Coerce a Cisco IOS, IOS-XR or NX-OS route table in text to a standard BGP Table."""
 
     _hyperglass_builtin: bool = PrivateAttr(True)
-    platforms: t.Sequence[str] = ("cisco_ios",)
-    directives: t.Sequence[str] = (
-        "__hyperglass_cisco_ios_bgp_route_table__",
-        "__hyperglass_cisco_ios_bgp_aspath_table__",
-        "__hyperglass_cisco_ios_bgp_community_table__",
+    platforms: t.Sequence[str] = ("cisco_ios", "cisco_xr", "cisco_nxos")
+    directives: t.Sequence[str] = tuple(
+        f"__hyperglass_{platform}_bgp_{kind}_table__"
+        for platform in ("cisco_ios", "cisco_xr", "cisco_nxos")
+        for kind in ("route", "aspath", "community")
     )
 
     def process(self, *, output: "OutputType", query: "Query") -> "OutputType":
-        """Parse Cisco IOS response if data is a string (and is therefore unparsed)."""
+        """Parse a Cisco response if data is a string (and is therefore unparsed)."""
         should_process = all(
             (
                 isinstance(output, (list, tuple)),
@@ -63,5 +65,5 @@ class BGPRoutePluginCiscoIOS(OutputPlugin):
             )
         )
         if should_process:
-            return parse_cisco_ios(output)
+            return parse_cisco_ios(output, query.device.platform)
         return output

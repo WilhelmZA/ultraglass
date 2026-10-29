@@ -64,3 +64,43 @@ def test_iosv_summary_tables(kind):
         assert route.as_path == [65000, 13335]
         assert route.active is True
         assert route.communities == []
+
+
+@pytest.mark.parametrize(
+    ("platform", "fixture", "next_hops"),
+    [
+        ("cisco_xr", "cisco-xr-live", {4: "10.251.4.0", 6: "fd00:251:4::"}),
+        ("cisco_nxos", "cisco-nxos-live", {4: "10.251.6.0", 6: "fd00:251:6::"}),
+    ],
+)
+@pytest.mark.parametrize("family", (4, 6))
+def test_xr_nxos_route_detail(platform, fixture, next_hops, family):
+    table = parse_cisco_ios([(FIXTURES / fixture / f"route{family}.txt").read_text()], platform)
+    assert table.count == 1
+    route = table.routes[0]
+    assert route.prefix == PREFIXES[family]
+    assert route.active is True
+    assert route.as_path == [65000, 13335]
+    assert route.source_as == 13335
+    assert route.next_hop == next_hops[family]
+    assert route.peer_rid == next_hops[family]
+    assert route.source_rid == next_hops[4]
+    assert route.local_preference == 100
+    assert route.communities == ["37195:302"]
+
+
+@pytest.mark.parametrize(
+    ("platform", "fixture"), [("cisco_xr", "cisco-xr-live"), ("cisco_nxos", "cisco-nxos-live")]
+)
+@pytest.mark.parametrize("kind", ("aspath", "community"))
+def test_xr_nxos_summary_tables(platform, fixture, kind):
+    """Summary output carries no communities; the parser must not invent any."""
+    table = parse_cisco_ios(
+        [(FIXTURES / fixture / f"{kind}{family}.txt").read_text() for family in (4, 6)], platform
+    )
+    assert [route.prefix for route in table.routes] == [PREFIXES[4], PREFIXES[6]]
+    for route in table.routes:
+        assert route.as_path == [65000, 13335]
+        assert route.active is True
+        assert route.communities == []
+        assert route.rpki_state == 3

@@ -15,6 +15,9 @@ __all__ = (
     "CiscoXR_BGPRoute",
     "CiscoXR_Ping",
     "CiscoXR_Traceroute",
+    "CiscoXR_BGPRouteTable",
+    "CiscoXR_BGPASPathTable",
+    "CiscoXR_BGPCommunityTable",
 )
 
 NAME = "Cisco IOS-XR"
@@ -22,6 +25,7 @@ PLATFORMS = ["cisco_xr"]
 
 CiscoXR_BGPRoute = BuiltinDirective(
     id="__hyperglass_cisco_xr_bgp_route__",
+    table_output="__hyperglass_cisco_xr_bgp_route_table__",
     name="BGP Route",
     rules=[
         RuleWithIPv4(
@@ -41,6 +45,7 @@ CiscoXR_BGPRoute = BuiltinDirective(
 
 CiscoXR_BGPASPath = BuiltinDirective(
     id="__hyperglass_cisco_xr_bgp_aspath__",
+    table_output="__hyperglass_cisco_xr_bgp_aspath_table__",
     name="BGP AS Path",
     rules=[
         RuleWithPattern(
@@ -58,6 +63,7 @@ CiscoXR_BGPASPath = BuiltinDirective(
 
 CiscoXR_BGPCommunity = BuiltinDirective(
     id="__hyperglass_cisco_xr_bgp_community__",
+    table_output="__hyperglass_cisco_xr_bgp_community_table__",
     name="BGP Community",
     rules=[
         RuleWithPattern(
@@ -108,5 +114,60 @@ CiscoXR_Traceroute = BuiltinDirective(
         ),
     ],
     field=Text(description="IP Address, Prefix, or Hostname"),
+    platforms=PLATFORMS,
+)
+
+# Table Output Directives
+
+CiscoXR_BGPRouteTable = BuiltinDirective(
+    id="__hyperglass_cisco_xr_bgp_route_table__",
+    name="BGP Route",
+    rules=[
+        RuleWithIPv4(
+            condition="0.0.0.0/0",
+            action="permit",
+            command="show bgp ipv4 unicast {target}",
+        ),
+        RuleWithIPv6(
+            condition="::/0",
+            action="permit",
+            command="show bgp ipv6 unicast {target}",
+        ),
+    ],
+    field=Text(description="IP Address, Prefix, or Hostname"),
+    platforms=PLATFORMS,
+)
+
+CiscoXR_BGPASPathTable = BuiltinDirective(
+    id="__hyperglass_cisco_xr_bgp_aspath_table__",
+    name="BGP AS Path",
+    rules=[
+        RuleWithPattern(
+            condition="*",
+            action="permit",
+            commands=[
+                "show bgp ipv4 unicast regexp {target}",
+                "show bgp ipv6 unicast regexp {target}",
+            ],
+        )
+    ],
+    field=Text(description="AS Path Regular Expression"),
+    platforms=PLATFORMS,
+)
+
+CiscoXR_BGPCommunityTable = BuiltinDirective(
+    id="__hyperglass_cisco_xr_bgp_community_table__",
+    name="BGP Community",
+    rules=[
+        RuleWithPattern(
+            condition="*",
+            action="permit",
+            commands=[
+                "show bgp ipv4 unicast community {target}",
+                "show bgp ipv6 unicast community {target}",
+            ],
+        )
+    ],
+    field=Text(description="BGP Community String"),
     platforms=PLATFORMS,
 )
