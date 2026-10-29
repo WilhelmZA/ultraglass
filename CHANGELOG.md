@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+
+- Opt-in structured BGP output for Cisco IOS-XR and NX-OS, with route detail, communities and best-path state. AS-path and community queries use the summary table, which carries no communities (#110, #113).
+
+### Fixed
+
+- NX-OS `% Invalid command` and `% Incomplete` errors are recognised as command errors instead of being returned as results (#110).
+- A Cisco NX-OS BGP route query for a bare IPv6 address returns an input error instead of a device error, because NX-OS looks up an IPv6 route only by prefix (#110).
+- An IOS-XR `%% Network not in table` reply is an empty result, not a command error (#113).
+
 ### Changed
 
 - Structured output is opt-in on every platform. Arista EOS, FRRouting, Huawei VRP, Juniper Junos, MikroTik RouterOS and SwitchOS devices without `structured_output` now return text. Set `structured_output: true` on those devices to keep the table view (#125).
@@ -32,15 +42,11 @@ Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/Wi
 
 - The `extreme_exos` platform, with built-in BGP route, AS path, community, ping and traceroute directives, `vr` forms, and opt-in structured BGP output parsed from `show bgp routes detail`. Route queries need a prefix. Community targets are sent in the `AS : value` form EXOS requires (#73).
 - The `extreme_vsp` platform for VOSS, with built-in BGP route, ping and traceroute directives and VRF forms. VOSS has no AS path or community filter, and its BGP output stays as text because it marks no best path. Route queries need a prefix (#73).
-- Opt-in structured BGP output for Cisco IOS-XR and NX-OS, with route detail, communities and best-path state. AS-path and community queries use the summary table, which carries no communities (#110, #113).
 - The `sonic` platform for community SONiC, which runs the FRRouting commands through `vtysh` in a Linux shell, with opt-in structured BGP and traceroute output from the FRR parsers (#76).
 
 ### Fixed
 
 - Device errors that start with `%%`, as EXOS prints them, are recognised as command errors instead of being returned as results (#73).
-- NX-OS `% Invalid command` and `% Incomplete` errors are recognised as command errors instead of being returned as results (#110).
-- A Cisco NX-OS BGP route query for a bare IPv6 address returns an input error instead of a device error, because NX-OS looks up an IPv6 route only by prefix (#110).
-- An IOS-XR `%% Network not in table` reply is an empty result, not a command error (#113).
 
 ### Changed
 

@@ -69,7 +69,7 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | VyOS 1.4+ | FRR JSON through `vtysh` | AS-path and community summary results omit communities and route age. |
 | VyOS 1.3 | Not supported | Use text BGP results, even with structured traceroute enabled. |
 
-Structured traceroute also parses standard numbered CLI output from EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, TNSR, Extreme EXOS and VOSS, and SONiC. Cisco, Nokia, TNSR, Extreme, SONiC, and both VyOS platform keys require `structured_output: true`. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation; remaining coverage is tracked in issues [#22](https://github.com/WilhelmZA/ultraglass/issues/22), [#25](https://github.com/WilhelmZA/ultraglass/issues/25), and [#35](https://github.com/WilhelmZA/ultraglass/issues/35).
+Structured traceroute also parses standard numbered CLI output from EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, TNSR, Extreme EXOS and VOSS, and SONiC. It needs `structured_output: true` on the device, like structured BGP. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation; remaining coverage is tracked in issues [#22](https://github.com/WilhelmZA/ultraglass/issues/22), [#25](https://github.com/WilhelmZA/ultraglass/issues/25), and [#35](https://github.com/WilhelmZA/ultraglass/issues/35).
 
 ### VRF queries
 
