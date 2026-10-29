@@ -39,6 +39,9 @@ A rule is a way of saying "if a query target matches the rule's conditions, run 
 | `commands`  | List of Strings |               | Commands to run when this rule matches. `{target}` is replaced with the query target.          |
 | `vrf_command` | String | | Single command form used when the device has `vrf` set. Use `{vrf}` for the validated VRF name. |
 | `vrf_commands` | List of Strings | | Multiple-command alternative to `vrf_command`. |
+| `fallback_command` | String | | Command to run when the device rejects `command`, for older software. The device's error output is replaced by the fallback output, and a warning names the device. |
+| `fallback_commands` | List of Strings | | Multiple-command alternative to `fallback_command`, matched to `commands` by position. |
+| `fallback_os_version` | String | | Version filter, such as `<16` or `>=12,<16`. A device whose `os_version` meets it runs the fallback commands directly, without trying `command` first. Only the leading dotted numbers of `os_version` are compared. |
 
 ### IP Rule
 

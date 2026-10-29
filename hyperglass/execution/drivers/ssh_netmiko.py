@@ -25,6 +25,7 @@ from hyperglass.exceptions.public import AuthError, DeviceTimeout, ResponseEmpty
 
 # Local
 from .ssh import SSHConnection
+from ._common import command_error
 
 if t.TYPE_CHECKING:
     from hyperglass.models.config.devices import Device
@@ -73,18 +74,34 @@ netmiko_device_send_args = {
 }
 
 
-def collect_commands(connection, platform: str, queries, timeout: int) -> tuple:
-    """Read each command fully and always release the SSH session."""
+def collect_commands(
+    connection, platform: str, queries, timeout: int, fallbacks=(), device=None
+) -> tuple:
+    """Read each command fully and always release the SSH session.
+
+    When the device rejects a command that has a fallback, run the fallback instead.
+    """
     try:
         if platform == "arista_eos":
             connection.enable()
         responses = []
-        for query in queries:
+        for index, query in enumerate(queries):
             # RouterOS BGP scans can be silent for a minute before the first row.
             timing = platform in netmiko_device_send_args and not query.startswith("routing route ")
             send = connection.send_command_timing if timing else connection.send_command
             args = netmiko_device_send_args[platform] if timing else {}
-            responses.append(send(query, read_timeout=timeout, **args))
+            response = send(query, read_timeout=timeout, **args)
+            fallback = fallbacks[index] if index < len(fallbacks) else None
+            if fallback is not None and command_error((response,)):
+                log.bind(device=device, command=query, fallback=fallback).warning(
+                    "{!r} rejected {!r}, so {!r} ran instead. Set os_version on this device "
+                    "in devices.yaml to run the supported command directly",
+                    device,
+                    query,
+                    fallback,
+                )
+                response = send(fallback, read_timeout=timeout, **args)
+            responses.append(response)
         return tuple(responses)
     finally:
         connection.disconnect()
@@ -157,7 +174,12 @@ class NetmikoConnection(SSHConnection):
                     nm_connect_direct.set_terminal_width = lambda *args, **kwargs: ""
                     nm_connect_direct._open()
                 return collect_commands(
-                    nm_connect_direct, self.device.platform, self.query, params.request_timeout
+                    nm_connect_direct,
+                    self.device.platform,
+                    self.query,
+                    params.request_timeout,
+                    fallbacks=getattr(self, "fallbacks", ()),
+                    device=self.device.name,
                 )
 
             except (NetMikoTimeoutException, ReadTimeout) as scrape_error:

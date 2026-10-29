@@ -64,7 +64,11 @@ def directive_attr_keys(directives: t.Iterable[Directive], *, vrf: bool) -> t.Se
         key
         for directive in directives
         for rule in directive.rules
-        for command in (rule.vrf_commands if vrf and rule.vrf_commands else rule.commands)
+        for command in (
+            rule.vrf_commands
+            if vrf and rule.vrf_commands
+            else rule.commands + rule.fallback_commands
+        )
         for key in get_fmt_keys(command)
         if key not in ("target", "vrf") and key not in directive.variables
     }
@@ -85,6 +89,9 @@ class Device(HyperglassModelWithId, extra="allow"):
     port: int = 22
     http: t.Optional[HttpConfiguration] = None
     platform: str
+    # Software version, such as `15.9(3)M6`. Directives use it to pick commands older
+    # releases accept.
+    os_version: t.Optional[str] = None
     structured_output: t.Optional[bool] = None
     # Run built-in queries in this VRF. Built-ins without a VRF form are not offered.
     vrf: t.Optional[str] = Field(None, pattern=r"^[A-Za-z0-9_.:-]{1,64}$")
@@ -356,6 +363,11 @@ class Device(HyperglassModelWithId, extra="allow"):
             device_directives += builtins.matching(*directive_options.builtins)
 
         return device_directives
+
+    @field_validator("os_version", mode="before")
+    def validate_os_version(cls, value: t.Any) -> t.Optional[str]:
+        """Accept an unquoted YAML number such as `15.9`."""
+        return value if value is None else str(value)
 
     @field_validator("driver")
     def validate_driver(cls: "Device", value: t.Optional[str], info: ValidationInfo) -> str:

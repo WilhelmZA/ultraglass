@@ -107,6 +107,46 @@ class Variable(HyperglassModel):
         return self.command + (shlex.quote(value) if quote else value)
 
 
+_VERSION_CLAUSE = re.compile(r"^\s*(<=|>=|==|<|>)\s*(\d+(?:\.\d+)*)\s*$")
+_VERSION_OPERATORS: t.Dict[str, t.Callable[[t.Tuple[int, ...], t.Tuple[int, ...]], bool]] = {
+    "<": lambda a, b: a < b,
+    "<=": lambda a, b: a <= b,
+    ">": lambda a, b: a > b,
+    ">=": lambda a, b: a >= b,
+    "==": lambda a, b: a == b,
+}
+
+
+def _version_tuple(version: str) -> t.Tuple[int, ...]:
+    """Read the leading dotted numbers of a vendor version, so `15.9(3)M6` is `(15, 9)`."""
+    match = re.match(r"\s*(\d+(?:\.\d+)*)", version)
+    if match is None:
+        raise ValueError(f"'{version}' does not start with a version number")
+    return tuple(int(part) for part in match.group(1).split("."))
+
+
+def validate_version_spec(spec: str) -> str:
+    """Check a comma-separated version filter such as `<16` or `>=12,<16`."""
+    for clause in spec.split(","):
+        if _VERSION_CLAUSE.match(clause) is None:
+            raise ValueError(f"Invalid version filter '{spec}'")
+    return spec
+
+
+def version_matches(version: t.Optional[str], spec: str) -> bool:
+    """Return whether a device's software version meets every clause of a filter."""
+    if not version:
+        return False
+    actual = _version_tuple(version)
+    for clause in spec.split(","):
+        operator, value = _VERSION_CLAUSE.match(clause).groups()
+        wanted = tuple(int(part) for part in value.split("."))
+        # Compare only as many parts as the filter names, so `15.9` equals `==15`.
+        if not _VERSION_OPERATORS[operator](actual[: len(wanted)], wanted):
+            return False
+    return True
+
+
 class Rule(HyperglassModel):
     """Base rule."""
 
@@ -117,8 +157,25 @@ class Rule(HyperglassModel):
     commands: t.List[str] = Field([], alias="command")
     # Commands for a device with a `vrf`, where `{vrf}` is the VRF name.
     vrf_commands: t.List[str] = Field([], alias="vrf_command")
+    # Commands for older software that rejects `commands`. A device whose `os_version` meets
+    # `fallback_os_version` runs them directly. Otherwise they run when the device rejects
+    # the matching command.
+    fallback_commands: t.List[str] = Field([], alias="fallback_command")
+    fallback_os_version: t.Optional[str] = None
 
-    @field_validator("commands", "vrf_commands", mode="before")
+    @field_validator("fallback_os_version")
+    def validate_fallback_os_version(cls, value: t.Optional[str]) -> t.Optional[str]:
+        """Check the version filter syntax."""
+        return value if value is None else validate_version_spec(value)
+
+    @model_validator(mode="after")
+    def validate_fallback(self) -> "Rule":
+        """Require fallback commands when a version filter selects them."""
+        if self.fallback_os_version and not self.fallback_commands:
+            raise ValueError("'fallback_os_version' needs 'fallback_command'")
+        return self
+
+    @field_validator("commands", "vrf_commands", "fallback_commands", mode="before")
     def validate_commands(cls, value: t.Union[str, t.List[str]]) -> t.List[str]:
         """Ensure commands is a list."""
         if isinstance(value, str):

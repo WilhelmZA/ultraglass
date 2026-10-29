@@ -35,6 +35,10 @@ ip bgp-community new-format
 
 Without it, colon-form community queries fail on the router, and route results show each community as one decimal number (`2437611822` instead of `37195:302`). Ultraglass does not change router configuration, so the router operator must apply the command. The lab's IOSv 15.9 and IOS XE 17.18 routers both set it.
 
+### Cisco IOS IPv6 traceroute
+
+Classic IOS releases before IOS XE 16, such as IOSv 15.9, accept no options after an IPv6 traceroute destination. Set `os_version` on these devices, for example `os_version: "15.9(3)M6"`. Ultraglass then sends `traceroute ipv6 <target>`, and the router traces from its routed source address instead of `source6`. Without `os_version`, Ultraglass sends the full command first, runs the destination-only form when the router rejects it, and logs a warning that names the device.
+
 ### Structured output
 
 Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured output by default. BIRD, Cisco IOS, OpenBGPD, VyOS, and Huawei VRPv8 require `structured_output: true` for structured BGP results.

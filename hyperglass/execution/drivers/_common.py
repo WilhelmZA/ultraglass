@@ -50,6 +50,7 @@ class Connection(ABC):
         self.query_target = self.query_data.query_target
         self._query = Construct(device=self.device, query=self.query_data)
         self.query = self._query.queries()
+        self.fallbacks = self._query.fallbacks
         self.plugin_manager = OutputPluginManager()
 
     @abstractmethod

@@ -18,6 +18,7 @@ from hyperglass.util import get_fmt_keys
 from hyperglass.constants import TRANSPORT_REST, LINUX_PLATFORMS, TARGET_FORMAT_SPACE
 from hyperglass.exceptions.public import InputInvalid
 from hyperglass.exceptions.private import ConfigError
+from hyperglass.models.directive import version_matches
 
 if t.TYPE_CHECKING:
     # Third Party
@@ -140,8 +141,12 @@ class Construct:
         return command.format(target=self.target, mask=mask, **attrs, **values)
 
     def queries(self):
-        """Return queries for each enabled AFI."""
+        """Return queries for each enabled AFI.
+
+        Also sets `fallbacks`: for each query, the command to run if the device rejects it.
+        """
         query = []
+        self.fallbacks: t.List[t.Optional[str]] = []
 
         rules = [r for r in self.directive.rules if r._passed is True]
         if len(rules) < 1:
@@ -151,14 +156,23 @@ class Construct:
             )
 
         vrf = getattr(self.device, "vrf", None)
+        os_version = getattr(self.device, "os_version", None)
         for rule in [r for r in self.directive.rules if r._passed is True]:
+            fallbacks = []
             if vrf is not None and rule.vrf_commands:
                 # The VRF name is validated on the device, so it is safe to insert as text.
                 commands = [command.replace("{vrf}", vrf) for command in rule.vrf_commands]
+            elif rule.fallback_os_version and version_matches(os_version, rule.fallback_os_version):
+                # The device's version is known to reject the primary commands.
+                commands = rule.fallback_commands
             else:
                 commands = rule.commands
-            for command in commands:
+                fallbacks = rule.fallback_commands
+            for index, command in enumerate(commands):
                 query.append(self.format(command))
+                self.fallbacks.append(
+                    self.format(fallbacks[index]) if index < len(fallbacks) else None
+                )
         self._log.bind(constructed_query=query).debug("Constructed query")
         return query
 

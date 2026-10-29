@@ -10,8 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+
+- Device `os_version`, and directive rule `fallback_command` with an optional `fallback_os_version` version filter. A rule's fallback runs directly on matching versions, or when the device rejects the primary command (#109).
+
 ### Fixed
 
+- Run Cisco IOS IPv6 traceroute on classic IOS. IOS releases before IOS XE 16 reject options after an IPv6 destination. A device with `os_version` below 16 now sends the destination-only command. A device without `os_version` falls back to it when the router rejects the full command, and a warning names the device (#109).
 - Read MikroTik BGP output on slow links. MikroTik devices now default to `global_delay_factor: 1` instead of 0.1. When a MikroTik BGP query returns no routes, each retry uses a higher delay factor (3, 6, then 10), and a warning names the device and the factor that worked. A device's `driver_config` value still overrides the default (#106).
 - Apply a device's `driver_config` delay factor on telnet platforms. The telnet default of 2 used to overwrite it (#106).
 - Warn at startup about each unknown device key, with the nearest valid key. A misspelt key such as `driver_args` was silently ignored (#107).
