@@ -5,6 +5,8 @@ https://github.com/ktbyers/netmiko
 
 # Standard Library
 import math
+import typing as t
+from contextvars import ContextVar
 from datetime import UTC, datetime
 from typing import Iterable
 
@@ -24,12 +26,46 @@ from hyperglass.exceptions.public import AuthError, DeviceTimeout, ResponseEmpty
 # Local
 from .ssh import SSHConnection
 
+if t.TYPE_CHECKING:
+    from hyperglass.models.config.devices import Device
+
+DEFAULT_DELAY_FACTOR = 0.1
+
+# RouterOS answers slowly. At 0.1 a high-latency link returns the prompt before
+# the route output, so the query parses to an empty table (#106).
+MIKROTIK_DELAY_FACTOR = 1
+
 netmiko_device_globals = {
     # Netmiko doesn't currently handle Mikrotik echo verification well,
     # see ktbyers/netmiko#1600
-    "mikrotik_routeros": {"global_cmd_verify": False},
-    "mikrotik_switchos": {"global_cmd_verify": False},
+    "mikrotik_routeros": {"global_cmd_verify": False, "global_delay_factor": MIKROTIK_DELAY_FACTOR},
+    "mikrotik_switchos": {"global_cmd_verify": False, "global_delay_factor": MIKROTIK_DELAY_FACTOR},
 }
+
+# Set by the API's empty-table retry to run one attempt at a higher delay factor.
+delay_factor_override: ContextVar[t.Optional[float]] = ContextVar(
+    "delay_factor_override", default=None
+)
+
+
+def device_driver_args(device: "Device") -> t.Dict[str, t.Any]:
+    """Return the netmiko arguments a device's config resolves to.
+
+    Defaults apply first and the device's `driver_config` last, so an operator's
+    value always wins.
+    """
+    args: t.Dict[str, t.Any] = {"global_delay_factor": DEFAULT_DELAY_FACTOR}
+    if "_telnet" in device.platform:
+        # Telnet devices with a low delay factor (default) tend to
+        # throw login errors.
+        args["global_delay_factor"] = 2
+    return {**args, **netmiko_device_globals.get(device.platform, {}), **device.driver_config}
+
+
+def device_delay_factor(device: "Device") -> float:
+    """Return the delay factor a device's config resolves to."""
+    return device_driver_args(device)["global_delay_factor"]
+
 
 netmiko_device_send_args = {
     "mikrotik_routeros": {"last_read": 5.0},
@@ -72,19 +108,19 @@ class NetmikoConnection(SSHConnection):
 
         _log.debug("Connecting to device")
 
-        global_args = netmiko_device_globals.get(self.device.platform, {})
-
         driver_kwargs = {
             "host": host or self.device._target,
             "port": port or self.device.port,
             "device_type": self.device.get_device_type(),
             "username": self.device.credential.username,
-            "global_delay_factor": 0.1,
             "timeout": math.floor(params.request_timeout * 1.25),
             "session_timeout": math.ceil(params.request_timeout - 1),
-            **global_args,
-            **self.device.driver_config,
+            **device_driver_args(self.device),
         }
+
+        override = delay_factor_override.get()
+        if override is not None:
+            driver_kwargs["global_delay_factor"] = override
 
         if params.logging.session_log:
             date = datetime.now(UTC).strftime("%Y%m%d")
@@ -96,11 +132,6 @@ class NetmikoConnection(SSHConnection):
         if not self.device.disable_paging:
             # Connect after replacing the paging and terminal width commands.
             driver_kwargs["auto_connect"] = False
-
-        if "_telnet" in self.device.platform:
-            # Telnet devices with a low delay factor (default) tend to
-            # throw login errors.
-            driver_kwargs["global_delay_factor"] = 2
 
         if self.device.credential._method == "password":
             # Use password auth if no key is defined.

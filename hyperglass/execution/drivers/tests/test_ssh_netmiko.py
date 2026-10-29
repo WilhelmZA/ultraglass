@@ -136,3 +136,55 @@ async def test_session_log_and_skipped_paging(monkeypatch, tmp_path):
     session._open.assert_called_once()
     assert session.disable_paging() == ""
     assert session.set_terminal_width() == ""
+
+
+def _device(platform, driver_config=None):
+    return SimpleNamespace(platform=platform, driver_config=driver_config or {})
+
+
+@pytest.mark.parametrize(
+    ("platform", "driver_config", "factor"),
+    [
+        ("cisco_ios", {}, 0.1),
+        ("mikrotik_routeros", {}, ssh_netmiko.MIKROTIK_DELAY_FACTOR),
+        ("mikrotik_switchos", {}, ssh_netmiko.MIKROTIK_DELAY_FACTOR),
+        ("mikrotik_routeros", {"global_delay_factor": 6}, 6),
+        ("cisco_ios_telnet", {}, 2),
+        # The telnet default must not overwrite an operator's value (#106).
+        ("cisco_ios_telnet", {"global_delay_factor": 5}, 5),
+    ],
+)
+def test_device_delay_factor_defaults_and_override(platform, driver_config, factor):
+    assert ssh_netmiko.device_delay_factor(_device(platform, driver_config)) == factor
+
+
+@pytest.mark.asyncio
+async def test_retry_override_sets_delay_factor(monkeypatch):
+    driver = object.__new__(ssh_netmiko.NetmikoConnection)
+    driver.device = SimpleNamespace(
+        name="lab",
+        platform="mikrotik_routeros",
+        proxy=None,
+        _target="127.0.0.1",
+        port=22,
+        credential=SimpleNamespace(username="lg", _method="key", key="/test/lab-key"),
+        driver_config={"global_delay_factor": 3},
+        disable_paging=True,
+        get_device_type=lambda: "mikrotik_routeros",
+    )
+    driver.query = ["routing route print detail without-paging where 192.0.2.1 in dst-address"]
+    session = Mock()
+    session.send_command.return_value = "route"
+    handler = Mock(return_value=session)
+    monkeypatch.setattr(ssh_netmiko, "ConnectHandler", handler)
+    monkeypatch.setattr(ssh_netmiko, "use_state", lambda _: PARAMS)
+
+    await driver.collect()
+    assert handler.call_args.kwargs["global_delay_factor"] == 3
+
+    token = ssh_netmiko.delay_factor_override.set(10)
+    try:
+        await driver.collect()
+    finally:
+        ssh_netmiko.delay_factor_override.reset(token)
+    assert handler.call_args.kwargs["global_delay_factor"] == 10

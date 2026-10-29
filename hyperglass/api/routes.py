@@ -25,6 +25,7 @@ from hyperglass.models.api import Query
 from hyperglass.models.data import OutputDataModel
 from hyperglass.util.typing import is_type
 from hyperglass.execution.main import execute
+from hyperglass.execution.drivers.ssh_netmiko import device_delay_factor, delay_factor_override
 from hyperglass.models.api.response import QueryResponse
 from hyperglass.models.config.params import Params, APIParams
 from hyperglass.models.config.devices import Devices, APIDevice
@@ -52,6 +53,15 @@ __all__ = (
 _MIKROTIK_PLATFORMS = ("mikrotik_routeros", "mikrotik_switchos", "mikrotik")
 _MIKROTIK_BGP_MAX_ATTEMPTS = 4
 _MIKROTIK_BGP_RETRY_DELAY = 10  # seconds
+# An empty table is also what a too-low delay factor returns on a slow link, so
+# each retry reads at the next step above the device's own factor (#106).
+_MIKROTIK_DELAY_FACTOR_STEPS = (3, 6, 10)
+
+
+def _delay_factor_steps(start: float) -> t.List[float]:
+    """Return the delay factor for each attempt, starting at the device's own."""
+    steps = [start, *(step for step in _MIKROTIK_DELAY_FACTOR_STEPS if step > start)]
+    return [steps[min(attempt, len(steps) - 1)] for attempt in range(_MIKROTIK_BGP_MAX_ATTEMPTS)]
 
 
 def _is_empty_bgp_table(output: t.Any) -> bool:
@@ -71,6 +81,7 @@ async def _execute_query(data: "Query") -> t.Any:
     is_bgp_query = "bgp_" in data.query_type or "bgp" in directive_name.lower()
     is_mikrotik_bgp = data.device.platform in _MIKROTIK_PLATFORMS and is_bgp_query
     max_attempts = _MIKROTIK_BGP_MAX_ATTEMPTS if is_mikrotik_bgp else 1
+    factors = _delay_factor_steps(device_delay_factor(data.device)) if is_mikrotik_bgp else []
 
     _log = log.bind(directive=data.query_type, device=data.device.name)
     if is_mikrotik_bgp:
@@ -81,15 +92,37 @@ async def _execute_query(data: "Query") -> t.Any:
     output = None
     for attempt in range(1, max_attempts + 1):
         if attempt > 1:
-            _log.bind(attempt=attempt, max_attempts=max_attempts).warning(
+            _log.bind(
+                attempt=attempt,
+                max_attempts=max_attempts,
+                global_delay_factor=factors[attempt - 1],
+            ).warning(
                 "MikroTik returned empty BGP table - retrying after {}s", _MIKROTIK_BGP_RETRY_DELAY
             )
             await asyncio.sleep(_MIKROTIK_BGP_RETRY_DELAY)
 
-        output = await execute(data)
+        token = delay_factor_override.set(factors[attempt - 1] if attempt > 1 else None)
+        try:
+            output = await execute(data)
+        finally:
+            delay_factor_override.reset(token)
 
-        if not (is_mikrotik_bgp and attempt < max_attempts and _is_empty_bgp_table(output)):
+        if not (is_mikrotik_bgp and _is_empty_bgp_table(output)):
+            if attempt > 1 and factors[attempt - 1] > factors[0]:
+                _log.warning(
+                    "{!r} returned no routes at global_delay_factor={} and returned routes at {}. "
+                    "Set driver_config: {{global_delay_factor: {}}} on this device in devices.yaml",
+                    data.device.name,
+                    factors[0],
+                    factors[attempt - 1],
+                    factors[attempt - 1],
+                )
             break
+
+    if is_mikrotik_bgp and _is_empty_bgp_table(output):
+        _log.bind(global_delay_factor=factors[-1]).info(
+            "MikroTik returned no routes at the highest delay factor"
+        )
 
     return output
 

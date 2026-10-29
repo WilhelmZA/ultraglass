@@ -19,12 +19,14 @@ Each configured device may have the following parameters:
 | `vrf` | String | | Run built-in queries in this VRF. Supported on Arista EOS, FRRouting, Huawei VRP, MikroTik RouterOS and VyOS. Built-in query types without a VRF form on the platform (ping and traceroute on FRRouting) are not offered for the device. To offer the same router in several VRFs, define it once per VRF with a different `name`. |
 | `directives`        | List of Strings |               | Enable referenced directives configured in the [directives config file](/configuration/directives.mdx).                                    |
 | `driver`            | String          | netmiko       | Specify which driver to use for this device. Currently, only `netmiko` is supported.                                                       |
-| `driver_config`     | Mapping         |               | Mapping/dict of options to pass to the connection driver.                                                                                  |
+| `driver_config`     | Mapping         |               | Mapping/dict of options to pass to the connection driver. Values here override the driver defaults. For example, `global_delay_factor` defaults to `0.1`, `1` on MikroTik and `2` on telnet platforms. Raise it for a router on a slow or high-latency link. A MikroTik BGP query that returns no routes is retried at delay factors 3, 6 and 10, and the log names the value that worked. |
 | `disable_paging`    | Boolean         | True          | Send the driver's paging and terminal width commands, such as `terminal length 0`, after login. Set to `false` when a login policy rejects them; directives must then disable paging themselves, for example with `\| no-more`. |
 | `attrs`             | Mapping         |               | Mapping/dict of variables, as referenced in configured directives.                                                                         |
 | `credential`        | Mapping         |               | Mapping/dict of a [credential configuration](/configuration/devices/credentials.mdx).                                                      |
 | `http`              | Mapping         |               | Mapping/dict of [HTTP client options](/configuration/devices/http-device.mdx), if this device is connected via HTTP.                       |
 | `proxy`             | Mapping         |               | Mapping/dict of [SSH proxy config](/configuration/devices/ssh-proxy.mdx) to use for this device's requests.                                |
+
+Ultraglass logs a warning at startup for each device key it does not recognise, for example `driver_args` instead of `driver_config`. The key is ignored, so check the warning for the suggested key.
 
 <Callout type="tip">
 

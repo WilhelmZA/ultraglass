@@ -8,6 +8,14 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- Read MikroTik BGP output on slow links. MikroTik devices now default to `global_delay_factor: 1` instead of 0.1. When a MikroTik BGP query returns no routes, each retry uses a higher delay factor (3, 6, then 10), and a warning names the device and the factor that worked. A device's `driver_config` value still overrides the default (#106).
+- Apply a device's `driver_config` delay factor on telnet platforms. The telnet default of 2 used to overwrite it (#106).
+- Warn at startup about each unknown device key, with the nearest valid key. A misspelt key such as `driver_args` was silently ignored (#107).
+
 ## 3.4.0-rc.2 - 2026-10-29
 
 **This is the second release candidate for 3.4.0.** It is published for testing and is not for production. It replaces 3.4.0-rc.1 and contains everything in it plus the fixes below.
