@@ -96,6 +96,13 @@ def test_version_filter_needs_fallback_commands():
         RuleWithIPv6(condition="::/0", command="x", fallback_os_version="<16")
 
 
+@pytest.mark.parametrize("version", ["Version 15.9", "IOS-XE 17.3", "v16.1", ""])
+def test_os_version_without_leading_number_is_rejected(state, version):
+    """A bad value fails at config load, not on every query (#109)."""
+    with pytest.raises(ValidationError, match="must start with a version number"):
+        Devices(_device("bad", version))
+
+
 @pytest.mark.parametrize("location", ["ios15", "number"])
 def test_matching_version_runs_fallback_directly(state, location):
     assert _construct(state, location) == ([BARE], [None])

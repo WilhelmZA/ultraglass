@@ -32,7 +32,7 @@ from ..main import MultiModel, HyperglassModel, HyperglassModelWithId
 from ..util import check_legacy_fields
 from .proxy import Proxy
 from ..fields import SupportedDriver
-from ..directive import Directive, Directives
+from ..directive import Directive, Directives, version_tuple
 from .credential import Credential
 from .http_client import HttpConfiguration
 
@@ -366,8 +366,17 @@ class Device(HyperglassModelWithId, extra="allow"):
 
     @field_validator("os_version", mode="before")
     def validate_os_version(cls, value: t.Any) -> t.Optional[str]:
-        """Accept an unquoted YAML number such as `15.9`."""
-        return value if value is None else str(value)
+        """Accept an unquoted YAML number such as `15.9` and require a leading version number."""
+        if value is None:
+            return None
+        value = str(value)
+        try:
+            version_tuple(value)
+        except ValueError as err:
+            raise ValueError(
+                f"os_version {value!r} must start with a version number, such as '15.9(3)M6'"
+            ) from err
+        return value
 
     @field_validator("driver")
     def validate_driver(cls: "Device", value: t.Optional[str], info: ValidationInfo) -> str:

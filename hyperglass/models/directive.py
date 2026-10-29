@@ -117,7 +117,7 @@ _VERSION_OPERATORS: t.Dict[str, t.Callable[[t.Tuple[int, ...], t.Tuple[int, ...]
 }
 
 
-def _version_tuple(version: str) -> t.Tuple[int, ...]:
+def version_tuple(version: str) -> t.Tuple[int, ...]:
     """Read the leading dotted numbers of a vendor version, so `15.9(3)M6` is `(15, 9)`."""
     match = re.match(r"\s*(\d+(?:\.\d+)*)", version)
     if match is None:
@@ -137,7 +137,7 @@ def version_matches(version: t.Optional[str], spec: str) -> bool:
     """Return whether a device's software version meets every clause of a filter."""
     if not version:
         return False
-    actual = _version_tuple(version)
+    actual = version_tuple(version)
     for clause in spec.split(","):
         operator, value = _VERSION_CLAUSE.match(clause).groups()
         wanted = tuple(int(part) for part in value.split("."))
