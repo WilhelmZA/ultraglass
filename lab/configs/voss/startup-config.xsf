@@ -1,0 +1,12 @@
+interface GigabitEthernet 1/1
+no auto-sense enable
+no shutdown
+exit
+vlan create 101 name LAB type port-mstprstp 0
+vlan members add 101 1/1
+interface vlan 101
+ip address 10.251.3.1 255.255.255.252
+exit
+interface GigabitEthernet 1/1
+default-vlan-id 101
+exit

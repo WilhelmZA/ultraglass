@@ -1,0 +1,65 @@
+# On-demand platform appliances. Start one with: sh platform.sh start <node>
+# Separate from the full-table topology so lab-up.sh cannot start these VMs.
+name: ultraglass-platforms
+
+mgmt:
+  network: ultraglass-mgmt
+  ipv4-subnet: 192.168.250.0/24
+  ipv6-subnet: fd00:250:ffff::/64
+
+topology:
+  nodes:
+    probe:
+      kind: linux
+      image: alpine:3.23
+      mgmt-ipv4: 192.168.250.30
+      cmd: sleep infinity
+      memory: 128MiB
+      exec:
+        - ip address add 10.251.1.0/31 dev eth1
+        - ip address add 10.251.2.0/31 dev eth2
+        - ip address add 10.251.3.2/30 dev eth3
+
+    sonic:
+      kind: sonic-vm
+      image: ultraglass-lab/sonic_sonic-vs:202505.1238524
+      mgmt-ipv4: 192.168.250.21
+      memory: 5GiB
+      cpu: 2
+      env:
+        QEMU_MEMORY: "4096"
+
+    exos:
+      kind: generic_vm
+      image: ultraglass-lab/extreme_exos:32.7.2.19
+      mgmt-ipv4: 192.168.250.22
+      memory: 2GiB
+      cpu: 2
+      binds:
+        - configs/exos/startup-config.xsf:/config/startup-config.xsf:ro
+      credentials:
+        username: admin
+        password: admin
+      env:
+        QEMU_CPU: core2duo
+        QEMU_MEMORY: "1024"
+
+    voss:
+      kind: generic_vm
+      image: ultraglass-lab/extreme_voss:9.4.0.0
+      mgmt-ipv4: 192.168.250.23
+      memory: 3GiB
+      cpu: 2
+      binds:
+        - configs/voss/startup-config.xsf:/config/startup-config.xsf:ro
+      credentials:
+        username: admin
+        password: Lab-Router9
+      env:
+        QEMU_CPU: core2duo
+        QEMU_MEMORY: "2048"
+
+  links:
+    - endpoints: ["probe:eth1", "sonic:eth1"]
+    - endpoints: ["probe:eth2", "exos:eth1"]
+    - endpoints: ["probe:eth3", "voss:eth1"]
