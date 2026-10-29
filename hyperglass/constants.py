@@ -49,6 +49,7 @@ OPT_IN_STRUCTURED_OUTPUT = (
     "tnsr",
     "extreme_exos",
     "extreme_vsp",
+    "sonic",
 )
 
 CONFIG_EXTENSIONS = ("py", "yaml", "yml", "json", "toml")
@@ -111,6 +112,7 @@ DRIVER_MAP = {
     "bird": "netmiko",
     "frr": "netmiko",
     "openbgpd": "netmiko",
+    "sonic": "netmiko",
     "vyos_1_3": "netmiko",
     "http": "hyperglass_http_client",
 }
@@ -124,4 +126,5 @@ LINUX_PLATFORMS = (
     "frr",
     "bird",
     "openbgpd",
+    "sonic",
 )

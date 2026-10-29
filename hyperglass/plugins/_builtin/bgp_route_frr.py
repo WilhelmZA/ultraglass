@@ -85,7 +85,7 @@ class BGPRoutePluginFrr(OutputPlugin):
     """Coerce a FRR route table in JSON format to a standard BGP Table structure."""
 
     _hyperglass_builtin: bool = PrivateAttr(True)
-    platforms: t.Sequence[str] = ("frr", "vyos")
+    platforms: t.Sequence[str] = ("frr", "vyos", "sonic")
     directives: t.Sequence[str] = (
         "__hyperglass_frr_bgp_route_table__",
         "__hyperglass_frr_bgp_aspath_table__",
@@ -93,6 +93,9 @@ class BGPRoutePluginFrr(OutputPlugin):
         "__hyperglass_vyos_bgp_route_table__",
         "__hyperglass_vyos_bgp_aspath_table__",
         "__hyperglass_vyos_bgp_community_table__",
+        "__hyperglass_sonic_bgp_route_table__",
+        "__hyperglass_sonic_bgp_aspath_table__",
+        "__hyperglass_sonic_bgp_community_table__",
     )
 
     def process(self, *, output: "OutputType", query: "Query") -> "OutputType":

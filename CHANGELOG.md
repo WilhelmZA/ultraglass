@@ -10,9 +10,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+
+- The `extreme_exos` platform, with built-in BGP route, AS path, community, ping and traceroute directives, `vr` forms, and opt-in structured BGP output parsed from `show bgp routes detail`. Route queries need a prefix. Community targets are sent in the `AS : value` form EXOS requires (#73).
+- The `extreme_vsp` platform for VOSS, with built-in BGP route, ping and traceroute directives and VRF forms. VOSS has no AS path or community filter, and its BGP output stays as text because it marks no best path. Route queries need a prefix (#73).
+- The `sonic` platform for community SONiC, which runs the FRRouting commands through `vtysh` in a Linux shell, with opt-in structured BGP and traceroute output from the FRR parsers (#76).
+
+### Fixed
+
+- Device errors that start with `%%`, as EXOS prints them, are recognised as command errors instead of being returned as results (#73).
+
 ### Changed
 
 - Each published image carries its release notes link in the `org.opencontainers.image.documentation` label, and every stable release refreshes the Docker Hub overview with the README, a release table and the latest release notes. The overview can also be refreshed by hand from the workflow's manual run.
+
 
 ## 3.4.0 - 2026-10-29
 

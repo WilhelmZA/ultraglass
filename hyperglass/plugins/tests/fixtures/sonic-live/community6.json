@@ -1,0 +1,9 @@
+{
+ "vrfId": 0,
+ "vrfName": "default",
+ "tableVersion": 2,
+ "routerId": "10.1.0.1",
+ "defaultLocPrf": 100,
+ "localAS": 65100,
+ "routes": { "2001:4860::/32": [{"valid":true,"bestpath":true,"selectionReason":"First path received","pathFrom":"external","prefix":"2001:4860::","prefixLen":32,"network":"2001:4860::/32","version":2,"weight":0,"peerId":"fd00:251:1::","path":"65000 3356 15169","origin":"incomplete","nexthops":[{"ip":"fd00:251:1::","hostname":"probe","afi":"ipv6","scope":"global","used":true}]}]
+ } , "totalRoutes": 1, "totalPaths": 2 }

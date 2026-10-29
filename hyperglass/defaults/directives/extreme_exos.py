@@ -23,6 +23,7 @@ __all__ = (
 NAME = "Extreme EXOS"
 PLATFORMS = ["extreme_exos"]
 
+
 # EXOS has no longest-match BGP lookup for an address; `network` needs the prefix.
 def _route_rules():
     return [
@@ -42,6 +43,7 @@ def _route_rules():
         ),
     ]
 
+
 def _aspath_rules():
     return [
         RuleWithPattern(
@@ -57,6 +59,7 @@ def _aspath_rules():
             ],
         )
     ]
+
 
 # The community target reaches the device as `AS : value`; see the EXOS formatter.
 def _community_rules():
@@ -74,6 +77,7 @@ def _community_rules():
             ],
         )
     ]
+
 
 ExtremeEXOS_BGPRoute = BuiltinDirective(
     id="__hyperglass_extreme_exos_bgp_route__",

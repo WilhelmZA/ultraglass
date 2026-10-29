@@ -295,8 +295,11 @@ class TraceroutePluginFrr(OutputPlugin):
     """Parse FRR traceroute output."""
 
     _hyperglass_builtin: bool = PrivateAttr(True)
-    platforms: t.Sequence[str] = ("frr",)
-    directives: t.Sequence[str] = ("__hyperglass_frr_traceroute__",)
+    platforms: t.Sequence[str] = ("frr", "sonic")
+    directives: t.Sequence[str] = (
+        "__hyperglass_frr_traceroute__",
+        "__hyperglass_sonic_traceroute__",
+    )
     common: bool = False
 
     def process(self, output: "OutputType", query: "Query") -> "OutputType":

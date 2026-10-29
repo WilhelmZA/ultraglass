@@ -131,6 +131,7 @@ class Construct:
             "bird",
             "frr",
             "openbgpd",
+            "sonic",
             "vyos",
             "vyos_1_3",
         ):

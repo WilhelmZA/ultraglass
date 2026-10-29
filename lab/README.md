@@ -105,16 +105,19 @@ Wait for VM container health before running queries. Check SSH access, the data 
 
 ### Companion BGP feed
 
-XRd, IOSv, Nexus and TiMOS have a separate GoBGP probe. It advertises `1.1.1.0/24` and `2606:4700::/44`, with AS path `65000 13335` and community `37195:302`. Ping and traceroute targets `1.1.1.1` and `2606:4700::1111` terminate on the probe. This feed does not connect to the main core.
+SONiC, EXOS, VOSS, XRd, IOSv, Nexus and TiMOS have a separate GoBGP probe. It advertises `1.1.1.0/24` and `2606:4700::/44`, with AS path `65000 13335` and community `37195:302`. Ping and traceroute targets `1.1.1.1` and `2606:4700::1111` terminate on the probe. This feed does not connect to the main core.
 
 | Appliance | Link number | Router AS |
 |---|---|---|
+| SONiC | 1 | 65100 |
+| EXOS | 2 | 65022 |
+| VOSS | 3 | 65023 |
 | XRd | 4 | 65024 |
 | IOSv | 5 | 65025 |
 | Nexus | 6 | 65026 |
 | TiMOS | 7 | 65027 |
 
-The appliance uses `10.251.N.1/31` and `fd00:251:N::1/127`. The probe uses `.0` and `::` on that link.
+The appliance uses `10.251.N.1/31` and `fd00:251:N::1/127`. The probe uses `.0` and `::` on that link. VOSS takes no IPv6 prefix longer than `/64`, so it uses `10.251.3.1/30` and `fd00:251:3::1/64`, and the probe uses `10.251.3.2` and `fd00:251:3::2`. IPv6 does not pass on the VOSS VM data port.
 
 Both probe sessions start disabled on each deployment. Enable them after enabling the appliance neighbors:
 
@@ -125,7 +128,7 @@ docker exec clab-ultraglass-platforms-probe gobgp neighbor "fd00:251:$N::1" enab
 docker exec clab-ultraglass-platforms-probe gobgp neighbor
 ```
 
-On IOSv, enter `router bgp 65025` and run `no neighbor 10.251.5.0 shutdown` and `no neighbor fd00:251:5:: shutdown`. On XRd and Nexus, enter each neighbor under its BGP process and run `no shutdown`. Commit XRd changes.
+EXOS and VOSS start with their neighbors enabled. On SONiC, run `sh fixture.sh` from `configs/sonic/` on the node after boot; it moves `Ethernet0` to the lab link and adds both neighbors to the default AS 65100. On IOSv, enter `router bgp 65025` and run `no neighbor 10.251.5.0 shutdown` and `no neighbor fd00:251:5:: shutdown`. On XRd and Nexus, enter each neighbor under its BGP process and run `no shutdown`. Commit XRd changes.
 
 After testing, disable both probe sessions and shut down both appliance neighbors. Save the appliance configuration, then run `sh platform.sh stop`.
 
@@ -139,7 +142,8 @@ After testing, disable both probe sessions and shut down both appliance neighbor
 - Huawei data ports require routed mode and committed configuration. `lab-up.sh` calls `scripts/configure-huawei.py` after boot.
 - EXOS and VOSS use the configured QEMU CPU setting. EXOS SSH can require `HostKeyAlgorithms=+ssh-rsa`.
 - VOSS uses a `/30` probe link. Its password must not contain the username.
-- SONiC data-port setup uses `sudo config interface ip add Ethernet0 10.251.1.1/31` followed by `sudo config interface startup Ethernet0`.
+- SONiC keeps its default configuration across deployments. `configs/sonic/fixture.sh` sets the data port and the fixture neighbors.
+- EXOS reads a community filter only as `AS : value`. Ultraglass converts the target.
 
 ## Management access
 

@@ -39,23 +39,39 @@ Without it, colon-form community queries fail on the router, and route results s
 
 Classic IOS releases before IOS XE 16, such as IOSv 15.9, accept no options after an IPv6 traceroute destination. Set `os_version` on these devices, for example `os_version: "15.9(3)M6"`. Ultraglass then sends `traceroute ipv6 <target>`, and the router traces from its routed source address instead of `source6`. Without `os_version`, Ultraglass sends the full command first, runs the destination-only form when the router rejects it, and logs a warning that names the device.
 
+### Extreme EXOS and VOSS
+
+Use `extreme_exos` for ExtremeXOS and `extreme_vsp` for VOSS (VSP and Fabric Engine). Both connect with their Netmiko drivers.
+
+- BGP route queries need a prefix, such as `1.1.1.0/24`, because neither platform has a longest-match BGP lookup for an address. EXOS matches the prefix exactly.
+- EXOS reads a community filter only as `AS : value`. Ultraglass converts a `65000:100` target and rejects large and extended communities.
+- VOSS has no BGP filter for an AS path or a community, so those query types are not offered. VOSS BGP results stay as text, because VOSS marks no best path.
+- Ultraglass enters privileged mode on VOSS, because VOSS runs traceroute only there.
+
+### SONiC
+
+Use `sonic` for community SONiC. It connects as a Linux shell and runs the FRRouting commands through `vtysh`, so the login user must be able to run `vtysh`. The default `admin` user can. Dell Enterprise SONiC uses a different CLI; configure it as `dell_sonic` with custom directives.
+
 ### Structured output
 
-Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured output by default. BIRD, Cisco IOS, OpenBGPD, VyOS, and Huawei VRPv8 require `structured_output: true` for structured BGP results.
+Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured output by default. BIRD, Cisco IOS, Extreme EXOS, OpenBGPD, SONiC, VyOS, and Huawei VRPv8 require `structured_output: true` for structured BGP results.
 
 | Platform | Structured BGP source | Limitations |
 | :------- | :-------------------- | :---------- |
 | BIRD | `show route all` text | Route age and router RPKI state remain unknown. |
 | Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Router RPKI state is read when the router validates origins. IPv6 route queries need a prefix, because IOS has no longest-match BGP lookup for an IPv6 address. |
+| Extreme EXOS | `show bgp routes detail` text | Route age, originator and router RPKI state remain unknown. EXOS does not print large communities. |
+| Extreme VOSS | Not supported | VOSS marks no best path, so BGP results stay as text. |
 | OpenBGPD | `bgpctl -j show rib detail` JSON | Router RPKI state comes from daemon origin validation. |
+| SONiC | FRR JSON through `vtysh` | AS-path and community summary results omit communities and route age. |
 | VyOS 1.4+ | FRR JSON through `vtysh` | AS-path and community summary results omit communities and route age. |
 | VyOS 1.3 | Not supported | Use text BGP results, even with structured traceroute enabled. |
 
-Structured traceroute also parses standard numbered CLI output from EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, and TNSR. Cisco, Nokia, TNSR, and both VyOS platform keys require `structured_output: true`. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation; remaining coverage is tracked in issues [#22](https://github.com/WilhelmZA/ultraglass/issues/22), [#25](https://github.com/WilhelmZA/ultraglass/issues/25), and [#35](https://github.com/WilhelmZA/ultraglass/issues/35).
+Structured traceroute also parses standard numbered CLI output from EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, TNSR, Extreme EXOS and VOSS, and SONiC. Cisco, Nokia, TNSR, Extreme, SONiC, and both VyOS platform keys require `structured_output: true`. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation; remaining coverage is tracked in issues [#22](https://github.com/WilhelmZA/ultraglass/issues/22), [#25](https://github.com/WilhelmZA/ultraglass/issues/25), and [#35](https://github.com/WilhelmZA/ultraglass/issues/35).
 
 ### VRF queries
 
-Built-in VRF forms support EOS, FRRouting, Huawei VRP, MikroTik RouterOS, and VyOS 1.4+. FRRouting exposes only BGP queries when `vrf` is set. See [device VRF configuration](/configuration/devices.mdx#vrf-queries).
+Built-in VRF forms support EOS, Extreme EXOS (`vr`) and VOSS, FRRouting, Huawei VRP, MikroTik RouterOS, SONiC, and VyOS 1.4+. FRRouting and SONiC expose only BGP queries when `vrf` is set. See [device VRF configuration](/configuration/devices.mdx#vrf-queries).
 
 ## Other Platforms
 

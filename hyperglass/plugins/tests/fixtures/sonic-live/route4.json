@@ -1,0 +1,61 @@
+{
+  "prefix":"1.1.1.0/24",
+  "version":2,
+  "advertisedTo":{
+    "10.251.1.0":{
+      "hostname":"probe"
+    }
+  },
+  "pathCount":1,
+  "paths":[
+    {
+      "aspath":{
+        "string":"65000 13335",
+        "segments":[
+          {
+            "type":"as-sequence",
+            "list":[
+              65000,
+              13335
+            ]
+          }
+        ],
+        "length":2
+      },
+      "origin":"incomplete",
+      "valid":true,
+      "version":2,
+      "bestpath":{
+        "overall":true,
+        "selectionReason":"First path received"
+      },
+      "community":{
+        "string":"37195:302",
+        "list":[
+          "37195:302"
+        ]
+      },
+      "lastUpdate":{
+        "epoch":1793275982,
+        "string":"Thu Oct 29 12:13:02 2026"
+      },
+      "fibInstalled":true,
+      "nexthops":[
+        {
+          "ip":"10.251.1.0",
+          "hostname":"probe",
+          "afi":"ipv4",
+          "metric":0,
+          "accessible":true,
+          "used":true
+        }
+      ],
+      "peer":{
+        "peerId":"10.251.1.0",
+        "routerId":"10.251.1.0",
+        "hostname":"probe",
+        "type":"external"
+      }
+    }
+  ]
+}

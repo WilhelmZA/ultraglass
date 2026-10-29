@@ -1,0 +1,9 @@
+{
+ "vrfId": 0,
+ "vrfName": "default",
+ "tableVersion": 3,
+ "routerId": "10.1.0.1",
+ "defaultLocPrf": 100,
+ "localAS": 65100,
+ "routes": { "8.8.8.0/24": [{"valid":true,"bestpath":true,"selectionReason":"First path received","pathFrom":"external","prefix":"8.8.8.0","prefixLen":24,"network":"8.8.8.0/24","version":3,"metric":50,"weight":0,"peerId":"10.251.1.0","path":"65000 3356 15169","origin":"incomplete","nexthops":[{"ip":"10.251.1.0","hostname":"probe","afi":"ipv4","used":true}]}]
+ } , "totalRoutes": 1, "totalPaths": 3 }
