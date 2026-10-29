@@ -56,6 +56,13 @@ fi
 if [ -f data/platforms/active.clab.yml ]; then
     sudo -n containerlab destroy --keep-mgmt-net -t data/platforms/active.clab.yml
 fi
+# Remove containers left by a run whose rendered topology is gone, for example a run
+# from another checkout. Deploy cannot reconcile a stopped appliance and fails.
+STALE=$(docker ps -aq --filter label=containerlab=ultraglass-platforms)
+if [ -n "$STALE" ]; then
+    # shellcheck disable=SC2086
+    docker rm -f $STALE >/dev/null
+fi
 # Containerlab 0.82 rejects --node-filter on an existing lab. Render a two-node
 # topology instead, preserving the management network shared with the main lab.
 mkdir -p data/platforms
