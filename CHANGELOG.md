@@ -15,6 +15,7 @@ This section describes merged changes on `main` for the next release candidate, 
 ### Fixed
 
 - Keep an open AS path tooltip open when async enrichment arrives, and show the organisation name in it. The BGP and traceroute tables passed an inline cell renderer, so every enrichment update remounted all cells (#86).
+- Check a VRF device's attributes against the commands it runs in the VRF. FRR VRF devices no longer need `source4` and `source6`, and attributes that only VRF commands reference are now checked (#95).
 
 ## 3.4.0-rc.1 - 2026-10-29
 
