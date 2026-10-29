@@ -36,6 +36,8 @@ CiscoNXOS_BGPRoute = BuiltinDirective(
         RuleWithIPv6(
             condition="::/0",
             action="permit",
+            # NX-OS has no longest-match BGP lookup for an IPv6 address; it needs the prefix.
+            le=127,
             command="show bgp ipv6 unicast {target}",
         ),
     ],
@@ -131,6 +133,8 @@ CiscoNXOS_BGPRouteTable = BuiltinDirective(
         RuleWithIPv6(
             condition="::/0",
             action="permit",
+            # NX-OS has no longest-match BGP lookup for an IPv6 address; it needs the prefix.
+            le=127,
             command="show bgp ipv6 unicast {target}",
         ),
     ],

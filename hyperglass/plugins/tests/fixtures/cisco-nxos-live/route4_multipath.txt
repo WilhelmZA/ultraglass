@@ -1,0 +1,20 @@
+BGP routing table information for VRF default, address family IPv4 Unicast
+BGP routing table entry for 1.1.1.0/24, version 6
+Paths: (2 available, best #2)
+Flags: (0x8000001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
+
+  Path type: external, path is valid, not best reason: AS Path, no labeled nexthop
+  AS-Path: 65001 6939 13335 , path sourced external to AS
+    10.251.6.0 (metric 0) from 10.253.6.1 (10.253.6.1)
+      Origin incomplete, MED 10, localpref 100, weight 0
+      Community: 6939:1000 
+
+  Advertised path-id 1
+  Path type: external, path is valid, is best path, no labeled nexthop, in rib
+  AS-Path: 65000 13335 , path sourced external to AS
+    10.251.6.0 (metric 0) from 10.251.6.0 (10.251.6.0)
+      Origin incomplete, MED not set, localpref 100, weight 0
+      Community: 37195:302 
+
+  Path-id 1 advertised to peers:
+    10.253.6.1

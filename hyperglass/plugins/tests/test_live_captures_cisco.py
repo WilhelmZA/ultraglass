@@ -148,3 +148,61 @@ def test_xr_command_error():
     assert command_error(text)
     with pytest.raises(ParsingError):
         parse_cisco_ios([text], "cisco_xr")
+
+
+def _nxos(name):
+    return (FIXTURES / "cisco-nxos-live" / f"{name}.txt").read_text()
+
+
+def test_nxos_route_best_path_listed_second():
+    """NX-OS lists the paths in arrival order, so the best path can come last."""
+    table = parse_cisco_ios([_nxos("route4_multipath")], "cisco_nxos")
+    alternate, best = table.routes
+    assert best.prefix == alternate.prefix == "1.1.1.0/24"
+    assert (best.active, alternate.active) == (True, False)
+    assert best.as_path == [65000, 13335]
+    assert alternate.as_path == [65001, 6939, 13335]
+    assert (best.peer_rid, alternate.peer_rid) == ("10.251.6.0", "10.253.6.1")
+    assert (best.med, alternate.med) == (0, 10)
+    assert (best.communities, alternate.communities) == (["37195:302"], ["6939:1000"])
+
+
+def test_nxos_route_med():
+    best, alternate = parse_cisco_ios([_nxos("route4_med")], "cisco_nxos").routes
+    assert (best.active, alternate.active) == (True, False)
+    assert (best.med, alternate.med) == (0, 50)
+    assert alternate.communities == ["15169:1", "65000:100"]
+
+
+@pytest.mark.parametrize("kind", ("aspath", "community"))
+def test_nxos_summary_best_and_alternate_path(kind):
+    table = parse_cisco_ios([_nxos(f"{kind}4_multipath")], "cisco_nxos")
+    best, alternate = table.routes
+    assert best.prefix == alternate.prefix == "8.8.8.0/24"
+    assert (best.active, alternate.active) == (True, False)
+    assert best.as_path == [65001, 1299, 15169]
+    assert alternate.as_path == [65000, 3356, 15169]
+    assert (best.med, alternate.med) == (0, 50)
+
+
+@pytest.mark.parametrize("name", ("route4_empty", "community4_empty"))
+def test_nxos_not_found(name):
+    assert not command_error(_nxos(name))
+    assert parse_cisco_ios([_nxos(name)], "cisco_nxos") is None
+
+
+@pytest.mark.parametrize("name", ("bad", "route6_host"))
+def test_nxos_command_error(name):
+    """NX-OS rejects a bare IPv6 address, so the directive requires a prefix."""
+    assert command_error(_nxos(name))
+    with pytest.raises(ParsingError):
+        parse_cisco_ios([_nxos(name)], "cisco_nxos")
+
+
+def test_nxos_summary_long_network():
+    """A network wider than its column pushes the rest of the NX-OS line right."""
+    (route,) = parse_cisco_ios([_nxos("aspath6_long_network")], "cisco_nxos").routes
+    assert route.prefix == "2606:4700:4700::/48"
+    assert route.next_hop == "fd00:251:6::"
+    assert route.as_path == [65000, 64999, 13335]
+    assert route.weight == 0

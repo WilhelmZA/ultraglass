@@ -143,12 +143,67 @@ def parse_detail(output: str) -> t.List[t.Dict[str, t.Any]]:
     return [_finish(route) for route in routes]
 
 
+def _apply_table_columns(route: t.Dict[str, t.Any], line: str, col: t.Dict[str, int]) -> None:
+    """Read the next hop, metrics and AS path from one summary-table line."""
+    metric_start = col["next_hop"]
+    if len(line) > metric_start and not line[metric_start].isspace():
+        route["next_hop"] = line[metric_start:].split()[0]
+        metric_start += len(route["next_hop"])
+    if len(line) <= col["path"]:
+        return
+    metric = line[metric_start : col["metric"]].strip()
+    locprf = line[col["metric"] : col["locprf"]].strip()
+    weight = line[col["locprf"] : col["weight"]].strip()
+    route["med"] = int(metric) if metric else 0
+    route["local_preference"] = int(locprf) if locprf else 100
+    route["weight"] = int(weight) if weight else 0
+    # The last path token is the origin code.
+    route["as_path"] = parse_as_path(line[col["path"] :].rsplit(maxsplit=1)[0])
+
+
+def _start_path(
+    line: str,
+    status: str,
+    col: t.Dict[str, int],
+    layout: t.Dict[str, t.Any],
+    prefix: str,
+) -> t.Tuple[t.Dict[str, t.Any], str, t.Optional[t.Dict[str, int]]]:
+    """Start a summary-table path at a status code.
+
+    Return the route, its prefix and the columns for the rest of the line, or no columns
+    when the path continues on the next line. Further paths of a prefix leave the network
+    blank.
+    """
+    network = line[col["network"] :].split()
+    has_network = bool(network) and not line[col["network"]].isspace()
+    if has_network:
+        prefix = _classful(network[0])
+    route = _new_route(prefix)
+    route["active"] = ">" in status
+    if layout["rpki"]:
+        route["rpki_state"] = next((RPKI_STATES[c] for c in status if c in "VIN"), 3)
+    end = col["network"] + len(network[0]) if has_network else 0
+    if end < col["next_hop"]:
+        return route, prefix, col
+    if len(network) == 1:
+        # IOS moves the rest of a long network's path onto the next line.
+        return route, prefix, None
+    # NX-OS keeps it on one line and pushes every later column right.
+    overflow = end + 1 - col["next_hop"]
+    return (
+        route,
+        prefix,
+        {name: index if name == "network" else index + overflow for name, index in col.items()},
+    )
+
+
 def parse_table(output: str, platform: str = "cisco_ios") -> t.List[t.Dict[str, t.Any]]:
     """Convert the `show bgp <afi> unicast` summary table to standard route fields.
 
     The summary table carries no communities. IOS moves a long network onto its own
-    line and continues the path on the next line, which aligns with the header. A line
-    that starts with a status code sits one character right of the header on IOS.
+    line and continues the path on the next line, which aligns with the header. NX-OS
+    keeps the line and shifts the later columns right. A line that starts with a status
+    code sits one character right of the header on IOS.
     """
     layout = TABLE_LAYOUT[platform]
     routes = []
@@ -174,35 +229,12 @@ def parse_table(output: str, platform: str = "cisco_ios") -> t.List[t.Dict[str, 
         shift = layout["shift"] if status.strip() else 0
         col = {name: index + shift for name, index in columns.items()}
         if status.strip():
-            # A status code starts a path. Further paths of a prefix leave the network blank.
-            network = line[col["network"] :].split()
-            has_network = bool(network) and not line[col["network"]].isspace()
-            if has_network:
-                prefix = _classful(network[0])
-            route = _new_route(prefix)
-            route["active"] = ">" in status
-            if layout["rpki"]:
-                route["rpki_state"] = next((RPKI_STATES[c] for c in status if c in "VIN"), 3)
+            route, prefix, col = _start_path(line, status, col, layout, prefix)
             routes.append(route)
-            if has_network and col["network"] + len(network[0]) >= col["next_hop"]:
-                # A long network takes the whole line.
+            if col is None:
                 continue
-        if route is None:
-            continue
-        metric_start = col["next_hop"]
-        if len(line) > metric_start and not line[metric_start].isspace():
-            route["next_hop"] = line[metric_start:].split()[0]
-            metric_start += len(route["next_hop"])
-        if len(line) <= col["path"]:
-            continue
-        metric = line[metric_start : col["metric"]].strip()
-        locprf = line[col["metric"] : col["locprf"]].strip()
-        weight = line[col["locprf"] : col["weight"]].strip()
-        route["med"] = int(metric) if metric else 0
-        route["local_preference"] = int(locprf) if locprf else 100
-        route["weight"] = int(weight) if weight else 0
-        # The last path token is the origin code.
-        route["as_path"] = parse_as_path(line[col["path"] :].rsplit(maxsplit=1)[0])
+        if route is not None:
+            _apply_table_columns(route, line, col)
     return [_finish(route) for route in routes]
 
 
