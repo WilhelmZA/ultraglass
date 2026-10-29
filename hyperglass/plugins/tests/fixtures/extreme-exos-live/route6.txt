@@ -1,0 +1,13 @@
+Routes:
+Route: 2606:4700::/44, Peer fd00:251:2::, BEST, Active
+Origin Incomplete, Next-Hop fd00:251:2::, LPref 100, MED 0     
+Weight 1, 
+As-PATH: 65000 13335 
+Community: 37195:302 
+
+
+BGP Route Statistics Matching the Display Criteria
+  Feasible Routes   : 1
+  Active Routes     : 1
+  Rejected Routes   : 0
+  Unfeasible Routes : 0

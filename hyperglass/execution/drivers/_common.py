@@ -14,7 +14,7 @@ from hyperglass.exceptions.public import DeviceCommandError
 from ._construct import Construct
 
 COMMAND_ERROR = re.compile(
-    r"^(?:%\s*(?:Invalid input|Unknown command|Error|Permission denied)"
+    r"^(?:%%?\s*(?:Invalid input|Unknown command|Unrecognized command|Error|Permission denied)"
     r"|(?:birdc?:\s*)?syntax error\b"
     r"|vtysh_connect\([^\n]*Permission denied"
     r"|(?:[\w/.-]+:\s*)?(?:Permission denied|Operation not permitted)\s*$"

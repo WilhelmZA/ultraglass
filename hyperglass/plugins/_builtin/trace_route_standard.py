@@ -22,6 +22,7 @@ PLATFORMS = (
     "vyos_1_3",
     "tnsr",
     "nokia_sros",
+    "extreme_exos",
 )
 
 

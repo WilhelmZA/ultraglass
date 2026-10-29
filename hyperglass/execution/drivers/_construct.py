@@ -210,6 +210,8 @@ class Formatter:
                 return self._with_formatter(self._mikrotik_bgp_pattern)
         if self.platform == "openbgpd" and self.query_type == "bgp_aspath":
             return self._with_formatter(self._openbgpd_bgp_aspath)
+        if self.platform == "extreme_exos" and self.query_type == "bgp_community":
+            return self._with_formatter(self._exos_bgp_community)
         return self._with_formatter(self._default)
 
     def _default(self, target: str) -> str:
@@ -283,6 +285,12 @@ class Formatter:
         else:
             target = "(^|,)" + target.replace(".", r"\.") + "(,|$)"
         return target.replace("$", r"\$")
+
+    def _exos_bgp_community(self, target: str) -> str:
+        """EXOS reads a standard community only as separate `AS : value` tokens."""
+        if not re.fullmatch(r"[0-9]+:[0-9]+", target):
+            raise InputInvalid(target=target, error="EXOS requires a standard ASN:value community")
+        return target.replace(":", " : ")
 
     def _openbgpd_bgp_aspath(self, target: str) -> str:
         """Extract the ASN after a directive rule selects the matching AS operator."""

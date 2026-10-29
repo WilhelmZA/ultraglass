@@ -1,0 +1,20 @@
+# Small, isolated BGP fixture. No connection to the full-table core.
+[global.config]
+  as = 65000
+  router-id = "10.251.3.2"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.251.3.1"
+    peer-as = 65023
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:251:3::1"
+    peer-as = 65023
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"

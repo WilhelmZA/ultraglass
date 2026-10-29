@@ -3,3 +3,14 @@ configure vlan Default delete ports 1
 configure vlan LAB add ports 1 untagged
 configure vlan LAB ipaddress 10.251.2.1 255.255.255.254
 enable ipforwarding vlan LAB
+configure vlan LAB ipaddress fd00:251:2::1/127
+enable ipforwarding ipv6 vlan LAB
+configure bgp AS-number 65022
+configure bgp routerid 10.251.2.1
+enable bgp community format AS-number
+create bgp neighbor 10.251.2.0 remote-AS-number 65000
+create bgp neighbor fd00:251:2:: remote-AS-number 65000
+disable bgp neighbor fd00:251:2:: capability ipv4-unicast
+enable bgp neighbor fd00:251:2:: capability ipv6-unicast
+enable bgp neighbor all
+enable bgp

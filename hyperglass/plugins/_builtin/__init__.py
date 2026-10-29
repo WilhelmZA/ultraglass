@@ -4,6 +4,7 @@
 from .bgp_route_frr import BGPRoutePluginFrr
 from .bgp_route_bird import BGPRoutePluginBird
 from .bgp_route_cisco_ios import BGPRoutePluginCiscoIOS
+from .bgp_route_extreme_exos import BGPRoutePluginExtremeEXOS
 from .remove_command import RemoveCommand
 from .bgp_route_arista import BGPRoutePluginArista
 from .bgp_route_huawei import BGPRoutePluginHuawei
@@ -23,6 +24,7 @@ __all__ = (
     "BGPRoutePluginArista",
     "BGPRoutePluginBird",
     "BGPRoutePluginCiscoIOS",
+    "BGPRoutePluginExtremeEXOS",
     "BGPRoutePluginFrr",
     "BGPRoutePluginJuniper",
     "BGPRoutePluginOpenBGPD",

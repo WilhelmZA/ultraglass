@@ -1,0 +1,8 @@
+traceroute to 1.1.1.1, 30 hops max
+ 1  1.1.1.1                                      0 ms        0 ms        0 ms
+
+--- Packet Response/Error Flags ---
+ (*) No response, (!N) ICMP network unreachable, (!H) ICMP host unreachable,
+ (!P) ICMP protocol unreachable, (!F) ICMP fragmentation needed,
+ (!S) ICMP source route failed, (!u) Transmit error, network unreachable,
+ (!f) Transmit error, fragmentation needed, (!t) General transmit error

@@ -47,6 +47,7 @@ OPT_IN_STRUCTURED_OUTPUT = (
     "vyos",
     "vyos_1_3",
     "tnsr",
+    "extreme_exos",
 )
 
 CONFIG_EXTENSIONS = ("py", "yaml", "yml", "json", "toml")

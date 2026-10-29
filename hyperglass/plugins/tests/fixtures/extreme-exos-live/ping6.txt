@@ -1,0 +1,10 @@
+Ping(ICMP6) 2606:4700::1111: 5 packets, 8 data bytes, interval 1 second(s).
+16 bytes from 2606:4700::1111: icmp_seq=0 ttl=64 time=0.327 ms
+16 bytes from 2606:4700::1111: icmp_seq=1 ttl=64 time=0.299 ms
+16 bytes from 2606:4700::1111: icmp_seq=2 ttl=64 time=0.323 ms
+16 bytes from 2606:4700::1111: icmp_seq=3 ttl=64 time=0.413 ms
+16 bytes from 2606:4700::1111: icmp_seq=4 ttl=64 time=0.360 ms
+
+--- 2606:4700::1111 ping statistics ---
+5 packets transmitted, 5 packets received, 0% loss
+round-trip min/avg/max = 0/0/0 ms

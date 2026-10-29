@@ -1,0 +1,2 @@
+%% Unrecognized command:  "show bgp routes detail ipv4-unicast nonsense"
+%% Invalid input detected.

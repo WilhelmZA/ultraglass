@@ -1,0 +1,20 @@
+Routes:
+Route: 1.1.1.0/24, Peer 10.251.2.0, BEST, Active
+Origin Incomplete, Next-Hop 10.251.2.0, LPref 100, MED 0     
+Weight 1, 
+As-PATH: 65000 13335 
+Community: 37195:302 
+
+
+Route: 1.1.1.0/24, Peer 10.252.2.0
+Origin Incomplete, Next-Hop 10.252.2.0, LPref 100, MED 10    
+Weight 1, 
+As-PATH: 65001 6939 13335 
+Community: 6939:1000 
+
+
+BGP Route Statistics Matching the Display Criteria
+  Feasible Routes   : 2
+  Active Routes     : 1
+  Rejected Routes   : 0
+  Unfeasible Routes : 0
