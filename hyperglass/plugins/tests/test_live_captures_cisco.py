@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 
 # Project
+from hyperglass.exceptions.private import ParsingError
+from hyperglass.execution.drivers._common import command_error
 from hyperglass.plugins._builtin.bgp_route_cisco_ios import parse_cisco_ios
 from hyperglass.plugins._builtin.trace_route_standard import parse_standard_traceroute
 
@@ -104,3 +106,45 @@ def test_xr_nxos_summary_tables(platform, fixture, kind):
         assert route.active is True
         assert route.communities == []
         assert route.rpki_state == 3
+
+
+def test_xr_route_best_and_alternate_path():
+    table = parse_cisco_ios(
+        [(FIXTURES / "cisco-xr-live" / "route4_multipath.txt").read_text()], "cisco_xr"
+    )
+    best, alternate = table.routes
+    assert best.prefix == alternate.prefix == "1.1.1.0/24"
+    assert (best.active, alternate.active) == (True, False)
+    assert best.as_path == [65000, 13335]
+    assert alternate.as_path == [65001, 6939, 13335]
+    assert (best.peer_rid, alternate.peer_rid) == ("10.251.4.0", "10.253.4.1")
+    assert alternate.source_rid == "10.253.4.1"
+    assert (best.med, alternate.med) == (0, 10)
+    assert (best.communities, alternate.communities) == (["37195:302"], ["6939:1000"])
+
+
+@pytest.mark.parametrize("kind", ("aspath", "community"))
+def test_xr_summary_best_and_alternate_path(kind):
+    table = parse_cisco_ios(
+        [(FIXTURES / "cisco-xr-live" / f"{kind}4_multipath.txt").read_text()], "cisco_xr"
+    )
+    best, alternate = table.routes
+    assert best.prefix == alternate.prefix == "8.8.8.0/24"
+    assert (best.active, alternate.active) == (True, False)
+    assert best.as_path == [65000, 3356, 15169]
+    assert alternate.as_path == [65001, 1299, 15169]
+    assert (best.med, alternate.med) == (50, 0)
+
+
+@pytest.mark.parametrize("name", ("route4_empty", "route6_empty", "community4_empty"))
+def test_xr_not_found(name):
+    text = (FIXTURES / "cisco-xr-live" / f"{name}.txt").read_text()
+    assert not command_error(text)
+    assert parse_cisco_ios([text], "cisco_xr") is None
+
+
+def test_xr_command_error():
+    text = (FIXTURES / "cisco-xr-live" / "bad.txt").read_text()
+    assert command_error(text)
+    with pytest.raises(ParsingError):
+        parse_cisco_ios([text], "cisco_xr")

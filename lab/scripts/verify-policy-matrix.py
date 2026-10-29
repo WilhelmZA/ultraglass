@@ -23,8 +23,8 @@ from pathlib import Path
 TEST_PREFIXES = {"1.0.0.0/24", "2606:4700:4700::/48"}
 # Device output that carries no communities, so the policy has nothing to act on.
 # EOS `show ip bgp regexp`, Huawei brief AS-path output, FRR `regexp` JSON (FRR, VyOS)
-# and the Cisco IOS summary table omit them.
-CISCO_IOS = {"lab-iol", "lab-ioll2"}
+# and the Cisco IOS, IOS-XR and NX-OS summary tables omit them.
+CISCO_IOS = {"lab-iol", "lab-ioll2", "lab-xrd", "lab-nexus"}
 NO_ASPATH_COMMUNITIES = {"lab-arista", "lab-huawei", "lab-frr", "lab-vyos", *CISCO_IOS}
 NO_COMMUNITY_COMMUNITIES = CISCO_IOS
 # Huawei brief community output omits the AS path, so RPKI and organisations cannot apply.

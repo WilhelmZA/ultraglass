@@ -1,0 +1,20 @@
+Thu Oct 29 14:04:31.012 UTC
+BGP router identifier 10.251.4.1, local AS number 65024
+BGP generic scan interval 60 secs
+Non-stop routing is enabled
+BGP table state: Active
+Table ID: 0xe0000000   RD version: 8
+BGP table nexthop route policy: 
+BGP main routing table version 8
+BGP NSR Initial initsync version 7 (Reached)
+BGP NSR/ISSU Sync-Group versions 0/0
+BGP scan interval 60 secs
+
+Status codes: s suppressed, d damped, h history, * valid, > best
+              i - internal, r RIB-failure, S stale, N Nexthop-discard
+Origin codes: i - IGP, e - EGP, ? - incomplete
+   Network            Next Hop            Metric LocPrf Weight Path
+*> 8.8.8.0/24         10.251.4.0              50             0 65000 3356 15169 ? N
+*                     10.251.4.0                             0 65001 1299 15169 ? N
+
+Processed 1 prefixes, 2 paths

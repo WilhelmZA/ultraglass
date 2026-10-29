@@ -31,8 +31,9 @@ TABLE_LAYOUT = {
     "cisco_xr": {"shift": 0, "rpki": False},
     "cisco_nxos": {"shift": 0, "rpki": False},
 }
-# An empty result is a normal answer; any other `%` line is a command error.
-NOT_FOUND = "% Network not in table"
+# An empty result is a normal answer; any other `%` line is a command error. IOS-XR
+# prints the message with `%%`.
+NOT_FOUND = ("% Network not in table", "%% Network not in table")
 
 
 def _new_route(prefix: str) -> t.Dict[str, t.Any]:
@@ -209,7 +210,7 @@ def parse_cisco_ios_routes(output: str, platform: str = "cisco_ios") -> t.List[t
     """Convert one Cisco `show bgp` response, in either form, to standard route fields."""
     for line in output.splitlines():
         stripped = line.strip()
-        if stripped.startswith("%") and stripped != NOT_FOUND:
+        if stripped.startswith("%") and stripped not in NOT_FOUND:
             raise ValueError(f"Cisco command error: {stripped}")
     if "BGP routing table entry for" in output:
         return parse_detail(output)
