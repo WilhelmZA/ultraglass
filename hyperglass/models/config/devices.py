@@ -22,7 +22,6 @@ from hyperglass.constants import (
     SCRAPE_HELPERS,
     LINUX_PLATFORMS,
     NETMIKO_DEVICE_TYPES,
-    OPT_IN_STRUCTURED_OUTPUT,
     SUPPORTED_STRUCTURED_OUTPUT,
 )
 from hyperglass.exceptions.private import ConfigError, UnsupportedDevice
@@ -292,13 +291,10 @@ class Device(HyperglassModelWithId, extra="allow"):
 
     @field_validator("structured_output", mode="before")
     def validate_structured_output(cls, value: bool, info: ValidationInfo) -> bool:
-        """Validate structured output is supported on the device & set a default."""
+        """Validate structured output is supported on the device; default to text."""
 
         if value is True:
-            if info.data.get("platform") not in (
-                *SUPPORTED_STRUCTURED_OUTPUT,
-                *OPT_IN_STRUCTURED_OUTPUT,
-            ):
+            if info.data.get("platform") not in SUPPORTED_STRUCTURED_OUTPUT:
                 raise ConfigError(
                     "The 'structured_output' field is set to 'true' on device '{d}' with "
                     "platform '{p}', which does not support structured output",
@@ -306,11 +302,7 @@ class Device(HyperglassModelWithId, extra="allow"):
                     p=info.data.get("platform"),
                 )
             return value
-        if value is None and info.data.get("platform") in SUPPORTED_STRUCTURED_OUTPUT:
-            value = True
-        else:
-            value = False
-        return value
+        return False
 
     @field_validator("directives", mode="before")
     def validate_directives(

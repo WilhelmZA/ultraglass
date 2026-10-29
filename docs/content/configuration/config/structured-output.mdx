@@ -2,17 +2,17 @@ import { Callout } from "nextra/components";
 
 ## Structured
 
-Devices that return structured or easily parsed data can display their response in a table, or as JSON through the REST API. The following platforms currently have structured data support in Ultraglass:
+Devices that return structured or easily parsed data can display their response in a table, or as JSON through the REST API. Structured output is opt-in: set `structured_output: true` on each device. The following platforms currently have structured data support in Ultraglass:
 
 -   Arista EOS
--   Cisco IOS and IOS XE (opt-in with `structured_output: true`; parses `show bgp` text. AS path and community results come from the summary table, which carries no communities or route age)
--   BIRD (opt-in with `structured_output: true`; parses `show route all` text. BIRD prints no route age or RPKI state, so both show as unknown)
+-   Cisco IOS and IOS XE (parses `show bgp` text. AS path and community results come from the summary table, which carries no communities or route age)
+-   BIRD (parses `show route all` text. BIRD prints no route age or RPKI state, so both show as unknown)
 -   FRRouting
 -   Huawei VRP
 -   Juniper Junos
 -   Mikrotik RouterOS/SwitchOS
--   OpenBGPD (opt-in with `structured_output: true`; BGP tables use `bgpctl -j show rib detail`, and RPKI state comes from the daemon's origin validation)
--   VyOS (opt-in with `structured_output: true`; BGP tables read FRR JSON through `vtysh`. AS path and community results carry no communities or route age, because FRR summary output omits them)
+-   OpenBGPD (BGP tables use `bgpctl -j show rib detail`, and RPKI state comes from the daemon's origin validation)
+-   VyOS (BGP tables read FRR JSON through `vtysh`. AS path and community results carry no communities or route age, because FRR summary output omits them)
 
 When structured output is available, Ultraglass can check the RPKI state of each returned BGP prefix using one of two methods:
 
@@ -179,7 +179,7 @@ structured:
 
 #### Complete Structured Traceroute Setup
 
-Set `structured_output: true` on BIRD, OpenBGPD, VyOS, TNSR, Cisco, and Nokia devices to enable the additional parser. Their existing text-output defaults remain in place. Huawei VRPv8 also requires this explicit setting for structured BGP and traceroute output. Huawei VRP defaults to structured output; set `structured_output: false` to retain text output.
+Set `structured_output: true` on each device to enable its structured BGP and traceroute parsers. A device without it returns text.
 
 ```yaml filename="config.yaml" copy {2-12}
 structured:

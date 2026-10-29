@@ -8,6 +8,12 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+
+- Structured output is opt-in on every platform. Arista EOS, FRRouting, Huawei VRP, Juniper Junos, MikroTik RouterOS and SwitchOS devices without `structured_output` now return text. Set `structured_output: true` on those devices to keep the table view (#125).
+
 ## 3.5.0-rc.1 - 2026-10-29
 
 **This is a release candidate for 3.5.0.** It is published for testing and is not for production. Run it in a lab or staging deployment, not in front of users.

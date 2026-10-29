@@ -54,7 +54,7 @@ Use `sonic` for community SONiC. It connects as a Linux shell and runs the FRRou
 
 ### Structured output
 
-Arista EOS, FRRouting, Huawei VRP, Juniper Junos, and MikroTik enable structured output by default. BIRD, Cisco IOS, IOS-XR and NX-OS, Extreme EXOS, OpenBGPD, SONiC, VyOS, and Huawei VRPv8 require `structured_output: true` for structured BGP results.
+Structured output is opt-in on every platform. Set `structured_output: true` on a device for structured BGP results. A device without it returns text.
 
 | Platform | Structured BGP source | Limitations |
 | :------- | :-------------------- | :---------- |

@@ -26,18 +26,15 @@ TARGET_FORMAT_SPACE = ("huawei", "huawei_vrpv8")
 
 TARGET_JUNIPER_ASPATH = ("juniper", "juniper_junos")
 
+# Every structured parser is opt-in: a device without `structured_output` gets text.
 SUPPORTED_STRUCTURED_OUTPUT = (
     "frr",
     "juniper",
     "arista_eos",
     "huawei",
+    "huawei_vrpv8",
     "mikrotik_routeros",
     "mikrotik_switchos",
-)
-
-# Additional parsers remain opt-in so existing text deployments keep their defaults.
-OPT_IN_STRUCTURED_OUTPUT = (
-    "huawei_vrpv8",
     "cisco_ios",
     "cisco_xr",
     "cisco_nxos",
