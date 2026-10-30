@@ -13,7 +13,7 @@ Ultraglass uses [Netmiko](https://github.com/ktbyers/netmiko) to interact with d
     Just because Netmiko supports a given platform doesn't mean it will automatically work with
     Ultraglass. Ultraglass has a limited number of built-in directives (listed below). Any platform
     other than the ones listed below will require you to [add a custom
-    directive](configuration/examples/add-your-own-command.mdx) for each command you wish to make
+    directive](/configuration/examples/add-your-own-command.mdx) for each command you wish to make
     available.
 </Callout>
 
@@ -28,14 +28,14 @@ Some vendors have more than one `platform` key. Pick the key from this section; 
 - **Huawei VRP:** see [Huawei VRP 5 and VRP 8](#huawei-vrp-5-and-vrp-8).
 - **Juniper Junos:** use `juniper`. Ultraglass rewrites `juniper_junos` and `junos` to `juniper` when it loads the device, so all three run the same directives and parsers. They connect with the Netmiko `juniper` driver.
 - **MikroTik:** use `mikrotik_routeros` for RouterOS 6 and 7. `mikrotik_switchos` runs the same directives and parsers, and connects with the Netmiko `mikrotik_switchos` driver. Ultraglass rewrites `mikrotik` to `mikrotik_routeros`. See [MikroTik RouterOS 6](#mikrotik-routeros-6) for RouterOS 6 devices.
-- **Cisco:** use `cisco_ios` for IOS and IOS XE, `cisco_xr` for IOS-XR and `cisco_nxos` for NX-OS. These are separate platforms with their own directives, not aliases. Each connects with the Netmiko driver of the same name. Ultraglass rewrites `ios` to `cisco_ios`.
+- **Cisco:** use `cisco_ios` for IOS and IOS XE, `cisco_xr` for IOS-XR and `cisco_nxos` for NX-OS. These are separate platforms with their own directives, not aliases. Each connects with the Netmiko driver of the same name. Ultraglass rewrites `ios` to `cisco_ios`. The Netmiko key `cisco_xe` has no built-in directives.
 - **Arista EOS:** use `arista_eos`. Ultraglass rewrites `arista` to `arista_eos`.
 - **VyOS:** see [VyOS versions](#vyos-versions).
 - **Extreme:** see [Extreme EXOS and VOSS](#extreme-exos-and-voss).
 
 ### Huawei VRP 5 and VRP 8
 
-Use `huawei`. It works on VRP 5 and VRP 8, and connects with the Netmiko `huawei` driver.
+Use `huawei`. It connects with the Netmiko `huawei` driver. The lab has no VRP 5 device, so `huawei` is tested only against VRP 8. The Netmiko key `huawei_vrp` has no built-in directives.
 
 `huawei_vrpv8` is the Netmiko name for VRP 8. It runs the same directives and parsers as `huawei`, and connects with the Netmiko `huawei_vrpv8` driver, which differs only in how it commits configuration changes. Ultraglass makes no configuration changes, so both keys behave the same for queries. Both keys returned identical results on all 136 lab queries against a CE12800 and an NE40E, both running VRP 8.180.
 
@@ -86,23 +86,25 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 
 | Platform | Structured BGP source | Limitations |
 | :------- | :-------------------- | :---------- |
-| Arista EOS | `show ip bgp` / `show ipv6 bgp` JSON | AS-path results omit communities. Router RPKI state is read when the router validates origins. |
+| Arista EOS | `show ip bgp` / `show ipv6 bgp` JSON; `show bgp ... community ... detail` JSON for communities | AS-path results omit communities. Router RPKI state is read when the router validates origins. |
 | BIRD | `show route all` text | Route age and router RPKI state remain unknown. |
-| Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Router RPKI state is read when the router validates origins. IPv6 route queries need a prefix, because IOS has no longest-match BGP lookup for an IPv6 address. |
+| Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Route results read route age only when the router prints the update time in UTC. Router RPKI state is read when the router validates origins. IPv6 route queries need a prefix, because IOS has no longest-match BGP lookup for an IPv6 address. |
 | Cisco IOS-XR | `show bgp` text | AS-path and community summary results omit communities. Route age remains unknown. Router RPKI state is read when the router validates origins. |
 | Cisco NX-OS | `show bgp` text | AS-path and community summary results omit communities. Route age and router RPKI state remain unknown. IPv6 route queries need a prefix, because NX-OS has no longest-match BGP lookup for an IPv6 address. |
 | Extreme EXOS | `show bgp routes detail` text | Route age, originator and router RPKI state remain unknown. EXOS does not print large communities. |
 | Extreme VOSS | Not supported | VOSS marks no best path, so BGP results stay as text. |
-| FRRouting | `show bgp ... json` through `vtysh` | AS-path results omit communities, because `regexp` has no JSON detail form. Router RPKI state remains unknown. |
-| Huawei VRP | `display bgp routing-table` detail text for routes, brief tables for AS path and community | AS-path brief results omit communities. Community brief results omit the AS path, so RPKI state and AS organisations do not apply to them. Router RPKI state remains unknown. |
+| FRRouting | `show bgp ... json` through `vtysh` | AS-path results omit communities and route age, because `regexp` has no JSON detail form. Router RPKI state remains unknown. |
+| Huawei VRP | `display bgp routing-table` detail text for routes, brief tables for AS path and community | AS-path brief results omit communities. Community brief results omit the AS path, so RPKI state and AS organisations do not apply to them. Brief results omit route age. Router RPKI state remains unknown. |
 | Juniper Junos | `show route ... detail \| display xml` | Route queries return the best path only. Router RPKI state is read when the router validates origins. |
-| MikroTik RouterOS | `print detail` text (RouterOS 6 and 7) | Route age remains unknown. |
+| MikroTik RouterOS | `print detail` text (RouterOS 6 and 7) | Route age remains unknown. Router RPKI state is read when the route detail carries an `rpki` value. |
+| Nokia SR OS | Not supported | Structured output covers traceroute only; BGP results stay as text. |
 | OpenBGPD | `bgpctl -j show rib detail` JSON | Router RPKI state comes from daemon origin validation. |
-| SONiC | FRR JSON through `vtysh` | AS-path and community summary results omit communities and route age. |
-| VyOS 1.4+ | FRR JSON through `vtysh` | AS-path and community summary results omit communities and route age. |
+| SONiC | FRR JSON through `vtysh` | AS-path results omit communities and route age. Router RPKI state remains unknown. |
+| TNSR | Not supported | Structured output covers traceroute only; BGP results stay as text. |
+| VyOS 1.4+ | FRR JSON through `vtysh` | AS-path results omit communities and route age. Router RPKI state remains unknown. |
 | VyOS 1.3 | Not supported | Use text BGP results, even with structured traceroute enabled. |
 
-Structured traceroute also parses standard numbered CLI output from EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, TNSR, Extreme EXOS and VOSS, and SONiC. It needs `structured_output: true` on the device, like structured BGP. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation; remaining coverage is tracked in issues [#22](https://github.com/WilhelmZA/ultraglass/issues/22), [#25](https://github.com/WilhelmZA/ultraglass/issues/25), and [#35](https://github.com/WilhelmZA/ultraglass/issues/35).
+Structured traceroute covers every built-in platform. FRRouting and SONiC, Huawei VRP and MikroTik have their own traceroute parsers. Arista EOS, Juniper Junos, Cisco IOS, IOS-XR and NX-OS, Nokia SR OS, BIRD, OpenBGPD, VyOS 1.4+ and 1.3, TNSR, and Extreme EXOS and VOSS use the standard numbered-hop parser. It needs `structured_output: true` on the device, like structured BGP. Set `structured.enable_for_traceroute: false` to return text on every device. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation.
 
 ### VRF queries
 
@@ -112,4 +114,4 @@ Built-in VRF forms support EOS, Extreme EXOS (`vr`) and VOSS, FRRouting, Huawei 
 
 | Platform          | Key    |                          Natively Supported                          |
 | :---------------- | :----- | :------------------------------------------------------------------: |
-| Any HTTP Endpoint | `http` | [See HTTP Device Docs](configuration/devices.mdx#http-configuration) |
+| Any HTTP Endpoint | `http` | [See HTTP Device Docs](/configuration/devices/http-device.mdx#http-configuration) |
