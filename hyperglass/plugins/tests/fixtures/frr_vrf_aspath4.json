@@ -1,0 +1,9 @@
+{
+ "vrfId": 3,
+ "vrfName": "LAB",
+ "tableVersion": 1,
+ "routerId": "10.250.1.1",
+ "defaultLocPrf": 100,
+ "localAS": 65001,
+ "routes": { "198.51.100.0/24": [{"valid":true,"bestpath":true,"selectionReason":"First path received","pathFrom":"external","prefix":"198.51.100.0","prefixLen":24,"network":"198.51.100.0/24","version":1,"metric":0,"weight":32768,"peerId":"(unspec)","path":"","origin":"IGP","nexthops":[{"ip":"0.0.0.0","hostname":"frr","afi":"ipv4","used":true}]}]
+ }  }

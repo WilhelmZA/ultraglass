@@ -1,0 +1,42 @@
+{
+  "prefix":"198.51.100.0/24",
+  "version":1,
+  "paths":[
+    {
+      "aspath":{
+        "string":"Local",
+        "segments":[],
+        "length":0
+      },
+      "origin":"IGP",
+      "metric":0,
+      "weight":32768,
+      "valid":true,
+      "version":1,
+      "sourced":true,
+      "local":true,
+      "bestpath":{
+        "overall":true,
+        "selectionReason":"First path received"
+      },
+      "lastUpdate":{
+        "epoch":1793326598,
+        "string":"Fri Oct 30 02:16:38 2026\n"
+      },
+      "nexthops":[
+        {
+          "ip":"0.0.0.0",
+          "hostname":"frr",
+          "afi":"ipv4",
+          "metric":0,
+          "accessible":true,
+          "used":true
+        }
+      ],
+      "peer":{
+        "peerId":"0.0.0.0",
+        "routerId":"10.250.1.1"
+      }
+    }
+  ]
+}

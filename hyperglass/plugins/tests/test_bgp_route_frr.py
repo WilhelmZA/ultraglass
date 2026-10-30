@@ -90,3 +90,45 @@ def test_frr_inaccessible_next_hop_without_metric():
 
     assert result.count == 1
     assert result.routes[0].next_hop == "10.99.99.99"
+
+
+def _process_vrf(outputs, platform: str = "frr", vrf: str = "LAB"):
+    plugin = BGPRoutePluginFrr()
+    device = MockDevice(
+        name="Test Device",
+        address="127.0.0.1",
+        group="Test Network",
+        credential={"username": "", "password": ""},
+        platform=platform,
+        structured_output=True,
+        vrf=vrf,
+        directives=[f"__hyperglass_{platform}_bgp_route_table__"],
+        attrs={"source4": "192.0.2.1", "source6": "2001:db8::1"},
+    )
+    query = type("Query", (), {"device": device})
+    return plugin.process(output=tuple(outputs), query=query)
+
+
+@pytest.mark.parametrize("platform", ("frr", "vyos", "sonic"))
+def test_frr_vrf_route_uses_device_vrf(platform):
+    # `show bgp vrf LAB ipv4 unicast <prefix> json` carries no VRF name (#134).
+    result = _process_vrf([(FIXTURES / "frr_vrf_route.json").read_text()], platform=platform)
+
+    assert result.count == 1
+    assert result.vrf == "LAB"
+
+
+@pytest.mark.parametrize("platform", ("frr", "vyos", "sonic"))
+def test_frr_vrf_aspath_uses_vrf_name_from_output(platform):
+    # Regexp and community output carries `vrfName`, which wins over the device setting.
+    outputs = [(FIXTURES / f"frr_vrf_aspath{family}.json").read_text() for family in (4, 6)]
+    result = _process_vrf(outputs, platform=platform, vrf="CONFIGURED")
+
+    assert result.count == 2
+    assert result.vrf == "LAB"
+
+
+def test_frr_route_without_vrf_is_default():
+    result = _process((FIXTURES / "frr_route_local.json").read_text())
+
+    assert result.vrf == "default"

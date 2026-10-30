@@ -24,8 +24,13 @@ if t.TYPE_CHECKING:
     from .._output import OutputType
 
 
-def parse_frr(output: t.Sequence[str]) -> "OutputDataModel":
-    """Parse a FRR BGP JSON response."""
+def parse_frr(output: t.Sequence[str], vrf: t.Optional[str] = None) -> "OutputDataModel":
+    """Parse a FRR BGP JSON response.
+
+    The VRF comes from the response's `vrfName` where FRR reports it (AS path and
+    community queries). A single-prefix lookup does not report it, so the device's
+    configured VRF is used, then `default`.
+    """
     result = None
 
     _log = log.bind(plugin=BGPRoutePluginFrr.__name__)
@@ -56,7 +61,7 @@ def parse_frr(output: t.Sequence[str]) -> "OutputDataModel":
             if not tables:
                 continue
 
-            bgp_table = frr_bgp_table(tables)
+            bgp_table = frr_bgp_table(tables, vrf=parsed.get("vrfName") or vrf or "default")
             if result is None:
                 result = bgp_table
             else:
@@ -109,5 +114,5 @@ class BGPRoutePluginFrr(OutputPlugin):
             )
         )
         if should_process:
-            return parse_frr(output)
+            return parse_frr(output, vrf=getattr(query.device, "vrf", None))
         return output

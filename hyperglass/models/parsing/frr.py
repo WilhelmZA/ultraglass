@@ -139,11 +139,8 @@ class FRRBGPTable(_FRRBase):
         return routes
 
 
-def frr_bgp_table(tables: t.Sequence[FRRBGPTable]) -> BGPRouteTable:
+def frr_bgp_table(tables: t.Sequence[FRRBGPTable], vrf: str = "default") -> BGPRouteTable:
     """Combine FRR prefixes into one standard BGP table."""
-
-    # TODO: somehow, get the actual VRF
-    vrf = "default"
 
     routes = [route for table in tables for route in table.routes()]
 
