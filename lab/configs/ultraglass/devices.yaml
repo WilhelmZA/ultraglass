@@ -175,7 +175,8 @@ devices:
       source4: 10.251.8.1
       source6: fd00:251:8::1
 
-  # VRF locations (#50). Arista and FRR hold VRF LAB from their startup configs, with
+  # VRF locations (#50, #130). Arista and FRR hold VRF LAB from their startup configs,
+  # Huawei from scripts/configure-huawei.py (vpn-instance LAB), each with
   # 198.51.100.0/24 and 2001:db8:100::/48 originated into BGP. FRR in a VRF offers BGP
   # queries only.
   - name: lab-arista-vrf
@@ -203,3 +204,17 @@ devices:
     attrs:
       source4: 10.250.1.1
       source6: fd00:250:1::1
+
+  # Huawei vpn-instance LAB (#130). source4/source6 are LoopBack100 inside the instance.
+  - name: lab-huawei-vrf
+    address: 192.168.250.18
+    group: VRF
+    credential:
+      username: admin
+      password: admin
+    platform: huawei
+    vrf: LAB
+    structured_output: true
+    attrs:
+      source4: 192.0.2.108
+      source6: 2001:db8:100::8

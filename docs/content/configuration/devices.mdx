@@ -84,6 +84,22 @@ devices:
           source6: "2001:db8::1"
 ```
 
+On Huawei VRP, `vrf` names the vpn-instance (`ip vpn-instance CUSTOMER_A`). Ultraglass runs the `display bgp vpnv4 vpn-instance` and `display bgp vpnv6 vpn-instance` forms for BGP queries, and `ping -vpn-instance` and `tracert -vpn-instance` for ping and traceroute. Set `source4` and `source6` to addresses on an interface bound to the same vpn-instance, for example a loopback with `ip binding vpn-instance CUSTOMER_A`.
+
+```yaml filename="devices.yaml" copy
+devices:
+    - name: Johannesburg - Customer A
+      address: 192.0.2.2
+      platform: huawei
+      vrf: CUSTOMER_A
+      credential:
+          username: looking-glass
+          password: replace-me
+      attrs:
+          source4: 198.51.100.1
+          source6: "2001:db8:100::1"
+```
+
 Define separate device entries with distinct names to offer multiple VRFs on one router. Built-in queries without a VRF form are hidden. For FRRouting and SONiC, this hides ping and traceroute. Setting `vrf` on a platform without VRF-capable built-ins causes a configuration error unless built-ins are disabled.
 
 Custom directives must provide their own VRF commands. A device's `vrf` setting does not rewrite arbitrary custom commands. Rules can supply `vrf_command` or `vrf_commands` containing the `{vrf}` placeholder.

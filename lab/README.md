@@ -213,7 +213,7 @@ Use `scripts/silent-hop.sh on` to test traceroute through a silent hop. Run it w
 
 ### VRF and interface checks
 
-The supplied Arista and FRR configurations create VRF `LAB`. Select `lab-arista-vrf` or `lab-frr-vrf` for BGP checks using `198.51.100.0/24` and `2001:db8:100::/48`. FRR's VRF location offers BGP queries only.
+The supplied Arista and FRR configurations create VRF `LAB`, and `scripts/configure-huawei.py` creates vpn-instance `LAB` on the Huawei with LoopBack100 (`192.0.2.108`, `2001:db8:100::8`) inside it. Select `lab-arista-vrf`, `lab-frr-vrf` or `lab-huawei-vrf` for BGP checks using `198.51.100.0/24` and `2001:db8:100::/48`. FRR's VRF location offers BGP queries only.
 
 Add another VRF location as a separate device entry with a unique name and `vrf: LAB`. Configure the corresponding VRF, routes and BGP address families on that router first.
 
