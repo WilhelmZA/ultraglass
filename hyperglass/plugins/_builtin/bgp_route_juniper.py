@@ -119,9 +119,7 @@ def parse_juniper(output: Sequence[str]) -> "OutputDataModel":  # noqa: C901
 
         except Exception as err:
             _log.bind(error=repr(err)).critical("Unexpected error parsing response")
-            raise ParsingError(
-                "Unexpected error parsing response: {error}", error=repr(err)
-            ) from err
+            raise ParsingError("Error parsing response data") from err
 
     return result
 
