@@ -306,7 +306,7 @@ def _parse_route_block(block: t.List[str]) -> t.Optional[MikrotikRouteEntry]:
                 )
             return MikrotikRouteEntry(**rd)
         except Exception as e:
-            log.warning(f"Failed to create MikroTik route entry ({rd.get('prefix','?')}: {e}")
+            log.warning(f"Failed to create MikroTik route entry ({rd.get('prefix', '?')}: {e}")
     return None
 
 
