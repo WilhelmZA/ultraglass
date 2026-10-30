@@ -284,7 +284,8 @@ class Formatter:
         if self.query_type == "bgp_aspath":
             target = target.replace("_", "(^|[ ,]|$)")
         else:
-            # RouterOS 6 joins a community list with `;`, RouterOS 7 with `,`.
+            # For regex matching RouterOS 6 and 7 both join a community list with
+            # `;`. The pattern also accepts `,` as a separator.
             target = "(^|[,;])" + target.replace(".", r"\.") + "([,;]|$)"
         return target.replace("$", r"\$")
 
