@@ -1,0 +1,39 @@
+
+ BGP local router ID : 192.0.2.1
+ Local AS number : 65001
+
+ VPN-Instance inet, Router ID 192.0.2.1:
+ Paths:   9 available, 1 best, 1 select, 0 best-external, 0 add-path
+ BGP routing table entry information of 8.8.8.0/24:
+ Route Distinguisher: 65001:100
+ From: 198.51.100.1 (198.51.100.101)
+ Route Duration: 2d23h22m21s
+ Direct Out-interface: Eth-Trunk1.100
+ Original nexthop: 198.51.100.1
+ Qos information : 0x0
+ Community: <64500:6>, <64500:7>, <65001:1003>
+ AS-path 64500 15169, origin igp, localpref 120, pref-val 0, valid, external, best, select, pre 255
+ Advertised to such 11 peers:
+    203.0.113.1
+    203.0.113.2
+    203.0.113.3
+    203.0.113.4
+    203.0.113.5
+    203.0.113.6
+    203.0.113.7
+    203.0.113.8
+    203.0.113.9
+    203.0.113.10
+    203.0.113.11
+
+ BGP routing table entry information of 8.8.8.0/24:
+ Route Distinguisher: 65001:100
+ From: 198.51.100.2 (198.51.100.102)
+ Route Duration: 2d09h16m46s
+ Direct Out-interface: Eth-Trunk1.200
+ Original nexthop: 198.51.100.2
+ Qos information : 0x0
+ Community: <64501:20508>, <65001:1000>, <65001:1006>
+ Ext-Community: RT <64501 : 1>
+ AS-path 64501 15169, origin igp, localpref 110, pref-val 0, valid, external, pre 255, not preferred for Local_Pref
+ Not advertised to any peer yet

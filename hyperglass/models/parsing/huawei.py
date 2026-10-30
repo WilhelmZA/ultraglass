@@ -56,6 +56,7 @@ class HuaweiRouteEntry(HuaweiBase):
 
     prefix: str
     from_addr: str = ""
+    from_router_id: str = ""
     duration: int = 0
     direct_out_interface: str = ""
     original_next_hop: str = ""
@@ -107,8 +108,12 @@ class HuaweiRouteEntry(HuaweiBase):
 
     @property
     def all_communities(self) -> t.List[str]:
-        """Get all communities combined."""
-        return self.communities + self.large_communities + self.ext_communities
+        """Get standard and large communities.
+
+        Extended communities (route targets such as `RT 64501 : 1`) are not
+        standard communities and stay out of the community list.
+        """
+        return self.communities + self.large_communities
 
     @property
     def source_as(self) -> int:
@@ -117,8 +122,8 @@ class HuaweiRouteEntry(HuaweiBase):
 
     @property
     def source_rid(self) -> str:
-        """Get source router ID."""
-        return ""
+        """Get the router ID printed in parentheses after `From:`."""
+        return self.from_router_id
 
     @property
     def peer_rid(self) -> str:
@@ -175,6 +180,7 @@ def _extract_route_entries(lines: t.List[str]) -> t.List[HuaweiRouteEntry]:
         route_data = {
             "prefix": "",
             "from_addr": "",
+            "from_router_id": "",
             "duration": 0,
             "direct_out_interface": "",
             "original_next_hop": "",
@@ -207,7 +213,9 @@ def _extract_route_entries(lines: t.List[str]) -> t.List[HuaweiRouteEntry]:
                     info, "BGP routing table entry information of "
                 ).rstrip(":")
             elif info.startswith("From:"):
-                route_data["from_addr"] = remove_prefix(info, "From: ").split(" (")[0]
+                peer = re.match(r"From:\s*(\S+)(?:\s*\(([^)]*)\))?", info)
+                route_data["from_addr"] = peer[1] if peer else ""
+                route_data["from_router_id"] = (peer[2] or "").strip() if peer else ""
             elif info.startswith("Route Duration:"):
                 duration_str = remove_prefix(info, "Route Duration: ")
                 try:

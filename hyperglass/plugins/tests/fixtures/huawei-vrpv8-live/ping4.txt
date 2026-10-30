@@ -1,0 +1,12 @@
+  PING 1.1.1.1: 56  data bytes, press CTRL_C to break
+    Reply from 1.1.1.1: bytes=56 Sequence=1 ttl=56 time=20 ms
+    Reply from 1.1.1.1: bytes=56 Sequence=2 ttl=56 time=17 ms
+    Reply from 1.1.1.1: bytes=56 Sequence=3 ttl=56 time=18 ms
+    Reply from 1.1.1.1: bytes=56 Sequence=4 ttl=56 time=16 ms
+    Reply from 1.1.1.1: bytes=56 Sequence=5 ttl=56 time=16 ms
+
+  --- 1.1.1.1 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 16/17/20 ms

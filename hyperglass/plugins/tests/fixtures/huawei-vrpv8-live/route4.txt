@@ -1,0 +1,13 @@
+ BGP local router ID : 10.250.8.1
+ Local AS number : 65008
+ Paths:   1 available, 1 best, 1 select, 0 best-external, 0 add-path
+ BGP routing table entry information of 1.1.1.0/24:
+ From: 10.250.8.0 (10.250.0.1)
+ Route Duration: 0d00h03m00s
+ Direct Out-interface: GE1/0/0
+ Original nexthop: 10.250.8.0
+ Qos information : 0x0
+ Community: <13335:10045>
+ AS-path 65000 5.280 13335, origin igp, pref-val 0, valid, external, best, select, pre 255
+ Aggregator: AS 13335, Aggregator ID 10.34.16.20, Atomic-aggregate
+ Not advertised to any peer yet

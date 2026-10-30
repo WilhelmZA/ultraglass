@@ -46,6 +46,7 @@ Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/Wi
 - Huawei VRP BGP route queries accept prefix targets again. The execution recheck validated the `a b` form the Huawei input plugin produces and rejected every CIDR target. Rules now check the target as sent, and the command syntax check still covers the rewritten form (#132).
 - Huawei VRP structured AS path and community tables parse 4-byte ASNs that VRP prints in asdot, such as `5.280`, and convert them to asplain. Before, the parser rejected the whole response (#132).
 - Huawei VRP structured routes take Weight from `pref-val`. The detailed route showed the route preference (`pre 255`) as Weight (#132).
+- Huawei VRP and VRPv8 structured routes keep route-target extended communities (`Ext-Community: RT 64501 : 1`) out of the community list, and fill Originator with the router ID that VRP prints in parentheses after `From:` (#103).
 
 ### Changed
 
