@@ -12,13 +12,26 @@ enrichment mode named on the command line. The core must advertise the lab test 
 
 AS 64999 and community 65000:777 appear only on these routes, so each query returns a
 small, known result. Cloudflare and Routinator both report the routes as RPKI valid.
+
+Each device is queried with its own platform's table directive, read from the
+devices file, so the instance needs no particular platform configured. Run it with
+the repository environment, which provides `hyperglass` and `yaml`.
 """
 
 import argparse
+import importlib
 import json
+import pkgutil
 import time
 import urllib.request
 from pathlib import Path
+
+import yaml
+
+import hyperglass.defaults.directives
+from hyperglass.models.directive import BuiltinDirective
+
+DEVICES_FILE = Path(__file__).resolve().parents[1] / "configs" / "ultraglass" / "devices.yaml"
 
 TEST_PREFIXES = {"1.0.0.0/24", "2606:4700:4700::/48"}
 # Device output that carries no communities, so the policy has nothing to act on.
@@ -30,11 +43,26 @@ NO_ASPATH_COMMUNITIES = {"lab-arista", *HUAWEI, "lab-frr", "lab-vyos", *CISCO_IO
 NO_COMMUNITY_COMMUNITIES = CISCO_IOS
 # Huawei brief community output omits the AS path, so RPKI and organisations cannot apply.
 NO_COMMUNITY_ASPATH = HUAWEI
-# Ultraglass resolves a vendor directive id to each device's equivalent by name.
-QUERIES = (
-    ("BGP AS Path", "__hyperglass_arista_eos_bgp_aspath_table__", "_64999_"),
-    ("BGP Community", "__hyperglass_arista_eos_bgp_community_table__", "65000:777"),
-)
+QUERIES = (("BGP AS Path", "_64999_"), ("BGP Community", "65000:777"))
+
+
+def table_directives():
+    """Map each platform to its table directive ids by query name."""
+    ids = {}
+    package = hyperglass.defaults.directives
+    for module in pkgutil.iter_modules(package.__path__):
+        members = vars(importlib.import_module(f"{package.__name__}.{module.name}"))
+        for directive in members.values():
+            if isinstance(directive, BuiltinDirective) and directive.id.endswith("_table__"):
+                for platform in directive.platforms:
+                    ids.setdefault(platform, {})[directive.name] = directive.id
+    return ids
+
+
+def device_platforms(path):
+    """Map each device id in a devices file to its platform."""
+    devices = yaml.safe_load(path.read_text())["devices"]
+    return {device.get("id", device["name"]): device["platform"] for device in devices}
 
 
 def post(url, body):
@@ -73,12 +101,16 @@ def main():
     parser.add_argument("--backend", choices=("cloudflare", "routinator"), required=True)
     parser.add_argument("--mode", choices=("inline", "async"), required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--devices-file", type=Path, default=DEVICES_FILE)
     parser.add_argument("devices", nargs="+")
     args = parser.parse_args()
 
+    platforms = device_platforms(args.devices_file)
+    directives = table_directives()
     results = []
     for device in args.devices:
-        for kind, query_type, target in QUERIES:
+        for kind, target in QUERIES:
+            query_type = directives[platforms[device]][kind]
             body = {"queryLocation": device, "queryType": query_type, "queryTarget": target}
             response = post(args.url, body)
             assert response["level"] == "success", (device, kind, response)
