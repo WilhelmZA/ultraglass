@@ -3,7 +3,7 @@
 # Local
 from .rpki import rpki_state
 from .slack import SlackHook
-from .generic import BaseExternal
+from ._base import BaseExternal
 from .msteams import MSTeams
 from .ip_enrichment import (
     network_info,

@@ -43,8 +43,9 @@ class BaseExternal:
         uri_prefix: str = "",
         uri_suffix: str = "",
         verify_ssl: bool = True,
-        timeout: int = 10,
+        timeout: t.Union[float, int] = 10,
         parse: bool = True,
+        auth: t.Optional[t.Tuple[str, str]] = None,
     ) -> None:
         """Initialize connection instance."""
         self.__name__ = getattr(self, "name", "BaseExternal")
@@ -67,6 +68,8 @@ class BaseExternal:
             "timeout": self.timeout,
             "verify": context,
         }
+        if auth is not None:
+            client_kwargs["auth"] = auth
 
         self._session = httpx.Client(**client_kwargs)
         self._asession = httpx.AsyncClient(**client_kwargs)
@@ -228,7 +231,7 @@ class BaseExternal:
         }
 
         if headers is not None:
-            request.update({"headers": headers})
+            request["headers"].update(headers)
 
         if params is not None:
             params = {str(k): str(v) for k, v in params.items() if v is not None}
@@ -264,7 +267,7 @@ class BaseExternal:
             method=method,
             endpoint=endpoint,
             item=item,
-            headers=None,
+            headers=headers,
             params=params,
             data=data,
             timeout=timeout,
@@ -320,7 +323,7 @@ class BaseExternal:
             method=method,
             endpoint=endpoint,
             item=item,
-            headers=None,
+            headers=headers,
             params=params,
             data=data,
             timeout=timeout,

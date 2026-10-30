@@ -59,15 +59,15 @@ If `logging.http` is set, Ultraglass sends one HTTP `POST` webhook for each quer
 | :--------------------- | :------ | :------------ | :---------- |
 | `logging.http.provider`   | String  | generic | Must be `generic`, `msteams`, or `slack`. |
 | `logging.http.host`       | URL     |         | Webhook URL. Required. The `msteams` provider sends to the path of this URL on `https://outlook.office.com`, and the `slack` provider sends to the path on `https://hooks.slack.com`. |
-| `logging.http.params`     | Map     |         | URL query parameters, sent by the `generic` provider. |
-| `logging.http.headers`    | Map     |         | Accepted, but not sent by the current code. |
-| `logging.http.verify_ssl` | Boolean | true    | Accepted, but not applied by the current code. Certificates are always verified. |
-| `logging.http.timeout`    | Number  | 5       | Accepted, but not applied by the current code. Webhook requests time out after 10 seconds. |
+| `logging.http.params`     | Map     |         | URL query parameters added to every webhook request. |
+| `logging.http.headers`    | Map     |         | HTTP headers added to every webhook request. Values are sent as strings. |
+| `logging.http.verify_ssl` | Boolean | true    | Verify the webhook server's TLS certificate. Set to `false` for a self-signed endpoint. |
+| `logging.http.timeout`    | Number  | 5       | Webhook request timeout in seconds. |
 | `logging.http.enable`     | Boolean | true    | Accepted, but not checked. Ultraglass sends webhooks whenever `logging.http` is set. |
 
 #### Authentication
 
-`logging.http.authentication` takes HTTP basic authentication or an API key. The current code validates these keys but does not add the credentials to the webhook request.
+`logging.http.authentication` takes HTTP basic authentication or an API key. With `mode: basic`, Ultraglass sends an `Authorization: Basic` header built from `username` and `password`. With `mode: api_key`, it sends `password` as the value of the header named by `header`.
 
 | Parameter                              | Type   | Default Value | Description |
 | :------------------------------------- | :----- | :------------ | :---------- |
