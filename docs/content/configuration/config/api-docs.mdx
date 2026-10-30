@@ -1,31 +1,18 @@
 ## API Docs
 
-Ultraglass automatically generates documentation for the REST API. The `docs` section allows administrators to customise the look, feel, and text used for that documentation.
+Ultraglass generates documentation for the REST API from its OpenAPI schema and serves it with Stoplight Elements. The `docs` section sets the path, title and description of that documentation.
 
-| Parameter          | Type    | Default Value                  | Description                                                                                     |
-| :----------------- | :------ | :----------------------------- | :---------------------------------------------------------------------------------------------- |
-| `docs.base_url`    | String  | https://lg.example.com         | Used for REST API samples. Open `/api/docs` on your deployment to view the generated documentation. |
-| `docs.enable`      | Boolean | `true`                         | Enable or disable the REST API documentation.                                                   |
-| `docs.path`        | String  | /api/docs                      | Path to the REST API documentation.                                                             |
-| `docs.title`       | String  | `site_title` API Documentation | API docs title. Uses the `site_title` parameter from the [global](#global) parameters.          |
-| `docs.description` | String  |                                | API docs description. Appears below the title.                                                  |
+| Parameter          | Type    | Default Value                    | Description                                                                                                                                                                  |
+| :----------------- | :------ | :------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs.enable`      | Boolean | `true`                           | Enable or disable the REST API documentation.                                                                                                                                |
+| `docs.path`        | String  | /api/docs                        | Path to the REST API documentation.                                                                                                                                          |
+| `docs.title`       | String  | \{site_title\} API Documentation | API docs title. `{site_title}` is replaced with the `site_title` value from the [top level parameters](/configuration/config.mdx#top-level-parameters).                      |
+| `docs.description` | String  |                                  | API docs description. Appears below the title.                                                                                                                               |
+| `docs.base_url`    | URL     | https://lg.example.net           | Accepted for compatibility. The current API documentation does not use it.                                                                                                   |
 
-The documentation for API endpoints follow a common schema:
+### Endpoint Parameters
 
--   `devices`
--   `info`
--   `queries`
--   `query`
-
-### Schema
-
-| Parameter     | Type   | Description                                                                      |
-| :------------ | :----- | :------------------------------------------------------------------------------- |
-| `title`       | String | API endpoint title, displayed as the header text above the API endpoint section. |
-| `description` | String | API endpoint description, displayed inside each API endpoint section.            |
-| `summary`     | String | API endpoint summary, displayed beside the API endpoint path.                    |
-
-### Parameters
+The `devices`, `info`, `queries` and `query` sections each take a `title`, `description` and `summary` string. Ultraglass accepts these keys for compatibility, but the current API documentation does not use them.
 
 | Parameter                  | Default Value                                                                               |
 | :------------------------- | :------------------------------------------------------------------------------------------ |
@@ -38,7 +25,7 @@ The documentation for API endpoints follow a common schema:
 | `docs.queries.title`       | Supported Queries                                                                           |
 | `docs.queries.description` | List of supported query types.                                                              |
 | `docs.queries.summary`     | Query Types                                                                                 |
-| `docs.query.title`         | Supported Query                                                                             |
+| `docs.query.title`         | Submit Query                                                                                |
 | `docs.query.description`   | Request a query response per-location.                                                      |
 | `docs.query.summary`       | Query the Looking Glass                                                                     |
 
@@ -46,27 +33,8 @@ The documentation for API endpoints follow a common schema:
 
 ```yaml filename="config.yaml"
 docs:
-    base_url: https://lg.example.com
     enable: true
-    mode: redoc
     path: /api/docs
-    title: Beloved Hyperglass User Looking Glass API Documentation
-    description: null
-    # API Endpoints ↓
-    devices:
-        title: Devices
-        description: List of all devices/locations with associated identifiers, display names, networks, & VRFs.
-        summary: Devices List
-    info:
-        title: System Information
-        description: General information about this looking glass.
-        summary: System Information
-    queries:
-        title: Supported Queries
-        description: List of supported query types.
-        summary: Query Types
-    query:
-        title: Supported Query
-        description: Request a query response per-location.
-        summary: Query the Looking Glass
+    title: "{site_title} API Documentation"
+    description: ""
 ```

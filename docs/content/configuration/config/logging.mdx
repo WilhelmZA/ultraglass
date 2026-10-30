@@ -1,13 +1,13 @@
 ## Logging
 
-Console, file, HTTP, and/or syslog logging configuration.
+Ultraglass writes logs to a file and can also send them to syslog. It can also send an HTTP webhook for each query.
 
-| Parameter   | Type   | Default Value | Description                                     |
-| :---------- | :----- | :------------ | :---------------------------------------------- |
-| `directory` | String | /tmp          | Path to directory where logs will be created.   |
-| `format`    | String | text          | Log text format, must be `text` or `json`.      |
-| `max_size`  | String | 50MB          | Maximum log file size before being overwritten. |
-| `session_log` | Boolean | false | Write every SSH session, with each command and its output, to `<directory>/<device id>-<YYYYMMDD>.log`. Netmiko redacts the device password and secret. |
+| Parameter             | Type    | Default Value | Description |
+| :-------------------- | :------ | :------------ | :---------- |
+| `logging.directory`   | String  | /tmp          | Existing directory where Ultraglass writes its log file. |
+| `logging.format`      | String  | text          | Log format, must be `text` or `json`. `text` writes `hyperglass.log`, `json` writes `hyperglass.log.json`. |
+| `logging.max_size`    | String  | 50MB          | Log file size at which Ultraglass rotates the file and starts a new one. |
+| `logging.session_log` | Boolean | false         | Write every SSH session, with each command and its output, to `<directory>/<device id>-<YYYYMMDD>.log`. Netmiko redacts the device password and secret. |
 
 ### SSH session logs
 
@@ -25,21 +25,22 @@ For devices that reject automatic paging or terminal-width commands, set `disabl
 
 `logging.samples` writes each query's request, raw device output and parsed result as one JSON line to `<directory>/hyperglass_query_log.jsonl`. It is off by default. Raw output can contain internal addresses and communities.
 
-| Parameter        | Type    | Default Value | Description |
-| :--------------- | :------ | :------------ | :---------- |
-| `enable`         | Boolean | false         | Write query samples. |
-| `path`           | String  |               | Output file. Defaults to `<directory>/hyperglass_query_log.jsonl`. |
-| `include_raw`    | Boolean | true          | Include the raw device output. |
-| `include_parsed` | Boolean | true          | Include the parsed result. |
-| `max_size`       | String  | 50MB          | File size at which the file rotates to `<name>.1`. |
-| `backup_count`   | Number  | 1             | Rotated files kept, `<name>.1` (newest) to `<name>.<backup_count>`. One structured full-table result can be tens of MB, so raise this for fixture capture runs. |
+| Parameter                        | Type    | Default Value | Description |
+| :------------------------------- | :------ | :------------ | :---------- |
+| `logging.samples.enable`         | Boolean | false         | Write query samples. |
+| `logging.samples.path`           | String  |               | Output file. Defaults to `<directory>/hyperglass_query_log.jsonl`. |
+| `logging.samples.include_raw`    | Boolean | true          | Include the raw device output. |
+| `logging.samples.include_parsed` | Boolean | true          | Include the parsed result. |
+| `logging.samples.max_size`       | String  | 50MB          | File size at which the file rotates to `<name>.1`. |
+| `logging.samples.backup_count`   | Number  | 1             | Rotated files kept, `<name>.1` (newest) to `<name>.<backup_count>`. The minimum is 1. One structured full-table result can be tens of MB, so raise this for fixture capture runs. |
 
 ### Syslog
 
-| Parameter | Type   | Default Value | Description             |
-| :-------- | :----- | :------------ | :---------------------- |
-| `host`    | String |               | Syslog target host.     |
-| `port`    | Number | 514           | Syslog target UDP port. |
+| Parameter               | Type    | Default Value | Description |
+| :---------------------- | :------ | :------------ | :---------- |
+| `logging.syslog.host`   | String  |               | Syslog target host. Required. |
+| `logging.syslog.port`   | Number  | 514           | Syslog target UDP port. |
+| `logging.syslog.enable` | Boolean | true          | Accepted, but not checked. Ultraglass sends to syslog whenever `logging.syslog` is set. |
 
 ##### Syslog Example
 
@@ -52,27 +53,28 @@ logging:
 
 ### HTTP Logging
 
-If enabled, logs will be sent by HTTP `POST` method.
+If `logging.http` is set, Ultraglass sends one HTTP `POST` webhook for each query, after it returns the response. The webhook carries the query location, type and target, the requester's address, its network details from BGP.tools, selected request headers and a timestamp. It does not carry log records.
 
-| Parameter    | Type    | Default Value | Description                                     |
-| :----------- | :------ | :------------ | :---------------------------------------------- |
-| `provider`   | String  | generic       | Must be `generic`, `msteams`, or `slack`.       |
-| `host`       | String  |               | URL                                             |
-| `headers`    | Map     |               |                                                 |
-| `params`     | Map     |               |                                                 |
-| `verify_ssl` | Boolean | true          | Enable or disable SSL certificate verification. |
-| `timeout`    | Number  | 5             | HTTP connection timeout in seconds.             |
+| Parameter              | Type    | Default Value | Description |
+| :--------------------- | :------ | :------------ | :---------- |
+| `logging.http.provider`   | String  | generic | Must be `generic`, `msteams`, or `slack`. |
+| `logging.http.host`       | URL     |         | Webhook URL. Required. The `msteams` provider sends to the path of this URL on `https://outlook.office.com`, and the `slack` provider sends to the path on `https://hooks.slack.com`. |
+| `logging.http.params`     | Map     |         | URL query parameters, sent by the `generic` provider. |
+| `logging.http.headers`    | Map     |         | Accepted, but not sent by the current code. |
+| `logging.http.verify_ssl` | Boolean | true    | Accepted, but not applied by the current code. Certificates are always verified. |
+| `logging.http.timeout`    | Number  | 5       | Accepted, but not applied by the current code. Webhook requests time out after 10 seconds. |
+| `logging.http.enable`     | Boolean | true    | Accepted, but not checked. Ultraglass sends webhooks whenever `logging.http` is set. |
 
 #### Authentication
 
-Authentication is supported using HTTP basic authentication or an API key.
+`logging.http.authentication` takes HTTP basic authentication or an API key. The current code validates these keys but does not add the credentials to the webhook request.
 
-| Parameter                      | Type   | Default Value | Description                                                                                                |
-| :----------------------------- | :----- | :------------ | :--------------------------------------------------------------------------------------------------------- |
-| `http.authentication.mode`     | String | basic         | Must be `basic` or `api_key`.                                                                              |
-| `http.authentication.username` | String |               | Basic authentication username if `mode` is set to `basic`.                                                 |
-| `http.authentication.password` | String |               | Basic authentication password if `mode` is set to `basic`, or API key value if `mode` is set to `api_key`. |
-| `http.authentication.header`   | String | X-API-Key     | Header name if `mode` is set to `api_key`.                                                                 |
+| Parameter                              | Type   | Default Value | Description |
+| :------------------------------------- | :----- | :------------ | :---------- |
+| `logging.http.authentication.mode`     | String | basic         | Must be `basic` or `api_key`. |
+| `logging.http.authentication.username` | String |               | Basic authentication username if `mode` is set to `basic`. |
+| `logging.http.authentication.password` | String |               | Required. Basic authentication password if `mode` is set to `basic`, or API key value if `mode` is set to `api_key`. |
+| `logging.http.authentication.header`   | String | x-api-key     | Header name if `mode` is set to `api_key`. |
 
 #### Examples
 
@@ -83,19 +85,11 @@ logging:
     http:
         provider: generic
         host: https://httpbin.org
-        headers:
-            x-special-header: super special header value
         params:
             source: hyperglass
-        verify_ssl: true
-        timeout: 5
-        authentication:
-            mode: basic
-            username: your username
-            password: super secret password
 ```
 
-In the example above, Ultraglass sends a `POST` request to `https://httpbin.org?source=hyperglass` with Basic Authentication headers set. The `source` value is an example identifier and can be changed for your deployment.
+In the example above, Ultraglass sends a `POST` request to `https://httpbin.org?source=hyperglass` for each query. The `source` value is an example identifier and can be changed for your deployment.
 
 ##### Microsoft Teams Webhook
 
@@ -119,13 +113,13 @@ logging:
 
 Use `hyperglass support-bundle` on the Ultraglass host to create a sanitized JSON file for manual attachment to a bug report. The command reads local log files only, makes no network request, and does not add a frontend endpoint or browser feature for reading source-system information.
 
-The bundle includes Ultraglass version, basic runtime information, recent error-level log records, and failure metadata from `logging.samples`. It excludes query targets, device names, raw device output, parsed results, credentials, tokens, and filesystem paths by default. Review the file before attaching it.
+The bundle includes Ultraglass version, basic runtime information, recent error-level log records, and failure metadata from `logging.samples`. It reads query samples only from the default file name, `hyperglass_query_log.jsonl`, in each log directory. It excludes query targets, device names, raw device output, parsed results, credentials, tokens, and filesystem paths by default. Review the file before attaching it.
 
 ```shell filename="terminal" copy
 hyperglass support-bundle --output ultraglass-support-bundle.json
 ```
 
-If logs are stored outside `/tmp` or the application directory, provide the directory explicitly:
+Without `--log-directory`, the command reads the system temporary directory and the application directory. If logs are stored elsewhere, provide the directory explicitly. `--log-lines` sets the number of recent lines read from each log, default 200, maximum 5000.
 
 ```shell filename="terminal" copy
 hyperglass support-bundle --log-directory /var/log/ultraglass --output ultraglass-support-bundle.json

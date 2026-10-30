@@ -2,17 +2,9 @@ import { Callout } from "nextra/components";
 
 ## Structured
 
-Devices that return structured or easily parsed data can display their response in a table, or as JSON through the REST API. Structured output is opt-in: set `structured_output: true` on each device. The following platforms currently have structured data support in Ultraglass:
+Devices that return structured or easily parsed data can display their response in a table, or as JSON through the REST API. Structured output is opt-in: set `structured_output: true` on each device. Ultraglass rejects `structured_output: true` on a platform that has no structured support.
 
--   Arista EOS
--   Cisco IOS and IOS XE (parses `show bgp` text. AS path and community results come from the summary table, which carries no communities or route age)
--   BIRD (parses `show route all` text. BIRD prints no route age or RPKI state, so both show as unknown)
--   FRRouting
--   Huawei VRP
--   Juniper Junos
--   Mikrotik RouterOS/SwitchOS
--   OpenBGPD (BGP tables use `bgpctl -j show rib detail`, and RPKI state comes from the daemon's origin validation)
--   VyOS (BGP tables read FRR JSON through `vtysh`. AS path and community results carry no communities or route age, because FRR summary output omits them)
+Structured BGP results are available for Arista EOS, BIRD, Cisco IOS, IOS-XR and NX-OS, Extreme EXOS, FRRouting, Huawei VRP, Juniper Junos, MikroTik RouterOS and SwitchOS, OpenBGPD, SONiC and VyOS 1.4 and later. Structured traceroute covers these platforms and also Nokia SR OS, TNSR, Extreme VOSS and VyOS 1.3. See [structured output in Platforms](/platforms.mdx#structured-output) for the source command and limitations of each platform.
 
 When structured output is available, Ultraglass can check the RPKI state of each returned BGP prefix using one of two methods:
 
@@ -25,21 +17,21 @@ For external validation, Ultraglass supports two backends:
 
 Ultraglass can also control which BGP communities are shown to the end user.
 
-For devices with structured traceroute support, Ultraglass can add ASN, organisation, country, reverse DNS, and IXP details using lookups from BGP.tools.
+For devices with structured traceroute support, Ultraglass can add ASN, organisation, country, prefix and IXP details using lookups from BGP.tools.
 
-| Parameter                         | Type            | Default Value | Description                                                                                                                            |
-| :-------------------------------- | :-------------- | :------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
-| `structured.rpki.mode`            | String          | router        | Use `router` to use the router's view of the RPKI state, or `external` to use an external validation service.                        |
-| `structured.rpki.backend`         | String          | cloudflare    | When using `external` mode, choose `cloudflare` or `routinator` as the validation backend.                                           |
-| `structured.rpki.rpki_server_url` | String          |               | When using `routinator` backend, specify the base URL of your Routinator server (e.g., `http://rpki.example.com:3323`).             |
-| `structured.communities.mode`     | String          | deny          | Use `deny` to deny any communities listed, `permit` to _only_ permit communities listed, or `name` to append friendly names.         |
-| `structured.communities.items`    | List of Strings |               | List of communities to match (used by `deny` and `permit` modes).                                                                     |
-| `structured.communities.names`    | Dict            |               | Dictionary mapping BGP community codes to friendly names (used by `name` mode).                                                       |
-| `structured.ip_enrichment.cache_timeout`    | Integer         | 604800        | **DEPRECATED:** No longer used with real-time BGP.tools lookups. Kept for backward compatibility only.                               |
-| `structured.ip_enrichment.enrich_traceroute`| Boolean         | false         | When `structured:` is present, enable IP enrichment of traceroute hops (ASN, org, IXP). This must be true for enrichment to run.   |
-| `structured.ip_enrichment.enrich_bgproute` | Boolean         | false         | When `structured:` is present, enable early ASN/org enrichment for BGP routes. When true, enrichment happens immediately on query response. When false, enrichment is lazy-loaded when viewing AS Path. |
-| `structured.enable_for_traceroute`| Boolean         | (when structured present) true | When `structured:` is present this controls whether the structured traceroute table output is shown. Set to false to force raw router output. |
-| `structured.enable_for_bgp_route`| Boolean         | (when structured present) true | When `structured:` is present this controls whether the structured BGP route table output is shown. Set to false to force raw router output. |
+| Parameter                                    | Type            | Default Value | Description |
+| :------------------------------------------- | :-------------- | :------------ | :---------- |
+| `structured.rpki.mode`                       | String          | router        | Use `router` to use the router's view of the RPKI state, or `external` to use an external validation service. |
+| `structured.rpki.backend`                    | String          | cloudflare    | When using `external` mode, choose `cloudflare` or `routinator` as the validation backend. |
+| `structured.rpki.rpki_server_url`            | String          |               | Base URL of your Routinator HTTP API, for example `http://rpki.example.com:8323`. Required when `backend` is `routinator`. |
+| `structured.communities.mode`                | String          | deny          | Use `deny` to deny any communities listed, `permit` to _only_ permit communities listed, or `name` to append friendly names. |
+| `structured.communities.items`               | List of Strings |               | List of communities to match (used by `deny` and `permit` modes). |
+| `structured.communities.names`               | Dict            |               | Dictionary mapping BGP community codes to friendly names. Required, with at least one entry, when `mode` is `name`. |
+| `structured.ip_enrichment.enrich_traceroute` | Boolean         | false         | Enrich traceroute hops with ASN, organisation, prefix and IXP details. |
+| `structured.ip_enrichment.enrich_bgproute`   | Boolean         | false         | Enrich BGP routes with AS path organisation names and next-hop details when the query runs. When `false`, the UI loads AS path organisation names when the user opens the AS path. |
+| `structured.ip_enrichment.mode`              | String          | inline        | `inline` enriches the result before Ultraglass returns it. `async` returns the result first, then enriches it in the background and the UI fetches the enriched result. |
+| `structured.enable_for_traceroute`           | Boolean         |               | Set to `false` to return text traceroute output on every device. When unset, each device's `structured_output` setting applies. |
+| `structured.enable_for_bgp_route`            | Boolean         |               | Set to `false` to return text BGP route output on every device. When unset, each device's `structured_output` setting applies. |
 
 ### RPKI Examples
 
@@ -67,13 +59,13 @@ structured:
     rpki:
         mode: external
         backend: routinator
-        rpki_server_url: "http://rpki.example.com:8080"
+        rpki_server_url: "http://rpki.example.com:8323"
 ```
 
 <Callout type="info" emoji="ℹ️">
     **Routinator URL Format**
     
-    The `rpki_server_url` should be the base URL of your Routinator HTTP web API endpoint. This is typically different from the RTR port (3323). Do not include the `/validity` path because Ultraglass appends it automatically.
+    The `rpki_server_url` should be the base URL of your Routinator HTTP API. Routinator serves HTTP on port 8323 by default, not on the RTR port (3323). Do not include the `/validity` path because Ultraglass appends it automatically.
 </Callout>
 
 ### Community Filtering Examples
@@ -119,32 +111,10 @@ structured:
 ### IP Enrichment Examples
 
 <Callout type="info" emoji="ℹ️">
-    **IP Enrichment Requirements**
-    
-    IP enrichment is currently supported for traceroute outputs on supported platforms.
-    
-    The system uses real-time lookups from BGP.tools for maximum accuracy and reliability.
+    **IP Enrichment Lookups**
+
+    Ultraglass looks up enrichment data from BGP.tools over WHOIS (TCP port 43) at query time. Each worker process keeps lookup results in memory until it restarts. Ultraglass writes no enrichment cache to disk.
 </Callout>
-
-#### Enable IP Enrichment for Traceroute
-
-```yaml filename="config.yaml" copy {2-4}
-structured:
-    # Ensure `structured:` exists to enable structured output. By default the
-    # structured table output is enabled when this block is present. To disable
-    # the structured traceroute table, set `structured.enable_for_traceroute: false`.
-    ip_enrichment:
-        enrich_traceroute: true
-```
-
-#### Enable IP Enrichment
-
-```yaml filename="config.yaml" copy {2-4}
-structured:
-    ip_enrichment:
-        enrich_traceroute: true
-        # cache_timeout is deprecated - real-time lookups are used
-```
 
 #### Enable IP Enrichment for Traceroute
 
@@ -154,26 +124,27 @@ structured:
         enrich_traceroute: true
 ```
 
-<Callout type="warning" emoji="⚠️">
-    **Performance Considerations**
-    
-    - Initial cache loading may take 30-60 seconds on first startup
-    - Data is cached locally using pickle format for ultra-fast subsequent loads
-    - Cache files are stored in `/etc/hyperglass/ip_enrichment/`
-    - Minimum cache timeout is 24 hours (86400 seconds) to prevent excessive API usage
-</Callout>
+#### Enrich in the Background
+
+```yaml filename="config.yaml" copy {2-5}
+structured:
+    ip_enrichment:
+        mode: async
+        enrich_traceroute: true
+        enrich_bgproute: true
+```
 
 ### Structured Traceroute Configuration
 
 <Callout type="info" emoji="ℹ️">
     **Structured Traceroute Support**
-    
+
     Structured traceroute with rich metadata is available for:
-    - **FRRouting**: Parses Unix-style traceroute output with load balancing and multi-path support
+    - **FRRouting and SONiC**: Parses Unix-style traceroute output with load balancing and multi-path support
     - **Huawei VRP**: Parses Unix-style traceroute output
     - **MikroTik RouterOS/SwitchOS**: Parses multi-table format with statistics
-    - **EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, TNSR**: Parses standard numbered CLI output, retaining unfamiliar formats as text. EOS, BIRD, OpenBGPD, and VyOS have captured lab fixtures. Remaining hardware formats require validation.
-    
+    - **EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, TNSR, Extreme EXOS and VOSS**: Parses standard numbered CLI output, retaining unfamiliar formats as text. EOS, BIRD, OpenBGPD, and VyOS have captured lab fixtures. Remaining hardware formats require validation.
+
     When IP enrichment is enabled, traceroute hops are enhanced with ASN numbers, organization names, country codes, prefixes, and IXP detection.
 </Callout>
 
@@ -181,12 +152,12 @@ structured:
 
 Set `structured_output: true` on each device to enable its structured BGP and traceroute parsers. A device without it returns text.
 
-```yaml filename="config.yaml" copy {2-12}
+```yaml filename="config.yaml" copy {2-13}
 structured:
     rpki:
         mode: external
         backend: routinator
-        rpki_server_url: "https://rpki.example.com"
+        rpki_server_url: "http://rpki.example.com:8323"
     communities:
         mode: name
         names:
@@ -194,12 +165,11 @@ structured:
             "65000:2000": "Peer Routes"
     ip_enrichment:
         enrich_traceroute: true
-        # cache_timeout is deprecated - real-time lookups are used
 ```
 
 #### Structured Traceroute with Cloudflare RPKI
 
-```yaml filename="config.yaml" copy {2-9}
+```yaml filename="config.yaml" copy {2-6}
 structured:
     rpki:
         mode: external
@@ -213,8 +183,8 @@ structured:
 ```yaml filename="config.yaml" copy {2-4}
 structured:
     ip_enrichment:
-        enrich_traceroute: false  # Traceroute will show basic hop info without ASN/org data
-        enrich_bgproute: true      # BGP routes will include ASN/org enrichment on query response
+        enrich_traceroute: false  # Traceroute shows basic hop info without ASN/org data
+        enrich_bgproute: false    # BGP routes are not enriched when the query runs
 ```
 
 <Callout type="warning" emoji="⚠️">
@@ -224,7 +194,7 @@ structured:
     - Traceroute hops will only show IP addresses and RTT values
     - BGP next-hop IPs will not show ASN/organization tooltips
     - No ASN organization names in copied BGP route text
-    - AS path visualization will be limited or unavailable
+    - AS path organization names load only when the user opens the AS path
     - IXP detection will not function
     
     For the full structured traceroute and BGP route experience with rich metadata, enable the appropriate enrichment settings.
@@ -232,37 +202,34 @@ structured:
 
 ### BGP Route Enrichment
 
-BGP route enrichment provides two modes for ASN and organization lookups:
+BGP route enrichment has two modes for ASN and organization lookups.
 
 #### Early Enrichment (On-Query)
-When `enrich_bgproute: true`, enrichment happens immediately during query execution:
-- ✅ ASN names appear instantly in AS path entries
-- ✅ Next-hop IP tooltips show organization information
-- ✅ Copied text includes enriched data: `37468 (Organization) → 12956 (Organization)`
-- ⚠️ Adds a small delay to query execution for bulk lookups
 
-```yaml filename="config.yaml" copy {4}
+When `enrich_bgproute: true`, Ultraglass enriches each route when the query runs:
+
+- AS path entries show organization names.
+- Next-hop IPs show the peer ASN and organization, for example `192.0.2.1 (ASN Organization)`.
+- Copied text includes enriched data: `37468 (Organization) → 12956 (Organization)`.
+- With the default `mode: inline`, the lookups add a delay to the query. Set `mode: async` to return the result first.
+
+```yaml filename="config.yaml" copy {3}
 structured:
     ip_enrichment:
         enrich_bgproute: true
 ```
 
 #### Lazy Enrichment (On-Demand)
-When `enrich_bgproute: false` (default), enrichment happens only when needed:
-- ✅ Faster initial query response
-- ✅ Organization names load when clicking "View AS Path" button or hovering
-- ✅ Reduces unnecessary lookups for partial queries
-- ⚠️ Organization names not included in copied text by default
 
-```yaml filename="config.yaml" copy {4}
+When `enrich_bgproute: false` (default), Ultraglass does not enrich routes when the query runs:
+
+- The query returns without enrichment lookups.
+- Organization names load when the user opens the AS path.
+- Next-hop IPs have no ASN or organization details.
+- Copied text does not include organization names.
+
+```yaml filename="config.yaml" copy {3}
 structured:
     ip_enrichment:
         enrich_bgproute: false
 ```
-
-#### Next-Hop Enrichment
-
-Regardless of enrichment mode, next-hop IPs for BGP routes are always enriched with:
-- Peer ASN (if available)
-- Peer organization name (if available)
-- Hovering over a next-hop IP shows: `192.0.2.1 (ASN Organization)`

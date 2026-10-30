@@ -7,9 +7,9 @@ Ultraglass provides extensive customisation options for the look and feel of the
 
 | Parameter                   | Type   | Default Value | Description                                                                                                                                |
 | :-------------------------- | :----- | :------------ | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `web.location_display_mode` | String | auto          | Show the locations field as a `dropdown`, `gallery`. When using `auto`, if there are more than 5 location groups, `dropdown` will be used. |
-| `web.custom_javascript`     | String |               | Path to a javascript file that will be loaded with the website.                                                                            |
-| `web.custom_html`           | String |               | Path to a custom HTML file that will be loaded with the website and rendered beneath the app.                                              |
+| `web.location_display_mode` | String | auto          | Show the locations field as a `dropdown` or a `gallery`. `auto` uses `gallery` when there are fewer than 5 location groups and every group has fewer than 9 locations, and `dropdown` otherwise. |
+| `web.custom_javascript`     | String |               | Path to a JavaScript file that is loaded in the page head. The file must exist.                                                            |
+| `web.custom_html`           | String |               | Path to a custom HTML file that is rendered beneath the app. The file must exist.                                                          |
 | `web.my_ip` | String | server | How the My IP button finds the visitor's address. `server` returns the address Ultraglass received the request from (it reads `X-Real-IP` or `X-Forwarded-For` behind a proxy), so no third party is contacted; only the address family used for the request is shown. `external` is opt-in: it asks myip.wtf, which can return both IPv4 and IPv6, after showing `web.text.ip_lookup_notice` and waiting for the visitor to confirm. If the myip.wtf lookup for a family fails, the button falls back to the server address for that family. `off` hides the button. |
 
 ### DNS over HTTPS
@@ -18,8 +18,8 @@ By default, the browser resolves hostname targets using [DNS over HTTPS](https:/
 
 | Parameter           | Type   | Default Value                          | Description                                                                 |
 | :------------------ | :----- | :------------------------------------- | :-------------------------------------------------------------------------- |
-| `dns_provider.name` | String | cloudflare                             | If `cloudflare` or `google` are provided, no URL is necessary. Use `server` to resolve hostnames on the Ultraglass server through `/api/dns` (A and AAAA, limited to 120 requests a minute per client), for networks that block public DNS-over-HTTPS. |
-| `dns_provider.url`  | String | `https://cloudflare-dns.com/dns-query` | Provide a custom DNS over HTTPS URL if you'd like to use your own resolver. |
+| `web.dns_provider.name` | String | cloudflare                             | If `cloudflare` or `google` are provided, no URL is necessary. Use `server` to resolve hostnames on the Ultraglass server through `/api/dns` (A and AAAA, limited to 120 requests a minute per client), for networks that block public DNS-over-HTTPS. |
+| `web.dns_provider.url`  | String | `https://cloudflare-dns.com/dns-query` | Provide a custom DNS over HTTPS URL if you'd like to use your own resolver. A URL that is not a built-in provider URL sets the provider name to `custom`. |
 
 ```yaml filename="config.yaml" copy
 web:
@@ -36,11 +36,11 @@ Server DNS supports A and AAAA records. Its endpoint allows 120 requests per min
 
 | Parameter          | Type             | Default Value | Description                                        |
 | :----------------- | :--------------- | :------------ | :------------------------------------------------- |
-| `web.logo.light`   | String           |               | Path to logo to show in light mode.                |
-| `web.logo.dark`    | String           |               | Path to logo to show in dark mode.                 |
-| `web.logo.favicon` | String           |               | Path to icon/logo from which to generate favicons. |
-| `web.logo.width`   | Number or String | 100%          | Width of logo, either as pixels or a percentage.   |
-| `web.logo.height`  | Number or String |               | Height of logo, either as pixels or a percentage.  |
+| `web.logo.light`   | String           | Ultraglass light logo | Path to logo to show in light mode. |
+| `web.logo.dark`    | String           | Ultraglass dark logo  | Path to logo to show in dark mode. |
+| `web.logo.favicon` | String           | Ultraglass icon       | Path to icon/logo from which to generate favicons. |
+| `web.logo.width`   | String           | 50%                   | Maximum width of the logo on wide screens, as a percentage from 1 to 100. The `%` sign is optional. |
+| `web.logo.height`  | String           |                       | Accepted, as a percentage from 1 to 100, but not used by the current UI. |
 
 ##### Example
 
@@ -50,8 +50,7 @@ web:
         light: /path/to/light-logo.svg
         dark: /path/to/dark-logo.svg
         favicon: /path/to/favicon.svg
-        width: 100%
-        height: null
+        width: 50%
 ```
 
 ### Greeting
@@ -64,11 +63,11 @@ The greeting is an optional modal/popup window that will present itself to users
 
 | Parameter               | Type    | Default Value | Description                                                                                          |
 | :---------------------- | :------ | :------------ | :--------------------------------------------------------------------------------------------------- |
-| `web.greeting.enable`   | Boolean | False         | Enable or disable the greeting.                                                                      |
-| `web.greeting.file`     | String  |               | Path to markdown or plain text file that contains greeting content.                                  |
+| `web.greeting.enable`   | Boolean | `false`       | Enable or disable the greeting.                                                                      |
+| `web.greeting.file`     | String  |               | Path to markdown or plain text file that contains greeting content. Required when `enable` is `true`. |
 | `web.greeting.title`    | String  | Welcome       | Text to be used as the greeting title.                                                               |
 | `web.greeting.button`   | String  | Continue      | Text to be used for the button that acknowledges/closes the greeting.                                |
-| `web.greeting.required` | Boolean | False         | If `true`, users cannot close the modal or run any queries until the greeting has been acknowledged. |
+| `web.greeting.required` | Boolean | `false`       | If `true`, users cannot close the modal or run any queries until the greeting has been acknowledged. |
 
 ##### Example
 
@@ -84,7 +83,7 @@ web:
 
 ### OpenGraph
 
-[OpenGraph](https://ogp.me/) controls the image, title, and description shown when you share a link. Ultraglass uses [this OpenGraph image](/opengraph.jpg) by default, but you can provide your own image.
+[OpenGraph](https://ogp.me/) controls the image, title, and description shown when you share a link. Ultraglass uses [this OpenGraph image](/opengraph.jpg) by default, but you can provide your own image. The image must be a JPEG or PNG file. Ultraglass resizes it to fit 1200 by 630 pixels and serves it as a JPEG.
 
 | Parameter             | Type   | Default Value | Description                   |
 | :-------------------- | :----- | :------------ | :---------------------------- |
@@ -94,13 +93,13 @@ web:
 
 Ultraglass can highlight special values in router output and provide users with additional context. For example, an organisation's BGP communities or IP address space can be highlighted with a tooltip.
 
-Each value you wish to be highlighted is defined with the following schema:
+`web.highlight` is a list. Each value you wish to be highlighted is defined with the following schema:
 
 | Parameter | Type   | Default Value | Description                                             |
 | :-------- | :----- | :------------ | :------------------------------------------------------ |
-| `pattern` | String |               | RegEx pattern or string to match against router output. |
+| `pattern` | String |               | RegEx pattern or string to match against router output. Required. |
 | `label`   | String |               | Tooltip value when the highlighted text is hovered.     |
-| `color`   | String |               | Color name from [`web.theme.colors`](#colors).          |
+| `color`   | String | primary       | Color name from [`web.theme.colors`](#colors).          |
 
 ##### Example
 
@@ -117,12 +116,12 @@ web:
 
 ### Menus
 
-Ultraglass can show customisable menus in the footer. Each menu can be configured with the following schema:
+Ultraglass can show customisable menus in the footer. `web.menus` is a list. By default, it contains a Terms menu and a Help menu. Setting `web.menus` replaces both. In menu content, `{site_title}`, `{org_name}` and `{version}` are replaced with their values. Each menu can be configured with the following schema:
 
 | Parameter | Type   | Default Value | Description                                                                                                                |
 | :-------- | :----- | :------------ | :------------------------------------------------------------------------------------------------------------------------- |
 | `title`   | String |               | Menu title, will be the text that shows on footer.                                                                         |
-| `content` | String |               | Plain text or markdown content of the menu or path to a file that contains plain text or markdown content.                 |
+| `content` | String |               | Plain text or markdown content of the menu or path to a file that contains plain text or markdown content. A value of 260 characters or more is always treated as content. |
 | `side`    | String | left          | Side of the footer with which the menu will be grouped.                                                                    |
 | `order`   | Number | 0             | Optionally specify an order for each menu item. If not specified, menus will be rendered in the order they are configured. |
 
@@ -132,9 +131,9 @@ Ultraglass can show customisable menus in the footer. Each menu can be configure
 web:
   menus:
     - title: Terms & Conditions
-      content:
-        | **Don't** break stuff!
-          _please_
+      content: |
+        **Don't** break stuff!
+        _please_
       side: right
       order: 1
     - title: Help
@@ -145,13 +144,13 @@ web:
 
 ### Links
 
-Ultraglass can show links to resources that users may find helpful. Each link can be configured with the following schema:
+Ultraglass can show links to resources that users may find helpful. `web.links` is a list. By default, it contains one PeeringDB link to `https://www.peeringdb.com/asn/{primary_asn}`. Setting `web.links` replaces it. In link URLs, `{primary_asn}` is replaced with the `primary_asn` value. Each link can be configured with the following schema:
 
 | Parameter   | Type    | Default Value | Description                                                                                                           |
 | :---------- | :------ | :------------ | :-------------------------------------------------------------------------------------------------------------------- |
 | `title`     | String  |               | Link text.                                                                                                            |
 | `url`       | String  |               | Link URL.                                                                                                             |
-| `show_icon` | Boolean | True          | If `true`, an icon indicating the link is an external link is shown.                                                  |
+| `show_icon` | Boolean | `true`        | If `true`, an icon indicating the link is an external link is shown.                                                  |
 | `side`      | String  | left          | Side of the footer with which the link will be grouped.                                                               |
 | `order`     | Number  | 0             | Optionally specify an order for each link. If not specified, links will be rendered in the order they are configured. |
 
@@ -161,7 +160,7 @@ Ultraglass can show links to resources that users may find helpful. Each link ca
 web:
     links:
         - title: PeeringDB
-          url: https://www.peeringdb.com/65000
+          url: https://www.peeringdb.com/asn/{primary_asn}
           show_icon: true
           side: right
           order: 1
@@ -176,7 +175,7 @@ web:
 
 | Parameter |  Type   | Default | Description                                                                              |
 | :-------- | :-----: | :-----: | :--------------------------------------------------------------------------------------- |
-| `enable`  | Boolean | `true`  | Enable or disable the display of Ultraglass and upstream credit in the footer. |
+| `web.credit.enable` | Boolean | `true`  | Enable or disable the display of Ultraglass and upstream credit in the footer. |
 
 <Callout emoji="❤️" type="info">
     **Note from the Developer**
@@ -193,13 +192,13 @@ Most of the text in the Ultraglass UI can be overridden to suit your needs.
 | Parameter                    | Type   | Default Value                         | Description                                                                                                                                                             |
 | :--------------------------- | :----- | :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `web.text.title_mode`        | String | logo_only                             | See [title mode section](#title-mode)                                                                                                                                   |
-| `web.text.title`             | String | Ultraglass                            | Title text.                                                                                                                                                             |
-| `web.text.subtitle`          | String | Network Looking Glass                 | Subtitle text.                                                                                                                                                          |
+| `web.text.title`             | String | Ultraglass                            | Title text. Maximum 32 characters.                                                                                                                                      |
+| `web.text.subtitle`          | String | Network Looking Glass                 | Subtitle text. Maximum 32 characters.                                                                                                                                   |
 | `web.text.query_location`    | String | Location                              | Text used to label the query location (router) field.                                                                                                                   |
 | `web.text.query_type`        | String | Query Type                            | Text used to label the query type (directive) field.                                                                                                                    |
 | `web.text.query_target`      | String | Target                                | Text used to label the query target field.                                                                                                                              |
 | `web.text.fqdn_tooltip`      | String | Use \{protocol\}                      | Tooltip text used when a user hovers over the FQDN tooltip.                                                                                                             |
-| `web.text.fqdn_message`      | String | Your browser has resolved \{fqdn\} to | Text used when prompting a user to select a resolve IPv4 or IPv6 address for an FQDN query.                                                                             |
+| `web.text.fqdn_message`      | String | Your browser has resolved \{fqdn\} to | Text used when prompting a user to select a resolved IPv4 or IPv6 address for an FQDN query. With `web.dns_provider.name: server`, the default becomes `Ultraglass has resolved {fqdn} to`. |
 | `web.text.fqdn_error`        | String | Unable to resolve \{fqdn\}            | Text used when an FQDN is not resolvable.                                                                                                                               |
 | `web.text.fqdn_error_button` | String | Try Again                             | Button text used when an FQDN is not resolvable.                                                                                                                        |
 | `web.text.cache_prefix`      | String | Results cached for                    | Text displayed with the cache timeout countdown.                                                                                                                        |
@@ -297,7 +296,7 @@ Ultraglass's fonts come from [Google Fonts](https://fonts.google.com/). Any Goog
 | Parameter              | Type   | Default Value | Description                                                                              |
 | :--------------------- | :----- | :------------ | :--------------------------------------------------------------------------------------- |
 | `web.theme.fonts.body` | String | Nunito        | Font for all standard body text, including headings.                                     |
-| `web.theme.fonts.mono` | String | Fire Code     | Font for all monospace text such as inline code or code blocks, including device output. |
+| `web.theme.fonts.mono` | String | Fira Code     | Font for all monospace text such as inline code or code blocks, including device output. |
 
 ##### Example
 

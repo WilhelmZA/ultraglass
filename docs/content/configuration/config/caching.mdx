@@ -1,11 +1,11 @@
 ## Cache
 
-Ultraglass automatically caches responses to reduce the number of times devices are queried for the same information.
+Ultraglass caches query responses in Redis, so a repeated query does not reach the device again until the cache entry expires.
 
 | Parameter         | Type    | Default Value | Description                                                                     |
 | :---------------- | :------ | :------------ | :------------------------------------------------------------------------------ |
-| `cache.timeout`   | Number  | 120           | Number of seconds for which to cache device responses.                          |
-| `cache.show_text` | Boolean | True          | If true, an indication that a user is viewing cached information will be shown. |
+| `cache.timeout`   | Number  | 120           | Number of seconds for which to cache device responses. The UI countdown for cached results uses the same value. |
+| `cache.show_text` | Boolean | `true`        | If `true`, the UI shows a cache icon and countdown on cached results. |
 
 ### Example with Defaults
 
