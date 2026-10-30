@@ -104,7 +104,7 @@ The greeting text comes from the file that `web.greeting.file` names:
 
 - This server resolves hostnames. Your browser sends no DNS query to a third party.
 - The My IP button reads your address from your request to this server.
-- We don't log sensitive query details.
+- The server logs the location, type and target of each query.
 ```
 
 ## High-Performance Setup
@@ -444,7 +444,7 @@ Ultraglass reads `config`, `devices` and `directives` files from the directory t
 - **Docker**: the Compose file mounts `${HYPERGLASS_APP_PATH}` on the host to `/etc/hyperglass` in the container.
 - **System install**: place the files in `/etc/hyperglass`, or set `HYPERGLASS_APP_PATH` to another directory.
 
-Every file path in a config, such as `web.logo.light`, `web.greeting.file` and `logging.directory`, must exist when Ultraglass starts.
+The files that `web.logo.light`, `web.logo.dark`, `web.logo.favicon`, `web.greeting.file`, `web.custom_javascript` and `web.custom_html` name, and the `logging.directory` directory, must exist when Ultraglass starts.
 
 ## Validation
 
@@ -454,8 +454,9 @@ Ultraglass validates its configuration when it starts. If a file is invalid, it 
 # Validate the configuration and start Ultraglass
 hyperglass start
 
-# Log more detail during startup
-HYPERGLASS_DEBUG=true hyperglass start
+# Log more detail during startup. Debug mode listens on all interfaces
+# unless HYPERGLASS_HOST is set.
+HYPERGLASS_HOST=::1 HYPERGLASS_DEBUG=true hyperglass start
 ```
 
 To test the UI without devices answering, set `fake_output: true` in `config.yaml`. Ultraglass then returns sample output for every query.
