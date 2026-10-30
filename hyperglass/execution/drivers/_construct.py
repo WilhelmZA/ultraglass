@@ -104,7 +104,9 @@ class Construct:
     def format(self, command: str) -> str:
         """Return formatted command for 'Scrape' endpoints (SSH)."""
         keys = get_fmt_keys(command)
-        attrs = {k: v for k, v in self.device.attrs.items() if k in keys}
+        attrs = {
+            k: v for k, v in self.device.attrs.items() if k in keys and k not in ("target", "mask")
+        }
         variables = self.directive.variables
         for key in [k for k in keys if k not in ("target", "mask") and k not in variables]:
             if key not in attrs:

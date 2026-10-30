@@ -56,7 +56,7 @@ def directive_attr_keys(directives: t.Iterable[Directive], *, vrf: bool) -> t.Se
     """Return the device attributes the device's commands reference.
 
     A VRF device runs a rule's VRF commands where the rule has them, as `Construct` does,
-    so only those commands count (#95). `target`, `vrf` and directive variables are
+    so only those commands count (#95). `target`, `mask`, `vrf` and directive variables are
     filled in at query time, not from `attrs`.
     """
     return {
@@ -69,7 +69,7 @@ def directive_attr_keys(directives: t.Iterable[Directive], *, vrf: bool) -> t.Se
             else rule.commands + rule.fallback_commands
         )
         for key in get_fmt_keys(command)
-        if key not in ("target", "vrf") and key not in directive.variables
+        if key not in ("target", "mask", "vrf") and key not in directive.variables
     }
 
 

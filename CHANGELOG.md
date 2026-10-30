@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Error messages no longer repeat the device error. A template that already contains `{error}`, such as the default connection error, showed it twice as `boom (boom)` (#187).
 - `create_platform_list`, which builds `docs/platforms.json`, no longer raises `TypeError` on the first directive file. A test now runs it and compares its output with `docs/platforms.json` (#174).
 - The sample manual `systemd` service now depends on `redis-server.service` and starts after it, and runs the Python in the `/opt/hyperglass/.venv` virtual environment. The manual install docs no longer need a `sed` step to fix `ExecStart` (#176).
+- Custom directives can use `{mask}`. Before, config validation treated `mask` as a missing device attribute, and setting `attrs.mask` made the query fail. The `{mask}` line is back in the directives docs (#168).
 
 ## 3.5.0-rc.3 - 2026-10-30
 
