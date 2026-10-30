@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 
 - A device without structured output no longer offers the table-output BGP directives. The UI sent them for some query types, so a text deployment showed raw JSON or XML (#132, #133, #134, #138, #139, #140, #141, #142).
+- Cisco IOS-XR queries sent back to back no longer fail with `Error reading SSH protocol banner` or `Connection reset by peer`. Ultraglass now retries the SSH connect with backoff when a device drops the session before login. The new `connect_retries` device setting defaults to 3 on `cisco_xr` and 0 elsewhere (#140).
 - MikroTik community queries now match a community anywhere in a route's community list. RouterOS 6 separates the list with `;`, so the query missed every community except the last (#117).
 - Structured BGP results with external RPKI validation now finish in seconds instead of minutes. Each result validates its routes in one batch: Ultraglass deduplicates prefix and origin ASN pairs, reads the Redis cache once, and looks up the uncached pairs concurrently over one HTTP session (#133, #134, #138, #139).
 - Juniper structured BGP queries no longer return an error on routes that carry the Only-to-Customer attribute (RFC 9234). Junos emits two path attribute blocks for these routes, and the parser now merges them. An unexpected parse fault now reports its cause instead of a bare 500 (#133).

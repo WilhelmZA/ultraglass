@@ -6,6 +6,8 @@ https://github.com/ktbyers/netmiko
 # Standard Library
 import re
 import math
+import time
+import random
 import typing as t
 from contextvars import ContextVar
 from datetime import UTC, datetime
@@ -76,6 +78,85 @@ netmiko_device_send_args = {
     "mikrotik_routeros": {"last_read": 5.0},
     "mikrotik_switchos": {"last_read": 5.0},
 }
+
+
+# Platforms that drop new SSH sessions above a rate. IOS-XR accepts about one new
+# session per second and resets the rest before login (#140).
+PLATFORM_CONNECT_RETRIES = {"cisco_xr": 3}
+
+# Connect-phase errors a session rate limit causes. Netmiko wraps each one in a
+# timeout exception, so match the chained cause and the message.
+CONNECT_REFUSALS = (ConnectionResetError, ConnectionRefusedError)
+CONNECT_REFUSAL_TEXT = (
+    "Error reading SSH protocol banner",
+    "Connection reset by peer",
+    "Connection refused",
+)
+
+
+def device_connect_retries(device: "Device") -> int:
+    """Return the connect retries a device's config resolves to."""
+    retries = getattr(device, "connect_retries", None)
+    if retries is None:
+        return PLATFORM_CONNECT_RETRIES.get(device.platform, 0)
+    return retries
+
+
+def is_connect_refusal(error: BaseException) -> bool:
+    """Return True when the device dropped the session before login."""
+    seen = set()
+    while error is not None and id(error) not in seen:
+        seen.add(id(error))
+        if isinstance(error, CONNECT_REFUSALS):
+            return True
+        if any(text in str(error) for text in CONNECT_REFUSAL_TEXT):
+            return True
+        error = error.__cause__ or error.__context__
+    return False
+
+
+def connect_with_retry(
+    connect: t.Callable[[], t.Any],
+    retries: int,
+    budget: float,
+    device: t.Optional[str] = None,
+    sleep: t.Optional[t.Callable[[float], None]] = None,
+    clock: t.Optional[t.Callable[[], float]] = None,
+) -> t.Any:
+    """Open a session, and retry with backoff when the device drops it before login.
+
+    Only the connect step runs here, so no query command is ever sent twice. Each
+    wait doubles from 1 s to at most 4 s, plus up to 1 s of jitter so workers spread
+    out. Retries stop when the next wait would pass `budget` seconds.
+    """
+    sleep = sleep or time.sleep
+    clock = clock or time.monotonic
+    started = clock()
+    attempt = 0
+    while True:
+        try:
+            return connect()
+        except Exception as error:
+            if attempt >= retries or not is_connect_refusal(error):
+                raise
+            delay = min(2**attempt, 4) + random.uniform(0, 1)  # noqa: S311 (jitter, not crypto)
+            if clock() - started + delay > budget:
+                raise
+            attempt += 1
+            log.bind(device=device, attempt=attempt, retries=retries, delay=round(delay, 1)).info(
+                "Device dropped the SSH session before login, retrying"
+            )
+            sleep(delay)
+
+
+def open_session(driver_kwargs: t.Dict[str, t.Any], disable_paging: bool) -> t.Any:
+    """Open a netmiko session. Without paging commands, connect after replacing them."""
+    session = ConnectHandler(**driver_kwargs)
+    if not disable_paging:
+        session.disable_paging = lambda *args, **kwargs: ""
+        session.set_terminal_width = lambda *args, **kwargs: ""
+        session._open()
+    return session
 
 
 def collect_commands(
@@ -173,11 +254,13 @@ class NetmikoConnection(SSHConnection):
         def _netmiko_connect():
             """Execute blocking netmiko operations in a separate thread."""
             try:
-                nm_connect_direct = ConnectHandler(**driver_kwargs)
-                if not self.device.disable_paging:
-                    nm_connect_direct.disable_paging = lambda *args, **kwargs: ""
-                    nm_connect_direct.set_terminal_width = lambda *args, **kwargs: ""
-                    nm_connect_direct._open()
+                # Half the request timeout at most, so the query keeps time to run.
+                nm_connect_direct = connect_with_retry(
+                    lambda: open_session(driver_kwargs, self.device.disable_paging),
+                    device_connect_retries(self.device),
+                    params.request_timeout / 2,
+                    device=self.device.name,
+                )
                 return collect_commands(
                     nm_connect_direct,
                     self.device.platform,

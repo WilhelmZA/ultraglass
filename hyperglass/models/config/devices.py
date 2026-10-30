@@ -100,6 +100,9 @@ class Device(HyperglassModelWithId, extra="allow"):
     # Set to false when a login policy rejects the driver's paging and terminal
     # width commands. Directives must then disable paging themselves.
     disable_paging: bool = True
+    # Retries when the device drops a new SSH session before login, for example a
+    # session rate limit. Unset uses the platform default: 3 on cisco_xr, else 0.
+    connect_retries: t.Optional[int] = Field(None, ge=0, le=10)
     attrs: t.Dict[str, str] = {}
 
     def __init__(self, **kw) -> None:
