@@ -14,10 +14,10 @@ Ultraglass keeps user-facing messages configurable so each deployment can descri
 | `messages.not_found`            | String | \{type\} '\{name\}' not found.                           | Displayed when an object property does not exist in the configuration. `{type}` corresponds to a user-friendly name of the object type (for example, 'Device'), `{name}` corresponds to the object name that was not found. |
 | `messages.request_timeout`      | String | Request timed out.                                       | Displayed when the [`request_timeout`](/configuration/config.mdx#top-level-parameters) time expires. |
 | `messages.target_not_allowed`   | String | \{target\} is not allowed.                               | Displayed when a query target is implicitly denied by a configured rule. `{target}` will be used to display the denied query target. |
-| `messages.feature_not_enabled`  | String | \{feature\} is not enabled.                              | Accepted, but not displayed by the current code. |
-| `messages.invalid_field`        | String | \{input\} is an invalid \{field\}.                       | Accepted, but not displayed by the current code. |
-| `messages.invalid_query`        | String | \{target\} is not a valid \{query_type\} target.         | Accepted, but not displayed by the current code. |
-| `messages.no_response`          | String | No response.                                             | Accepted, but not displayed by the current code. |
+| `messages.feature_not_enabled`  | String | \{feature\} is not enabled.                              | Deprecated. Accepted but not displayed, and removed in 4.0. Setting it logs a warning at startup. |
+| `messages.invalid_field`        | String | \{input\} is an invalid \{field\}.                       | Deprecated. Accepted but not displayed, and removed in 4.0. Setting it logs a warning at startup. |
+| `messages.invalid_query`        | String | \{target\} is not a valid \{query_type\} target.         | Deprecated. Accepted but not displayed, and removed in 4.0. Setting it logs a warning at startup. |
+| `messages.no_response`          | String | No response.                                             | Deprecated. Accepted but not displayed, and removed in 4.0. Setting it logs a warning at startup. |
 
 ##### Example
 

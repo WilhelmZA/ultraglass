@@ -2,7 +2,6 @@
 
 # Standard Library
 import re
-import typing as t
 
 # Project
 from hyperglass.log import log
@@ -217,19 +216,3 @@ class JuniperTracerouteParser(TracerouteParser):
 
         _log.info(f"Parsed {len(hops)} hops from Juniper traceroute output")
         return result
-
-
-# Parser mapping by platform
-TRACEROUTE_PARSERS = {
-    "cisco_ios": CiscoTracerouteParser,
-    "cisco_nxos": CiscoTracerouteParser,
-    "cisco_xr": CiscoTracerouteParser,
-    "juniper": JuniperTracerouteParser,
-    "juniper_junos": JuniperTracerouteParser,
-    "generic": TracerouteParser,  # Fallback
-}
-
-
-def get_traceroute_parser(platform: str) -> t.Type[TracerouteParser]:
-    """Get the appropriate traceroute parser for a platform."""
-    return TRACEROUTE_PARSERS.get(platform, TracerouteParser)

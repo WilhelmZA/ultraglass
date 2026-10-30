@@ -1,10 +1,16 @@
 """Validate error message configuration variables."""
 
 # Third Party
-from pydantic import Field, ConfigDict
+from pydantic import Field, ConfigDict, model_validator
+
+# Project
+from hyperglass.log import log
 
 # Local
 from ..main import HyperglassModel
+
+# Accepted so existing configs still load, but no code displays them. Removal is planned for 4.0.
+DEPRECATED_MESSAGES = ("feature_not_enabled", "invalid_query", "invalid_field", "no_response")
 
 
 class Messages(HyperglassModel):
@@ -29,7 +35,7 @@ class Messages(HyperglassModel):
     feature_not_enabled: str = Field(
         "{feature} is not enabled.",
         title="Feature Not Enabled",
-        description="Displayed when a query type is submitted that is not supported or disabled. The hyperglass UI performs validation of supported query types prior to submitting any requests, so this is primarily relevant to the hyperglass API. `{feature}` may be used to display the disabled feature.",
+        description="Deprecated: accepted but not displayed, and removed in 4.0. Displayed when a query type is submitted that is not supported or disabled. The hyperglass UI performs validation of supported query types prior to submitting any requests, so this is primarily relevant to the hyperglass API. `{feature}` may be used to display the disabled feature.",
     )
     invalid_input: str = Field(
         "{target} is not valid.",
@@ -39,12 +45,12 @@ class Messages(HyperglassModel):
     invalid_query: str = Field(
         "{target} is not a valid {query_type} target.",
         title="Invalid Query",
-        description="Displayed when a query target's value is invalid in relation to the corresponding query type. `{target}` and `{query_type}` may be used to display the invalid target and corresponding query type.",
+        description="Deprecated: accepted but not displayed, and removed in 4.0. Displayed when a query target's value is invalid in relation to the corresponding query type. `{target}` and `{query_type}` may be used to display the invalid target and corresponding query type.",
     )
     invalid_field: str = Field(
         "{input} is an invalid {field}.",
         title="Invalid Field",
-        description="Displayed when a query field contains an invalid or unsupported value. `{input}` and `{field}` may be used to display the invalid input value and corresponding field name.",
+        description="Deprecated: accepted but not displayed, and removed in 4.0. Displayed when a query field contains an invalid or unsupported value. `{input}` and `{field}` may be used to display the invalid input value and corresponding field name.",
     )
     general: str = Field(
         "Something went wrong.",
@@ -73,7 +79,7 @@ class Messages(HyperglassModel):
     no_response: str = Field(
         "No response.",
         title="No Response",
-        description="Displayed when hyperglass can connect to a device, but no output able to be read. Seeing this error may indicate a bug in hyperglas or one of its dependencies. If you see this in the wild, try enabling [debug mode](/fixme) and review the logs to pinpoint the source of the error.",
+        description="Deprecated: accepted but not displayed, and removed in 4.0. Displayed when hyperglass can connect to a device, but no output able to be read. Seeing this error may indicate a bug in hyperglas or one of its dependencies. If you see this in the wild, try enabling [debug mode](/fixme) and review the logs to pinpoint the source of the error.",
     )
     no_output: str = Field(
         "The query completed, but no matching results were found.",
@@ -85,6 +91,16 @@ class Messages(HyperglassModel):
         title="Device Command Error",
         description="Displayed when a device rejects a command or denies permission to run it.",
     )
+
+    @model_validator(mode="after")
+    def warn_deprecated(self) -> "Messages":
+        """Warn once per deprecated message the operator sets explicitly."""
+        for key in DEPRECATED_MESSAGES:
+            if key in self.model_fields_set:
+                log.bind(key=f"messages.{key}").warning(
+                    "Deprecated config key 'messages.{}' is ignored and will be removed in 4.0", key
+                )
+        return self
 
     def has(self, attr: str) -> bool:
         """Determine if message type exists in Messages model."""

@@ -114,24 +114,6 @@ class DeviceTimeout(PublicHyperglassError, template="request_timeout", level="da
         )
 
 
-class InvalidQuery(PublicHyperglassError, template="request_timeout"):
-    """Raised when input validation fails."""
-
-    def __init__(
-        self, *, error: Optional[str] = None, query: "Query", **kwargs: Dict[str, Any]
-    ) -> None:
-        """Initialize parent error."""
-
-        kwargs = {
-            "query_type": query.query_type,
-            "target": query.query_target,
-            "error": str(error),
-            **kwargs,
-        }
-
-        super().__init__(**kwargs)
-
-
 class NotFound(PublicHyperglassError, template="not_found"):
     """Raised when an object is not found."""
 

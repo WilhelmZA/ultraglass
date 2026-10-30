@@ -272,16 +272,6 @@ class Device(HyperglassModelWithId, extra="allow"):
                     device=info.data["name"],
                 )
 
-        if value is None:
-            if info.data.get("http") is not None:
-                value = "http"
-            else:
-                # Ensure device platform is defined.
-                raise ConfigError(
-                    "Device '{device}' is missing a 'platform' (Network Operating System) property",
-                    device=info.data["name"],
-                )
-
         if value in SCRAPE_HELPERS.keys():
             # Rewrite platform to helper value if needed.
             value = SCRAPE_HELPERS[value]

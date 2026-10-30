@@ -10,7 +10,7 @@ from pydantic import Field, HttpUrl
 from ..main import HyperglassModel
 from ..fields import AnyUri
 
-DocsMode = t.Literal["swagger", "redoc"]
+EndpointName = t.Literal["query", "devices", "queries", "info"]
 
 
 class EndpointConfig(HyperglassModel):
@@ -40,7 +40,7 @@ class Docs(HyperglassModel):
     base_url: HttpUrl = Field(
         "https://lg.example.net",
         title="Base URL",
-        description="Base URL used in request samples.",
+        description="Base URL used in request samples. When set, it is published as the OpenAPI server URL.",
     )
     path: AnyUri = Field(
         "/api/docs",
@@ -77,3 +77,23 @@ class Docs(HyperglassModel):
         description="General information about this looking glass.",
         summary="System Information",
     )
+
+    @property
+    def server_url(self) -> t.Optional[str]:
+        """OpenAPI server URL, only when `base_url` is set explicitly.
+
+        The default is a placeholder, so publishing it would point request
+        samples at a host that does not exist.
+        """
+        if "base_url" in self.model_fields_set:
+            return str(self.base_url).rstrip("/")
+        return None
+
+    def endpoint_docs(self, endpoint: EndpointName) -> t.Dict[str, t.Any]:
+        """OpenAPI tag, summary and description for one API endpoint."""
+        config: EndpointConfig = getattr(self, endpoint)
+        return {
+            "tags": [config.title],
+            "summary": config.summary,
+            "description": config.description,
+        }

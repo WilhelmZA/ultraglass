@@ -7,6 +7,7 @@ export type ParsedDataField = [string, keyof Route, 'left' | 'right' | 'center' 
 
 interface _Messages {
   no_input: string;
+  /** @deprecated Accepted but not displayed. Removed in 4.0 (#179). */
   feature_not_enabled: string;
   invalid_input: string;
   general: string;

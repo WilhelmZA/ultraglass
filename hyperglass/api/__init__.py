@@ -6,6 +6,7 @@ import logging
 # Third Party
 from litestar import Litestar
 from litestar.openapi import OpenAPIConfig
+from litestar.openapi.spec import Server
 from litestar.exceptions import HTTPException, ValidationException
 from litestar.static_files import create_static_files_router
 
@@ -38,13 +39,26 @@ UI_DIR = STATE.settings.static_path / "ui"
 IMAGES_DIR = STATE.settings.static_path / "images"
 
 
+DOCS = STATE.params.docs
+
 OPEN_API = OpenAPIConfig(
-    title=STATE.params.docs.title.format(site_title=STATE.params.site_title),
+    title=DOCS.title.format(site_title=STATE.params.site_title),
     version=__version__,
-    description=STATE.params.docs.description,
-    path=STATE.params.docs.path,
+    description=DOCS.description,
+    path=DOCS.path,
     root_schema_site="elements",
+    servers=[Server(url=DOCS.server_url or "/")],
 )
+
+# Per-endpoint documentation from `docs.query`, `docs.devices`, `docs.queries` and `docs.info`.
+for _handler, _endpoint in (
+    (query, "query"),
+    (devices, "devices"),
+    (queries, "queries"),
+    (info, "info"),
+):
+    for _attr, _value in DOCS.endpoint_docs(_endpoint).items():
+        setattr(_handler, _attr, _value)
 
 HANDLERS = [
     device,

@@ -81,11 +81,11 @@ Controls the automatically generated API documentation. Ultraglass serves it at 
 | `docs.path` | String | `/api/docs` | HTTP path where API documentation is accessible. Must start with `/`. |
 | `docs.title` | String | `{site_title} API Documentation` | API documentation title. `{site_title}` is automatically replaced. |
 | `docs.description` | String | `""` | Description appearing below the API documentation title. |
-| `docs.base_url` | URL | `https://lg.example.net` | Accepted for compatibility. The generated documentation does not use it. |
+| `docs.base_url` | URL | `https://lg.example.net` | Server URL for request samples. Unset, the documentation uses the host that serves it. |
 
 ### API Endpoint Documentation
 
-`docs.query`, `docs.devices`, `docs.queries` and `docs.info` are accepted for compatibility. The generated documentation does not use them. Each one takes `title`, `description` and `summary`. If you set one of these objects, set all three keys.
+`docs.query`, `docs.devices`, `docs.queries` and `docs.info` set the documentation for the matching endpoint. Each one takes `title` (the section heading), `description` (the endpoint detail) and `summary` (shown beside the path). If you set one of these objects, set all three keys.
 
 | Parameter | Default `title` | Default `summary` |
 | :-------- | :-------------- | :---------------- |
@@ -210,16 +210,16 @@ Customize error messages and user-facing text shown in the UI and API responses.
 | :-------- | :--- | :------ | :---------- |
 | `messages.no_input` | String | `{field} must be specified.` | Shown when required field is missing. `{field}` shows field name. |
 | `messages.target_not_allowed` | String | `{target} is not allowed.` | Shown when query target is denied by rules. `{target}` shows denied target. |
-| `messages.feature_not_enabled` | String | `{feature} is not enabled.` | Shown when disabled query type is requested. `{feature}` shows feature name. |
+| `messages.feature_not_enabled` | String | `{feature} is not enabled.` | Deprecated. Accepted but not displayed, and removed in 4.0. Setting it logs a warning at startup. |
 | `messages.invalid_input` | String | `{target} is not valid.` | Shown for invalid query target values. `{target}` shows invalid input. |
-| `messages.invalid_query` | String | `{target} is not a valid {query_type} target.` | Shown for query type/target mismatches. |
-| `messages.invalid_field` | String | `{input} is an invalid {field}.` | Shown for invalid field values. |
+| `messages.invalid_query` | String | `{target} is not a valid {query_type} target.` | Deprecated. Accepted but not displayed, and removed in 4.0. Setting it logs a warning at startup. |
+| `messages.invalid_field` | String | `{input} is an invalid {field}.` | Deprecated. Accepted but not displayed, and removed in 4.0. Setting it logs a warning at startup. |
 | `messages.general` | String | `Something went wrong.` | Generic error message for unexpected errors. |
 | `messages.not_found` | String | `{type} '{name}' not found.` | Shown when configuration object doesn't exist. |
 | `messages.request_timeout` | String | `Request timed out.` | Shown when request exceeds timeout limit. |
 | `messages.connection_error` | String | `Error connecting to {device_name}: {error}` | Shown for device connection failures. |
 | `messages.authentication_error` | String | `Authentication error occurred.` | Shown for device authentication failures. |
-| `messages.no_response` | String | `No response.` | Shown when no output can be read from device. |
+| `messages.no_response` | String | `No response.` | Deprecated. Accepted but not displayed, and removed in 4.0. Setting it logs a warning at startup. |
 | `messages.no_output` | String | `The query completed, but no matching results were found.` | Shown for successful queries with empty results. |
 | `messages.device_command_error` | String | `The query command failed on {device_name}.` | Shown when a device rejects a command or denies permission to run it. |
 

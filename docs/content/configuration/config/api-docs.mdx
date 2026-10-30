@@ -1,6 +1,6 @@
 ## API Docs
 
-Ultraglass generates documentation for the REST API from its OpenAPI schema and serves it with Stoplight Elements. The `docs` section sets the path, title and description of that documentation.
+Ultraglass generates documentation for the REST API from its OpenAPI schema and serves it with Stoplight Elements. The `docs` section sets the path, title and description of that documentation, the server URL used in request samples, and the heading, summary and description of each endpoint.
 
 | Parameter          | Type    | Default Value                    | Description                                                                                                                                                                  |
 | :----------------- | :------ | :------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -8,11 +8,11 @@ Ultraglass generates documentation for the REST API from its OpenAPI schema and 
 | `docs.path`        | String  | /api/docs                        | Path to the REST API documentation.                                                                                                                                          |
 | `docs.title`       | String  | \{site_title\} API Documentation | API docs title. `{site_title}` is replaced with the `site_title` value from the [top level parameters](/configuration/config.mdx#top-level-parameters).                      |
 | `docs.description` | String  |                                  | API docs description. Appears below the title.                                                                                                                               |
-| `docs.base_url`    | URL     | https://lg.example.net           | Accepted for compatibility. The current API documentation does not use it.                                                                                                   |
+| `docs.base_url`    | URL     | https://lg.example.net           | Server URL for request samples and the try-it console. When you leave it unset, the documentation uses the host that serves it. Set it to the public URL of your looking glass. |
 
 ### Endpoint Parameters
 
-The `devices`, `info`, `queries` and `query` sections each take a `title`, `description` and `summary` string. Ultraglass accepts these keys for compatibility, but the current API documentation does not use them.
+The `devices`, `info`, `queries` and `query` sections each take a `title`, `description` and `summary` string. `title` is the section heading the endpoint is grouped under, `summary` is shown beside the endpoint path, and `description` is shown in the endpoint's detail. If you set one of these sections, set all three keys.
 
 | Parameter                  | Default Value                                                                               |
 | :------------------------- | :------------------------------------------------------------------------------------------ |
