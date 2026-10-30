@@ -45,8 +45,8 @@ def test_vendor_community_and_rpki_policy(monkeypatch, parser, filename, mode, b
     params.structured.rpki.mode = "external"
     params.structured.rpki.rpki_server_url = "https://rpki.example.test"
     params.structured.rpki.backend = backend
-    validate = Mock(return_value=1)
-    monkeypatch.setattr(bgp_route, "rpki_state", validate)
+    validate = Mock(side_effect=lambda pairs, **_: {(str(p), str(a)): 1 for p, a in pairs})
+    monkeypatch.setattr(bgp_route, "rpki_states", validate)
     result = parser((sample,))
     assert len(result.routes) == len(baseline.routes)
     for original, route in zip(baseline.routes, result.routes):

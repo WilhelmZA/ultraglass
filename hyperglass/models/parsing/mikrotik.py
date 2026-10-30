@@ -11,7 +11,7 @@ from pydantic import ConfigDict
 from hyperglass.log import log
 from hyperglass.util import parse_as_path
 from hyperglass.settings import Settings
-from hyperglass.models.data.bgp_route import BGPRoute, BGPRouteTable  # Add BGPRoute import
+from hyperglass.models.data.bgp_route import BGPRouteTable
 
 # Local
 from ..main import HyperglassModel
@@ -361,8 +361,8 @@ class MikrotikBGPTable(MikrotikBase):
                 "rpki_state": route.rpki_state,
                 "filtered": route.is_filtered,
             }
-            # Instantiate BGPRoute to trigger validation (including external RPKI)
-            routes.append(BGPRoute(**route_data))
+            # BGPRouteTable validates the routes, RPKI included, in one batch.
+            routes.append(route_data)
         return MikrotikBGPRouteTable(
             vrf="default",
             count=len(routes),

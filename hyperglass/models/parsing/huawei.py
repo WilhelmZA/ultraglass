@@ -11,7 +11,7 @@ from pydantic import ConfigDict, field_validator, model_validator
 # Project
 from hyperglass.log import log
 from hyperglass.util import parse_as_path
-from hyperglass.models.data.bgp_route import BGPRoute, BGPRouteTable
+from hyperglass.models.data.bgp_route import BGPRouteTable
 
 # Local
 from ..main import HyperglassModel
@@ -454,7 +454,8 @@ class HuaweiBGPTable(HuaweiBase):
                 # VRP's '*' / 'valid' marks BGP usability, not RPKI validation.
                 "rpki_state": RPKI_STATE_MAP["unverified"],
             }
-            routes.append(BGPRoute(**route_data))
+            # BGPRouteTable validates the routes, RPKI included, in one batch.
+            routes.append(route_data)
 
         return HuaweiBGPRouteTable(
             vrf="default",
