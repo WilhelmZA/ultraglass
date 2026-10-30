@@ -49,9 +49,9 @@ A rule is a way of saying "if a query target matches the rule's conditions, run 
 | :------------------ | :------ | :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ge`                | Number  | 0             | Minimum prefix length to match, inclusive.                                                                                                                                                                        |
 | `le`                | Number  | 32,128        | `32` for IPv4 evaluations, `128` for IPv6 evaluations. Maximum prefix length to match, inclusive.                                                                                                                 |
-| `allow_reserved`    | Boolean | `false`       | Accepted but not enforced. Reserved ([RFC1918](https://www.rfc-editor.org/rfc/rfc1918), [RFC5735](https://www.rfc-editor.org/rfc/rfc5735), [RFC5737](https://www.rfc-editor.org/rfc/rfc5737.html), etc.) addresses pass when `condition` contains them. Use a `deny` rule to block them. |
-| `allow_unspecified` | Boolean | `false`       | Accepted but not enforced. Unspecified addresses (`0.0.0.0` `::`) pass when `condition` contains them.                                                                                                            |
-| `allow_loopback`    | Boolean | `false`       | Accepted but not enforced. [Loopback addresses](https://www.rfc-editor.org/rfc/rfc1700.html) (`127.0.0.0/8` `::1`) pass when `condition` contains them.                                                          |
+| `allow_reserved`    | Boolean | `false`       | Allow reserved targets: IPv4 `240.0.0.0/4` and the IETF reserved IPv6 blocks, such as `::/8` and `100::/8`. RFC1918, documentation ([RFC5737](https://www.rfc-editor.org/rfc/rfc5737.html), `2001:db8::/32`) and benchmarking ranges are not reserved and pass. Use a `deny` rule to block them. |
+| `allow_unspecified` | Boolean | `false`       | Allow unspecified targets (`0.0.0.0` `::`). A default route query such as `0.0.0.0/0` is not unspecified and passes. |
+| `allow_loopback`    | Boolean | `false`       | Allow [loopback](https://www.rfc-editor.org/rfc/rfc1700.html) targets (`127.0.0.0/8` `::1`). |
 
 #### Examples
 

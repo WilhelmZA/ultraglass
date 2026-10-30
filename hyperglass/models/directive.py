@@ -228,6 +228,22 @@ class RuleWithIP(Rule):
 
         return False
 
+    def refused_class(self, target: IPvAnyNetwork) -> t.Optional[str]:
+        """Return the address class that refuses the target, or `None` (#173).
+
+        The classes follow Python's `ipaddress` flags, which hold for a prefix only when the
+        whole prefix is in the class. Loopback and unspecified are checked first, so `::1` and
+        `::` need only `allow_loopback` or `allow_unspecified`, although IPv6 `::/8` is also
+        reserved. Documentation ranges, such as 192.0.2.0/24, are not reserved.
+        """
+        if target.is_loopback:
+            return None if self.allow_loopback else "Loopback"
+        if target.is_unspecified:
+            return None if self.allow_unspecified else "Unspecified"
+        if target.is_reserved and not self.allow_reserved:
+            return "Reserved"
+        return None
+
     def validate_target(self, target: str, *, multiple: bool) -> bool:
         """Validate an IP address target against this rule's conditions."""
 
@@ -254,6 +270,12 @@ class RuleWithIP(Rule):
         in_range = self.in_range(valid_target)
 
         if all((is_member, in_range, self.action == "permit")):
+            refused = self.refused_class(valid_target)
+            if refused is not None:
+                self._passed = False
+                raise InputValidationError(
+                    error="{kind} targets are not allowed", target=target, kind=refused
+                )
             self._passed = True
             return True
 

@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 
 - Manual installs now need Node.js 22.13 or later at startup, not only at UI build. The startup check compares the minor version too, so Node.js 18 to 22.12 now fails at startup instead of in the pnpm install of the UI build (#175).
+- IP rules now enforce `allow_loopback`, `allow_unspecified` and `allow_reserved`. With the defaults, loopback (`127.0.0.0/8`, `::1`), unspecified (`0.0.0.0`, `::`) and reserved (`240.0.0.0/4`, IETF reserved IPv6 blocks) targets are refused, even when the rule's `condition` contains them, as the docs already said. Set the key to `true` on the rule to accept them. Configs that set the keys keep loading. Documentation, private and default route targets are not affected (#173).
 
 ### Fixed
 
