@@ -84,3 +84,16 @@ def test_safe_format_blanks_unknown_placeholders(template, expected):
 def test_safe_format_never_raises(template):
     """A template that cannot be parsed is returned unchanged."""
     assert PublicHyperglassError._safe_format(template, error="x") == template
+
+
+def test_error_text_not_repeated_when_template_has_error():
+    """A template that already shows `{error}` gets no ` (error)` suffix (#187)."""
+    err = public.ScrapeError(error=Exception("boom"), device=DEVICE)
+    assert err.message.count("boom") == 1
+
+
+def test_error_text_appended_when_template_lacks_error():
+    """A template without `{error}` still shows the error once, in parentheses (#187)."""
+    err = public.AuthError(error=Exception("boom"), device=DEVICE)
+    assert err.message.endswith(" (boom)")
+    assert err.message.count("boom") == 1
