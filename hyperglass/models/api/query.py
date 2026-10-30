@@ -36,10 +36,10 @@ def resolve_directive_by_name(
     platforms, so a multi-vendor location selection sends one vendor's id to every
     selected device. Match on that shared name.
 
-    An unstructured device carries two directives with the same name, the plain
-    builtin and its table-output variant, so name alone is ambiguous. Pick the one
-    the device's own `structured_output` flag selected when its directive list was
-    built: the table variant when structured, the plain builtin otherwise. Every
+    A device carries either the plain builtin or its table-output variant, never
+    both. Prefer the one the device's own `structured_output` flag selected when its
+    directive list was built: the table variant when structured, the plain builtin
+    otherwise. Every
     structured-output plugin gates on that same device flag, so the requester's
     variant carries no signal here.
     """

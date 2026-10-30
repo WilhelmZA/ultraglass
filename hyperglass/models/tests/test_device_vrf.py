@@ -77,7 +77,7 @@ def test_default_commands_unchanged():
 
 def test_vrf_drops_builtins_without_vrf_form():
     kinds = {d.id for d in _device("frr", vrf="LAB").directives}
-    assert "__hyperglass_frr_bgp_route_table__" in kinds
+    assert "__hyperglass_frr_bgp_route__" in kinds
     assert "__hyperglass_frr_ping__" not in kinds
     assert "__hyperglass_frr_ping__" in {d.id for d in _device("frr").directives}
 

@@ -550,12 +550,16 @@ class Directives(MultiModel[Directive], model=Directive, unique_by="id"):
         """Get builtin directives for a device.
 
         A device with a VRF only gets the built-ins that have a VRF form for every rule.
+        Table-output variants are never offered on their own: a structured device gets
+        each one in place of its plain directive, a text device gets none of them.
         """
+        table_ids = {directive.table_output for directive in self if directive.table_output}
         selected = (
             self.table_if_available(directive) if table_output else directive  # noqa: IF100 GFY
             for directive in self
             if directive._hyperglass_builtin is True
             and platform in getattr(directive, "platforms", ())
+            and directive.id not in table_ids
         )
         return Directives(
             *(
