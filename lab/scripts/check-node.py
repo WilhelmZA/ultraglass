@@ -15,7 +15,9 @@ import yaml
 def check(node, timeout=180, management_only=False):
     lab = Path(__file__).resolve().parents[1]
     devices = yaml.safe_load((lab / "configs/ultraglass/devices.yaml").read_text())["devices"]
-    device = next((item for item in devices if item["name"] == "lab-" + node), None)
+    # Both Huawei nodes run VRP 8.180, so their locations carry the platform name (#103).
+    name = {"huawei": "lab-huawei-vrpv8"}.get(node, "lab-" + node)
+    device = next((item for item in devices if item["name"] == name), None)
     deadline = time.monotonic() + timeout
     error = "not ready"
     while time.monotonic() < deadline:

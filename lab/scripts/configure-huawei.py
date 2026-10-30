@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""Apply the lab data-plane + eBGP config to the Huawei CE12800.
+"""Apply the lab data-plane + eBGP config to a Huawei lab node.
 
-vrnetlab only bootstraps the CE12800's management interface, SSH and login. The
-data port (GE1/0/0) and the eBGP session to the GoBGP core are configured here,
-after the VM is up. The CE12800 is a two-stage-commit switch whose GE ports are
-L2 by default, so the port is made routed with `undo portswitch` before it gets
-an address, and every change is committed. It also creates vpn-instance LAB for
-the lab-huawei-vrpv8-vrf location (#130). Safe to re-run: each part is skipped when the
-device already has it.
+    configure-huawei.py [huawei | huawei-ne40]
 
-Needs netmiko (pip install netmiko). lab-up.sh calls this for the huawei node.
+vrnetlab only bootstraps the management interface, SSH and login. The data port
+and the eBGP session to the GoBGP core are configured here, after the VM is up.
+Both nodes run VRP 8.180 and commit every change. The CE12800 (`huawei`) is a
+switch whose GE ports are L2 by default, so its port is made routed with
+`undo portswitch` before it gets an address; the NE40E (`huawei-ne40`) is a
+router. Each node also gets vpn-instance LAB for its VRF location (#130, #103).
+Safe to re-run: each part is skipped when the device already has it.
+
+Needs netmiko (pip install netmiko). start-node.py calls this for both nodes.
 """
 
 import sys
@@ -19,30 +21,65 @@ try:
 except ImportError:
     sys.exit("netmiko not installed; run: pip install netmiko")
 
-HOST = "192.168.250.18"
-LOCAL_V4 = "10.250.8.1"
-PEER_V4 = "10.250.8.0"
-LOCAL_V6 = "fd00:250:8::1"
-PEER_V6 = "fd00:250:8::"
-LOCAL_AS = 65008
+NODES = {
+    "huawei": {
+        "host": "192.168.250.18",
+        "subnet": 8,
+        "port": "GE1/0/0",
+        "routed": False,
+        "vrf_v4": "192.0.2.108",
+        "vrf_v6": "2001:db8:100::8",
+    },
+    "huawei-ne40": {
+        "host": "192.168.250.32",
+        "subnet": 11,
+        "port": "Ethernet1/0/0",
+        "routed": True,
+        "vrf_v4": "192.0.2.111",
+        "vrf_v6": "2001:db8:100::11",
+    },
+}
+NODE = NODES[sys.argv[1] if len(sys.argv) > 1 else "huawei"]
+N = NODE["subnet"]
+HOST = NODE["host"]
+PORT = NODE["port"]
+LOCAL_V4 = f"10.250.{N}.1"
+PEER_V4 = f"10.250.{N}.0"
+LOCAL_V6 = f"fd00:250:{N}::1"
+PEER_V6 = f"fd00:250:{N}::"
+LOCAL_AS = 65000 + N
 PEER_AS = 65000
 
 # vpn-instance LAB (#130), matching the Arista and FRR VRF locations.
 VRF = "LAB"
-VRF_V4 = "192.0.2.108"
-VRF_V6 = "2001:db8:100::8"
+VRF_V4 = NODE["vrf_v4"]
+VRF_V6 = NODE["vrf_v6"]
 
 dev = {
-    "device_type": "huawei",
+    "device_type": "huawei_vrpv8",
     "host": HOST,
     "username": "admin",
     "password": "admin",
     "conn_timeout": 20,
     "banner_timeout": 30,
     "auth_timeout": 30,
-    # Old VRP (V200R005) offers legacy host-key/kex that paramiko 4 disables.
+    # VRP 8.180 offers legacy host-key/kex that paramiko 4 disables.
     "disabled_algorithms": {"pubkeys": ["rsa-sha2-512", "rsa-sha2-256"]},
 }
+
+
+def save(nc):
+    """Save the configuration, answering the confirmation prompts.
+
+    The NE40E reads `save force` as a file name, so answer the prompts instead.
+    """
+    out = last = nc.send_command_timing("save", read_timeout=90)
+    for _ in range(3):
+        if "[Y/N]" not in last.upper():
+            break
+        last = nc.send_command_timing("Y", read_timeout=90)
+        out += last
+    return out
 
 
 def main():
@@ -53,8 +90,8 @@ def main():
     base_done = LOCAL_V4 in brief
     vrf_done = VRF in instances.split()
     if base_done and vrf_done:
-        print("Huawei already configured (GE1/0/0 and vpn-instance", VRF + "); nothing to do.")
-        print(nc.send_command("save force", read_timeout=90))
+        print(f"{HOST} already configured ({PORT} and vpn-instance {VRF}); nothing to do.")
+        print(save(nc))
         nc.disconnect()
         return
 
@@ -69,9 +106,9 @@ def main():
         return out
 
     base = (
-        # Data port: GE1/0/0 is a switchport by default -> make it routed, address it.
-        "interface GE1/0/0",
-        "undo portswitch",
+        # Data port: the CE12800 GE port is a switchport by default -> make it routed.
+        f"interface {PORT}",
+        *(() if NODE["routed"] else ("undo portswitch",)),
         "undo shutdown",
         f"ip address {LOCAL_V4} 255.255.255.254",
         "ipv6 enable",
@@ -124,7 +161,7 @@ def main():
 
     send("commit")
     nc.exit_config_mode()
-    print(nc.send_command("save force", read_timeout=90))
+    print(save(nc))
     print(nc.send_command("display ip interface brief", read_timeout=60))
     nc.disconnect()
     print("Huawei configured.")

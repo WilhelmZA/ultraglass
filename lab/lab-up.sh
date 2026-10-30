@@ -3,7 +3,7 @@
 #
 #   ./lab-up.sh                 whole lab (all vendors, needs the most RAM)
 #   ./lab-up.sh frr             just one device: core + redis + both ultraglass + frr
-#   ./lab-up.sh mikrotik        devices: frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2
+#   ./lab-up.sh mikrotik        devices: frr bird openbgpd mikrotik arista vyos huawei huawei-ne40 junos iol ioll2
 #   PREFIXES=50000 ./lab-up.sh frr   cap the table for low-RAM machines
 #   ./lab-up.sh --image <image-reference> [device]
 #                               run a published Ultraglass image instead of the
@@ -21,7 +21,7 @@ if [ "${1:-}" = "--image" ]; then
     shift 2
 fi
 DEV="${1:-}"
-case " frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2 " in
+case " frr bird openbgpd mikrotik arista vyos huawei huawei-ne40 junos iol ioll2 " in
     *" $DEV "*) : ;;
     *) [ -z "$DEV" ] || { echo "Unknown device '$DEV'" >&2; exit 1; } ;;
 esac
@@ -53,7 +53,7 @@ for C in clab-ultraglass-ultraglass clab-ultraglass-ultraglass-text; do
     fi
 done
 
-NODES="core redis ultraglass ultraglass-text ${DEV:-frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2}"
+NODES="core redis ultraglass ultraglass-text ${DEV:-frr bird openbgpd mikrotik arista vyos huawei huawei-ne40 junos iol ioll2}"
 EXISTING=true
 for N in $NODES; do
     docker inspect "clab-ultraglass-$N" >/dev/null 2>&1 || EXISTING=false
@@ -63,9 +63,9 @@ if [ "$EXISTING" = true ]; then
         "$PYTHON" scripts/start-node.py "$N"
     done
 elif [ -n "$DEV" ]; then
-    case " frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2 " in
+    case " frr bird openbgpd mikrotik arista vyos huawei huawei-ne40 junos iol ioll2 " in
         *" $DEV "*) : ;;
-        *) echo "Unknown device '$DEV'. Pick one of: frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2" >&2; exit 1 ;;
+        *) echo "Unknown device '$DEV'. Pick one of: frr bird openbgpd mikrotik arista vyos huawei huawei-ne40 junos iol ioll2" >&2; exit 1 ;;
     esac
     echo "Starting single device: $DEV (plus core, redis, ultraglass)"
     sudo env ULTRAGLASS_IMAGE="$IMAGE" containerlab deploy -t ultraglass-lab.clab.yml --node-filter "core,redis,ultraglass,ultraglass-text,$DEV"
@@ -89,7 +89,7 @@ done
 # Core link addressing. ethN carries 10.250.N.0/31 + fd00:250:N::/127 (N matches the
 # device subnet). Applied idempotently here so it is correct no matter how the core
 # was created (a prior single-device deploy can leave it with only some interfaces).
-for N in 1 2 3 4 5 6 7 8 9 10; do
+for N in 1 2 3 4 5 6 7 8 9 10 11; do
     docker exec clab-ultraglass-core sh -c "ip addr add 10.250.$N.0/31 dev eth$N 2>/dev/null; ip addr add fd00:250:$N::/127 dev eth$N 2>/dev/null; true"
 done
 
@@ -110,4 +110,4 @@ fi
 
 echo
 echo "Lab up on $IMAGE. Ultraglass structured: http://127.0.0.1:8001  text: http://127.0.0.1:8002"
-echo "Query a device by its name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei-vrpv8, lab-junos, lab-iol, lab-ioll2"
+echo "Query a device by its name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei-vrpv8, lab-huawei-ne40, lab-junos, lab-iol, lab-ioll2"

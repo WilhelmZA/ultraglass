@@ -22,6 +22,7 @@ NAMED = {
         "lab-arista",
         "lab-frr",
         "lab-huawei-vrpv8",
+        "lab-huawei-ne40",
         "lab-bird",
         "lab-openbgpd",
         "lab-vyos",
@@ -29,7 +30,7 @@ NAMED = {
         "lab-junos",
     },
 }
-NO_PATH = {"BGP Community": {"lab-huawei-vrpv8"}}
+NO_PATH = {"BGP Community": {"lab-huawei-vrpv8", "lab-huawei-ne40"}}
 
 
 def column(panel, name):

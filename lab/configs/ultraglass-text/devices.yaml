@@ -98,6 +98,18 @@ devices:
       source4: 10.250.8.1
       source6: fd00:250:8::1
 
+  - name: lab-huawei-ne40
+    address: 192.168.250.32
+    group: Huawei
+    credential:
+      username: admin
+      password: admin
+    platform: huawei_vrpv8
+    structured_output: false
+    attrs:
+      source4: 10.250.11.1
+      source6: fd00:250:11::1
+
   - name: lab-iol
     address: 192.168.250.19
     group: Cisco
@@ -218,3 +230,17 @@ devices:
     attrs:
       source4: 192.0.2.108
       source6: 2001:db8:100::8
+
+  # NE40E vpn-instance LAB (#103). source4/source6 are LoopBack100 inside the instance.
+  - name: lab-huawei-ne40-vrf
+    address: 192.168.250.32
+    group: VRF
+    credential:
+      username: admin
+      password: admin
+    platform: huawei_vrpv8
+    vrf: LAB
+    structured_output: false
+    attrs:
+      source4: 192.0.2.111
+      source6: 2001:db8:100::11

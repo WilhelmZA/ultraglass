@@ -39,6 +39,7 @@ sh scripts/build-timos.sh /path/to/timos.qcow2
 sh scripts/build-routeros6.sh /path/to/chr.vmdk
 sh scripts/build-mikrotik.sh
 sh scripts/build-huawei.sh
+sh scripts/build-huawei.sh ne40e /path/to/hda.qcow2
 sh scripts/build-os9.sh /path/to/ftos.iso
 sh scripts/import-xrd.sh /path/to/image.tgz
 sh scripts/build-platform.sh sonic
@@ -79,6 +80,7 @@ Keep both address families disabled on unused routers. Enable them for the route
 | Huawei | 8 |
 | Cisco IOL | 9 |
 | Cisco IOL-L2 | 10 |
+| Huawei NE40E | 11 |
 
 ```sh
 N=1
@@ -91,7 +93,7 @@ Disabled sessions show `Idle(Admin)`. Established sessions show `Establ`. Repeat
 
 MikroTik also starts with its router-side sessions `core4` and `core6` disabled. Enable them on the router with `/routing/bgp/connection enable [find name~"core"]`. Use `disable` after testing.
 
-The core rewrites route next hops to its data-link address. Test prefixes receive multiple paths where the peer supports ADD-PATH. Huawei receives a capped feed through its export policy.
+The core rewrites route next hops to its data-link address. Test prefixes receive multiple paths where the peer supports ADD-PATH. Both Huawei nodes receive a capped feed through the core export policy.
 
 ## Optional appliances
 
@@ -155,6 +157,8 @@ After testing, disable both probe sessions and shut down both appliance neighbor
 - Restart an existing main-lab node with `python3 scripts/start-node.py <node>`. This restores Containerlab data links and Linux interface settings while preserving the appliance disk.
 - MikroTik uses fixed NIC addresses and accepts saved credentials after restart. Its wrapper repairs interface references left by the previous launcher.
 - The `huawei` node is a CE12800 V200R005C10SPC607B607, which runs VRP 8.180 (VRPv8). Its locations use platform `huawei_vrpv8`: `lab-huawei-vrpv8` and `lab-huawei-vrpv8-vrf` (#103).
+- The `huawei-ne40` node is an NE40E V800R011C00SPC607B607, also VRP 8.180, with 2 GiB RAM and 2 vCPUs. Its locations are `lab-huawei-ne40` and `lab-huawei-ne40-vrf`, also platform `huawei_vrpv8`. Build its image with `sh scripts/build-huawei.sh ne40e /path/to/hda.qcow2`, which assembles a vrnetlab `huawei_vrp` context in a temporary directory. The data port is `Ethernet1/0/0`. The lab has no classic VRP (V5) image, so the `huawei` platform key is tested only against these VRPv8 nodes (#103).
+- Start one Huawei VM at a time. `scripts/start-node.py huawei-ne40` runs `scripts/configure-huawei.py huawei-ne40` after SSH answers.
 - Huawei preserves its saved configuration and binds guest interfaces to PCI slots. The startup helper waits for SSH before applying the data-port configuration.
 - IOL and IOL-L2 need host-side checksum offloading disabled on their management links. The startup helper reapplies this after Docker creates each link.
 - Huawei data ports require routed mode and committed configuration. `lab-up.sh` calls `scripts/configure-huawei.py` after boot.
@@ -176,6 +180,7 @@ After testing, disable both probe sessions and shut down both appliance neighbor
 | Junos | 192.168.250.16 | admin / admin@123 |
 | Arista | 192.168.250.17 | admin / admin |
 | Huawei CE12800 (VRP 8.180, `lab-huawei-vrpv8`) | 192.168.250.18 | admin / admin |
+| Huawei NE40E (VRP 8.180, `lab-huawei-ne40`) | 192.168.250.32 | admin / admin |
 | IOL | 192.168.250.19 | admin / admin |
 | IOL-L2 | 192.168.250.20 | admin / admin |
 | SONiC | 192.168.250.21 | admin / admin |
@@ -214,7 +219,7 @@ Use `scripts/silent-hop.sh on` to test traceroute through a silent hop. Run it w
 
 ### VRF and interface checks
 
-The supplied Arista and FRR configurations create VRF `LAB`, and `scripts/configure-huawei.py` creates vpn-instance `LAB` on the Huawei with LoopBack100 (`192.0.2.108`, `2001:db8:100::8`) inside it. Select `lab-arista-vrf`, `lab-frr-vrf` or `lab-huawei-vrpv8-vrf` for BGP checks using `198.51.100.0/24` and `2001:db8:100::/48`. FRR's VRF location offers BGP queries only.
+The supplied Arista and FRR configurations create VRF `LAB`, and `scripts/configure-huawei.py` creates vpn-instance `LAB` on each Huawei node with LoopBack100 inside it: `192.0.2.108` and `2001:db8:100::8` on the CE12800, `192.0.2.111` and `2001:db8:100::11` on the NE40E. Select `lab-arista-vrf`, `lab-frr-vrf`, `lab-huawei-vrpv8-vrf` or `lab-huawei-ne40-vrf` for BGP checks using `198.51.100.0/24` and `2001:db8:100::/48`. FRR's VRF location offers BGP queries only.
 
 Add another VRF location as a separate device entry with a unique name and `vrf: LAB`. Configure the corresponding VRF, routes and BGP address families on that router first.
 

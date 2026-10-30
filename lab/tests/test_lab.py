@@ -96,6 +96,15 @@ MATRIX = {
         ("__hyperglass_huawei_ping__", "ping_v4", V4, "text", None),
         ("__hyperglass_huawei_traceroute__", "traceroute_v4", V4, "structured", None),
     ],
+    # NE40E V800R011C00SPC607B607, also VRP 8.180, with the same capped feed (#103).
+    "lab-huawei-ne40": [
+        ("__hyperglass_huawei_bgp_route_table__", "bgp_route_v4", V4, "structured", None),
+        ("__hyperglass_huawei_bgp_route_table__", "bgp_route_v6", V6, "structured", None),
+        ("__hyperglass_huawei_bgp_aspath_table__", "bgp_aspath", ASPATH, "structured", None),
+        ("__hyperglass_huawei_bgp_community_table__", "bgp_community", COMMUNITY, "structured", None),
+        ("__hyperglass_huawei_ping__", "ping_v4", V4, "text", None),
+        ("__hyperglass_huawei_traceroute__", "traceroute_v4", V4, "structured", None),
+    ],
 }
 
 

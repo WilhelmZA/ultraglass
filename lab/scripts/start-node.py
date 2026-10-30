@@ -51,9 +51,14 @@ def start(node, timeout=600):
             )
             // 1024
         )
-        reserve = {"junos": 6144, "huawei": 4096, "mikrotik": 2048, "iol": 4096, "ioll2": 4096}.get(
-            node, 2048
-        )
+        reserve = {
+            "junos": 6144,
+            "huawei": 4096,
+            "huawei-ne40": 4096,
+            "mikrotik": 2048,
+            "iol": 4096,
+            "ioll2": 4096,
+        }.get(node, 2048)
         if available < reserve + 12288:
             raise RuntimeError(f"Not enough RAM to start {node}: {available} MiB available")
         # Docker retains stopped containers' assigned IPv6 addresses while the
@@ -97,8 +102,8 @@ def start(node, timeout=600):
                 )
                 launcher.write_text(source)
                 run("docker", "cp", str(launcher), PREFIX + node + ":/launch.py")
-        if node == "huawei":
-            launcher = LAB / "data/huawei-launch.py"
+        if node in ("huawei", "huawei-ne40"):
+            launcher = LAB / f"data/{node}-launch.py"
             run("docker", "cp", PREFIX + node + ":/launch.py", str(launcher))
             run(sys.executable, str(LAB / "images/huawei/patch-launcher.py"), str(launcher))
             run("docker", "cp", str(launcher), PREFIX + node + ":/launch.py")
@@ -193,7 +198,7 @@ def start(node, timeout=600):
             python = LAB.parent / ".venv/bin/python3"
             if not python.exists():
                 python = Path(sys.executable)
-            if node == "huawei":
+            if node in ("huawei", "huawei-ne40"):
                 run(
                     str(python),
                     str(LAB / "scripts/check-node.py"),
@@ -202,7 +207,7 @@ def start(node, timeout=600):
                     "--timeout",
                     "300",
                 )
-                run(str(python), str(LAB / "scripts/configure-huawei.py"))
+                run(str(python), str(LAB / "scripts/configure-huawei.py"), node)
             result = run(str(python), str(LAB / "scripts/check-node.py"), node)
             print(result.stdout.strip(), flush=True)
             return

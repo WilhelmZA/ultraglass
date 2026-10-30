@@ -164,6 +164,28 @@
     [neighbors.afi-safis.config]
       afi-safi-name = "ipv6-unicast"
 
+# NE40E (#103): the same slow VRP 8.180 VM, so the same timers and feed cap.
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.250.11.1"
+    peer-as = 65011
+  [neighbors.timers.config]
+    hold-time = 900
+    keepalive-interval = 300
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "fd00:250:11::1"
+    peer-as = 65011
+  [neighbors.timers.config]
+    hold-time = 900
+    keepalive-interval = 300
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+
 [[neighbors]]
   [neighbors.config]
     neighbor-address = "10.250.9.1"
@@ -226,7 +248,7 @@
 
 [[defined-sets.neighbor-sets]]
   neighbor-set-name = "ns-hw"
-  neighbor-info-list = ["10.250.8.1", "fd00:250:8::1"]
+  neighbor-info-list = ["10.250.8.1", "fd00:250:8::1", "10.250.11.1", "fd00:250:11::1"]
 
 [[policy-definitions]]
   name = "pol-hw-exp"

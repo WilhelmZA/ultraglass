@@ -8,6 +8,19 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- Lab NE40E node (`lab-huawei-ne40`, `lab-huawei-ne40-vrf`). The lab CE12800 runs VRP 8.180, so its locations are now `lab-huawei-vrpv8` and `lab-huawei-vrpv8-vrf` with platform `huawei_vrpv8` (#103).
+
+### Fixed
+
+- Huawei VRP and VRPv8 structured routes keep route-target extended communities (`Ext-Community: RT 64501 : 1`) out of the community list, and fill Originator with the router ID that VRP prints in parentheses after `From:` (#103).
+- Huawei IPv6 traceroute works on VRP 8.180 devices that have no source option on `tracert ipv6`, such as the CE12800. Ultraglass sends `-a <source6>` and, when the device rejects it, runs the same trace without the source (#155).
+- Huawei IPv6 ping and traceroute in a VRF send `vpn-instance <vrf>` without the dash, the form VRP 8.180 accepts (#155).
+- A Huawei `Error: Too many parameters` or `Error[4]: ...` response is now a device command error. Before, it returned success, as raw text or as an empty traceroute hop table (#155).
+
 ## 3.5.0-rc.3 - 2026-10-30
 
 **This is a release candidate for 3.5.0.** It is published for testing and is not for production. Run it in a lab or staging deployment, not in front of users.
@@ -46,7 +59,6 @@ Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/Wi
 - Huawei VRP BGP route queries accept prefix targets again. The execution recheck validated the `a b` form the Huawei input plugin produces and rejected every CIDR target. Rules now check the target as sent, and the command syntax check still covers the rewritten form (#132).
 - Huawei VRP structured AS path and community tables parse 4-byte ASNs that VRP prints in asdot, such as `5.280`, and convert them to asplain. Before, the parser rejected the whole response (#132).
 - Huawei VRP structured routes take Weight from `pref-val`. The detailed route showed the route preference (`pre 255`) as Weight (#132).
-- Huawei VRP and VRPv8 structured routes keep route-target extended communities (`Ext-Community: RT 64501 : 1`) out of the community list, and fill Originator with the router ID that VRP prints in parentheses after `From:` (#103).
 
 ### Changed
 
