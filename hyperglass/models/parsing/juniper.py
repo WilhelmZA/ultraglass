@@ -22,6 +22,23 @@ RPKI_STATE_MAP = {
 }
 
 
+def _merge_blocks(value: t.Any) -> t.Dict[str, t.Any]:
+    """Merge an element that Junos may repeat into one dict.
+
+    Junos emits a second `<bgp-path-attributes>` block for attributes such as
+    Only-to-Customer (RFC 9234, `<attr-otc>`), so xmltodict yields a list.
+    Each block carries different child elements, so merge them in order.
+    """
+    if isinstance(value, t.Dict):
+        return value
+    merged: t.Dict[str, t.Any] = {}
+    if isinstance(value, t.List):
+        for block in value:
+            if isinstance(block, t.Dict):
+                merged.update(block)
+    return merged
+
+
 class JuniperBase(HyperglassModel, extra="ignore"):
     """Base Juniper model."""
 
@@ -86,7 +103,7 @@ class JuniperRouteTableEntry(JuniperBase):
 
         values["next_hop"] = selected_next_hop
 
-        _path_attr = values.get("bgp_path_attributes", {})
+        _path_attr = _merge_blocks(values.get("bgp_path_attributes"))
         _path_attr_agg = _path_attr.get("attr_aggregator", {}).get("attr_value", {})
         values["as_path"] = _path_attr.get("attr_as_path_effective", {}).get("attr_value", "")
         values["source_as"] = _path_attr_agg.get("aggr_as_number", 0)
@@ -137,12 +154,15 @@ class JuniperRouteTableEntry(JuniperBase):
     @field_validator("communities", mode="before")
     def validate_communities(cls, value):
         """Flatten community list and drop Junos' `large:` prefix (#82)."""
-        if value is not None:
-            flat = value.get("community", [])
-        else:
-            flat = []
-        if isinstance(flat, str):
-            flat = [flat]
+        flat = []
+        blocks = value if isinstance(value, t.List) else [value]
+        for block in blocks:
+            if not isinstance(block, t.Dict):
+                continue
+            community = block.get("community", [])
+            if isinstance(community, str):
+                community = [community]
+            flat.extend(community)
         return [c.removeprefix("large:") for c in flat]
 
 

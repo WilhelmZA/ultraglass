@@ -102,6 +102,9 @@ def parse_juniper(output: Sequence[str]) -> "OutputDataModel":  # noqa: C901
             else:
                 result += bgp_table
 
+        except ParsingError:
+            raise
+
         except xmltodict.expat.ExpatError as err:
             _log.bind(error=str(err)).critical("Failed to decode XML")
             raise ParsingError("Error parsing response data") from err
@@ -113,6 +116,12 @@ def parse_juniper(output: Sequence[str]) -> "OutputDataModel":  # noqa: C901
         except ValidationError as err:
             _log.critical(err)
             raise ParsingError(err) from err
+
+        except Exception as err:
+            _log.bind(error=repr(err)).critical("Unexpected error parsing response")
+            raise ParsingError(
+                "Unexpected error parsing response: {error}", error=repr(err)
+            ) from err
 
     return result
 

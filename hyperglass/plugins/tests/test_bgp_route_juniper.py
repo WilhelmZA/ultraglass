@@ -3,16 +3,18 @@
 # flake8: noqa
 # Standard Library
 from pathlib import Path
+from unittest.mock import patch
 
 # Third Party
 import pytest
 
 # Project
+from hyperglass.exceptions.private import ParsingError
 from hyperglass.models.data.bgp_route import BGPRouteTable
 
 # Local
 from ._fixtures import MockDevice
-from .._builtin.bgp_route_juniper import BGPRoutePluginJuniper
+from .._builtin.bgp_route_juniper import BGPRoutePluginJuniper, parse_juniper
 
 DEPENDS_KWARGS = {
     "depends": [
@@ -101,3 +103,30 @@ def test_juniper_bgp_route_confederation():
     result = _parse(sample)
 
     assert result.routes[0].as_path == [1299, 13335]
+
+
+OTC = Path(__file__).parent / "fixtures" / "juniper-live" / "community4-otc.xml"
+
+
+def test_juniper_bgp_route_otc():
+    """Two `<bgp-path-attributes>` blocks on an OTC route parse as one (#133)."""
+    table = parse_juniper([OTC.read_text()])
+
+    assert [route.prefix for route in table.routes] == ["1.0.0.0/24", "8.44.61.0/24"]
+    otc = table.routes[1]
+    assert otc.as_path == [65000, 37239, 13335]
+    assert otc.source_as == 13335
+    assert otc.source_rid == "0.90.0.146"
+    assert otc.communities == ["37195:302"]
+
+
+def test_juniper_bgp_route_unexpected_error():
+    """An unexpected parse fault surfaces as a ParsingError with a cause (#133)."""
+    with pytest.raises(ParsingError) as exc:
+        with patch(
+            "hyperglass.plugins._builtin.bgp_route_juniper.JuniperBGPTable",
+            side_effect=AttributeError("boom"),
+        ):
+            parse_juniper([OTC.read_text()])
+
+    assert isinstance(exc.value.__cause__, AttributeError)
