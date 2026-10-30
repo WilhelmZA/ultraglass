@@ -6,7 +6,8 @@ sudo config interface ip remove Ethernet0 10.0.0.0/31 || true
 sudo config interface ip add Ethernet0 10.251.1.1/31
 sudo config interface ip add Ethernet0 fd00:251:1::1/127
 sudo config interface startup Ethernet0
-vtysh \
+# The SONiC vtysh wrapper runs `docker exec -it`, which fails without a TTY.
+sudo docker exec bgp vtysh \
     -c 'configure terminal' \
     -c 'router bgp 65100' \
     -c 'neighbor 10.251.1.0 remote-as 65000' \
