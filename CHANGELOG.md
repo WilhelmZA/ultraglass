@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - Lab NE40E node (`lab-huawei-ne40`, `lab-huawei-ne40-vrf`). The lab CE12800 runs VRP 8.180, so its locations are now `lab-huawei-vrpv8` and `lab-huawei-vrpv8-vrf` with platform `huawei_vrpv8` (#103).
+- Platform key guidance in the docs: which key to pick for Huawei VRP 5 and VRP 8, Juniper, MikroTik, Cisco and Arista, and structured output rows for Arista EOS, FRRouting, Huawei VRP, Juniper Junos and MikroTik RouterOS (#159).
 
 ### Fixed
 

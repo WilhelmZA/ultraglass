@@ -84,7 +84,7 @@ devices:
           source6: "2001:db8::1"
 ```
 
-On Huawei VRP, `vrf` names the vpn-instance (`ip vpn-instance CUSTOMER_A`). Ultraglass runs the `display bgp vpnv4 vpn-instance` and `display bgp vpnv6 vpn-instance` forms for BGP queries, and `ping -vpn-instance` and `tracert -vpn-instance` for ping and traceroute. Set `source4` and `source6` to addresses on an interface bound to the same vpn-instance, for example a loopback with `ip binding vpn-instance CUSTOMER_A`.
+On Huawei VRP, `vrf` names the vpn-instance (`ip vpn-instance CUSTOMER_A`). Ultraglass runs the `display bgp vpnv4 vpn-instance` and `display bgp vpnv6 vpn-instance` forms for BGP queries, and `ping -vpn-instance` and `tracert -vpn-instance` for IPv4 ping and traceroute. IPv6 ping and traceroute use `ping ipv6 vpn-instance` and `tracert ipv6 vpn-instance`, without the dash, which is the form VRP 8 accepts. Set `source4` and `source6` to addresses on an interface bound to the same vpn-instance, for example a loopback with `ip binding vpn-instance CUSTOMER_A`.
 
 ```yaml filename="devices.yaml" copy
 devices:
