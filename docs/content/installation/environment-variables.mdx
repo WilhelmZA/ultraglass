@@ -5,7 +5,9 @@ description: Ultraglass environment variables
 
 Some environment variables must be supplied before Ultraglass can start or read its configuration files. Most deployments can use the defaults.
 
-Environment variables may be overridden at the command line, or by placing them in `${HYPERGLASS_APP_PATH}/hyperglass.env`.
+Set environment variables in the shell that starts Ultraglass, or in `/etc/hyperglass/hyperglass.env`. Ultraglass does not read that file itself. The sample `systemd` services load it with `EnvironmentFile`.
+
+With Docker, `compose.yaml` mounts the host directory in `HYPERGLASS_APP_PATH` at `/etc/hyperglass` in the container. Inside the container, the application path is always `/etc/hyperglass`.
 
 | Variable Name               | Type    | Default           | Description                                                                                                        |
 | :-------------------------- | :------ | :---------------- | :----------------------------------------------------------------------------------------------------------------- |
@@ -17,6 +19,7 @@ Environment variables may be overridden at the command line, or by placing them 
 | `HYPERGLASS_REDIS_PASSWORD` | string  | —                 | Redis password, if any.                                                                                            |
 | `HYPERGLASS_REDIS_DB`       | number  | `1`               | Redis database number.                                                                                             |
 | `HYPERGLASS_REDIS_DSN`      | string  | —                 | Redis DSN. If supplied, overrides `HYPERGLASS_REDIS_HOST`, `HYPERGLASS_REDIS_DB`, and `HYPERGLASS_REDIS_PASSWORD`. |
-| `HYPERGLASS_HOST`           | string  | `[::1]`           | Address on which Ultraglass listens for requests.                                                                  |
+| `HYPERGLASS_HOST`           | string  | `::1`             | Address on which Ultraglass listens for requests. The default is `::` when `HYPERGLASS_DEBUG` is `true`. The Docker image sets `0.0.0.0`. |
 | `HYPERGLASS_PORT`           | number  | `8001`            | TCP port on which Ultraglass listens for requests.                                                                 |
-| `HYPERGLASS_CA_CERT`        | string  | —                 | Path to CA certificate file for validating HTTPS certificates. If not supplied, system CAs are used.               |
+| `HYPERGLASS_WORKERS`        | number  | —                 | Number of web server workers. If not supplied, Ultraglass uses 1 worker in debug mode, else 2 workers per CPU core. |
+| `HYPERGLASS_CA_CERT`        | string  | —                 | Path to a CA certificate file. Ultraglass uses it to validate HTTPS certificates on outbound requests. If not supplied, system CAs are used.               |

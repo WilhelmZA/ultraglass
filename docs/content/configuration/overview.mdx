@@ -13,8 +13,7 @@ Once you have a basic configuration working, you can customise the Ultraglass in
 
 <Callout type="info">
     **File Extensions** <br />
-    All the examples in the docs are provided in [YAML](https://yaml.org/) format, but [TOML](https://toml.io/),
-    JSON, and Python files are also supported.
+    All the examples in the docs are provided in [YAML](https://yaml.org/) format, but [TOML](https://toml.io/), JSON, and Python files are also supported.
 </Callout>
 
 ### Using a Python File
@@ -59,7 +58,7 @@ main = {
 
 ## Built-in Directives
 
-Ultraglass ships with predefined [directives](/configuration/directives.mdx) for the following [platforms](platforms.mdx):
+Ultraglass ships with predefined [directives](/configuration/directives.mdx) for the following [platforms](/platforms):
 
 <SupportedPlatforms />
 
@@ -70,7 +69,4 @@ All built in directives require that the following `attrs` be defined on each de
 | `source4` | IPv4 address used to source Ping and Traceroute commands. |
 | `source6` | IPv6 address used to source Ping and Traceroute commands. |
 
-<Callout type="warning">
-    If you do not utilize IPv6 in your network, you'll need to create your own directive that only
-    has IPv4 commands.
-</Callout>
+<Callout type="warning">If you do not use IPv6 in your network, create your own directive that only has IPv4 commands. Ultraglass does not start if a device is missing an attribute that its directives reference.</Callout>

@@ -1,6 +1,6 @@
 ## Using Docker
 
-The application keeps the `hyperglass` service and configuration names for compatibility. Pull the Ultraglass repository, then update the checked-out release before rebuilding the containers.
+The application keeps the `hyperglass` service and configuration names for compatibility. Pull the Ultraglass repository, then update the checked-out release before rebuilding the containers. Replace `v3.4.0` with the release you want from the [releases page](https://github.com/WilhelmZA/ultraglass/releases).
 
 ```shell copy
 cd /opt/hyperglass
@@ -10,4 +10,17 @@ git fetch --tags
 git checkout v3.4.0
 docker compose build
 docker compose up
+```
+
+## Manual installation
+
+Update the checked-out release, reinstall the package in the virtual environment, then restart the service. Ultraglass rebuilds the UI at start when the version changes.
+
+```shell copy
+cd /opt/hyperglass
+git fetch --tags
+git checkout v3.4.0
+. .venv/bin/activate
+python -m pip install -e '.[ui]'
+systemctl restart hyperglass
 ```
