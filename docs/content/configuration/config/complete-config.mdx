@@ -8,7 +8,7 @@ import { DocsButton } from '~/components/docs-button'
 
 # Complete Configuration Reference
 
-This is a comprehensive reference for all available configuration options in Ultraglass. Write the configuration in YAML and save it as `config.yaml` in the Ultraglass application directory (default `/etc/hyperglass`). Ultraglass also reads `config.yml`, `config.json`, `config.toml` and `config.py`. Unknown keys fail validation.
+This is a comprehensive reference for all available configuration options in Ultraglass. Write the configuration in YAML and save it as `config.yaml` in the Ultraglass application directory (default `/etc/hyperglass`). Ultraglass also reads `config.yml`, `config.json`, `config.toml` and `config.py`. Unknown keys fail validation, except under `logging.http`, which accepts extra keys.
 
 ## Top-Level Parameters
 
@@ -267,8 +267,8 @@ Controls how Ultraglass processes and displays structured data from network devi
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
-| `structured.enable_for_traceroute` | Boolean | unset | When the `structured` section is present and this key is unset, structured traceroute output is on. Set `false` to show raw router output. |
-| `structured.enable_for_bgp_route` | Boolean | unset | When the `structured` section is present and this key is unset, structured BGP route output is on. Set `false` to show raw router output. |
+| `structured.enable_for_traceroute` | Boolean | unset | Set `false` to show raw router output for traceroute on every device. Structured output itself is on only for devices with `structured_output: true` in `devices.yaml`. This key cannot turn it on. |
+| `structured.enable_for_bgp_route` | Boolean | unset | Set `false` to show raw router output for BGP route queries on every device. Structured output itself is on only for devices with `structured_output: true` in `devices.yaml`. This key cannot turn it on. |
 
 #### Example: Structured Output Configuration
 ```yaml filename="config.yaml"
@@ -307,12 +307,12 @@ Extensive customization options for the web interface appearance and behavior.
 Controls hostname resolution in the browser using DNS-over-HTTPS.
 
 <Callout type="info">
-When users enter hostnames such as `example.com` instead of IP addresses, Ultraglass uses DNS-over-HTTPS to resolve them to IP addresses directly in the user's browser. This avoids sending the lookup through the application server.
+When users enter hostnames such as `example.com` instead of IP addresses, Ultraglass resolves them to IP addresses with DNS-over-HTTPS. With `cloudflare`, `google` or `custom`, the user's browser sends the lookup to the provider. With `server`, the Ultraglass server resolves the name through `/api/dns`.
 </Callout>
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
-| `web.dns_provider.name` | String | `cloudflare` | DNS provider: `cloudflare`, `google`, `server` (resolve on the Ultraglass server through `/api/dns`), or `custom`. |
+| `web.dns_provider.name` | String | `cloudflare` | DNS provider: `cloudflare`, `google`, `server` (resolve on the Ultraglass server through `/api/dns`), or `custom`. `custom` requires `url`; without it, startup fails. |
 | `web.dns_provider.url` | String | Set from `name` | DNS-over-HTTPS endpoint URL. A URL that is not a built-in provider URL sets `name` to `custom`. |
 
 #### Example: DNS Configuration
