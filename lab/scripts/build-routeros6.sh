@@ -10,4 +10,7 @@ git -C "$BUILD" fetch --quiet --depth 1 origin "$REVISION"
 git -C "$BUILD" checkout --quiet --detach FETCH_HEAD
 cp --reflink=auto "$DISK" "$BUILD/mikrotik/routeros/chr-6.49.19.vmdk"
 make -C "$BUILD/mikrotik/routeros" REGISTRY=ultraglass-lab/ IMAGE=chr-6.49.19.vmdk docker-build
+ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+docker build --build-arg BASE=ultraglass-lab/mikrotik_routeros:6.49.19 \
+    -t ultraglass-lab/mikrotik_routeros:6.49.19 "$ROOT/images/mikrotik"
 echo "Build directory: $BUILD"

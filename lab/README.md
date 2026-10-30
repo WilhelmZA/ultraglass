@@ -37,6 +37,8 @@ sh scripts/build-iosv.sh /path/to/iosv.qcow2
 sh scripts/build-nexus.sh /path/to/nexus.qcow2
 sh scripts/build-timos.sh /path/to/timos.qcow2
 sh scripts/build-routeros6.sh /path/to/chr.vmdk
+sh scripts/build-mikrotik.sh
+sh scripts/build-huawei.sh
 sh scripts/build-os9.sh /path/to/ftos.iso
 sh scripts/import-xrd.sh /path/to/image.tgz
 sh scripts/build-platform.sh sonic
@@ -101,9 +103,9 @@ sh platform.sh stop
 
 Supported names are `sonic`, `exos`, `voss`, `xrd`, `iosv`, `nexus`, `timos`, `routeros6` and `os9`. The helper replaces the previous companion deployment before starting the selected appliance. It reserves 12 GiB for the host in addition to the appliance and probe limits.
 
-Fresh VM deployments discard appliance-local changes. Put repeatable settings in the startup configuration. XRd retains its committed configuration in `data/platforms/clab-ultraglass-platforms/xrd/xr-storage`.
+Starting the same optional appliance after `stop` preserves its disk and restores its data link. Selecting a different appliance creates a fresh deployment and discards the previous appliance-local changes. Put repeatable settings in the startup configuration. XRd retains its committed configuration in `data/platforms/clab-ultraglass-platforms/xrd/xr-storage`.
 
-Wait for VM container health before running queries. Check SSH access, the data interface and BGP state after boot.
+The helper waits for SSH and verifies both fixture data links before reporting success. A failed check returns an error instead of reporting the appliance ready.
 
 OS9 remains an experimental console appliance. Connect to `192.168.250.29:5000` with Telnet. Its container health confirms configuration loading only; SSH and data links are not operational.
 
@@ -148,7 +150,10 @@ After testing, disable both probe sessions and shut down both appliance neighbor
 - Cisco IOS IPv6 BGP lookups require a prefix, such as `2606:4700::/44`.
 - IOL reads its partial configuration on first boot, then uses NVRAM. Run `sh scripts/save-cisco-iol.sh` after direct Containerlab deployment.
 - Junos forwarding requires an online FPC. Check `show chassis fpc` after boot.
-- MikroTik can require its startup configuration to be reapplied. `lab-up.sh` checks the data address and imports the configuration when needed.
+- Restart an existing main-lab node with `python3 scripts/start-node.py <node>`. This restores Containerlab data links and Linux interface settings while preserving the appliance disk.
+- MikroTik uses fixed NIC addresses and accepts saved credentials after restart. Its wrapper repairs interface references left by the previous launcher.
+- Huawei preserves its saved configuration and binds guest interfaces to PCI slots. The startup helper waits for SSH before applying the data-port configuration.
+- IOL and IOL-L2 need host-side checksum offloading disabled on their management links. The startup helper reapplies this after Docker creates each link.
 - Huawei data ports require routed mode and committed configuration. `lab-up.sh` calls `scripts/configure-huawei.py` after boot.
 - EXOS and VOSS use the configured QEMU CPU setting. EXOS SSH can require `HostKeyAlgorithms=+ssh-rsa`.
 - VOSS uses a `/30` probe link. Its password must not contain the username.
@@ -164,7 +169,7 @@ After testing, disable both probe sessions and shut down both appliance neighbor
 | BIRD | 192.168.250.12 | root / lg |
 | OpenBGPD | 192.168.250.13 | root / lg |
 | MikroTik | 192.168.250.14 | admin / admin |
-| VyOS | 192.168.250.15 | admin / admin |
+| VyOS | 192.168.250.31 | admin / admin |
 | Junos | 192.168.250.16 | admin / admin@123 |
 | Arista | 192.168.250.17 | admin / admin |
 | Huawei | 192.168.250.18 | admin / admin |

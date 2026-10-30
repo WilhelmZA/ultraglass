@@ -21,6 +21,9 @@ case "$ACTION" in
     start) ;;
     *) echo "Usage: sh platform.sh start sonic|exos|voss|xrd|iosv|nexus|timos|routeros6|os9 | stop | status" >&2; exit 1 ;;
 esac
+PYTHON=${LAB_PYTHON:-../.venv/bin/python3}
+[ -x "$PYTHON" ] || PYTHON=python3
+"$PYTHON" -c 'import yaml, netmiko'
 
 case "$NODE" in
     sonic) IMAGE=ultraglass-lab/sonic_sonic-vs:202505.1238524; LIMIT_MB=5120 ;;
@@ -74,7 +77,8 @@ for N in sonic exos voss xrd iosv nexus timos routeros6 os9; do
     fi
 done
 if [ "$(docker inspect -f '{{.State.Running}}' "$PREFIX-$NODE" 2>/dev/null || true)" = true ]; then
-    echo "$NODE is already running"
+    "$PYTHON" scripts/start-platform.py "$NODE"
+    "$PYTHON" scripts/check-platform.py "$NODE"
     exit 0
 fi
 # Reserve 12 GiB for the host, existing lab and other applications.
@@ -83,6 +87,13 @@ REQUIRED_MB=$((LIMIT_MB + 256 + 12288))
 if [ "$AVAILABLE_MB" -lt "$REQUIRED_MB" ]; then
     echo "Need $REQUIRED_MB MiB available; have $AVAILABLE_MB MiB. Leave $NODE stopped." >&2
     exit 1
+fi
+
+# Reuse the current appliance and its disk after a stop/start cycle.
+if docker inspect "$PREFIX-$NODE" >/dev/null 2>&1; then
+    "$PYTHON" scripts/start-platform.py "$NODE"
+    "$PYTHON" scripts/check-platform.py "$NODE"
+    exit 0
 fi
 
 # Destroy the previous two-node topology before replacing its file. Destroy uses
@@ -100,7 +111,7 @@ fi
 # Containerlab 0.82 rejects --node-filter on an existing lab. Render a two-node
 # topology instead, preserving the management network shared with the main lab.
 mkdir -p data/platforms
-python3 - "$NODE" <<'PY'
+"$PYTHON" - "$NODE" <<'PY'
 import sys
 from pathlib import Path
 import yaml
@@ -116,6 +127,7 @@ if node in ('sonic', 'exos', 'voss', 'xrd', 'iosv', 'nexus', 'timos', 'routeros6
         binds=[f'configs/{node}/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro'],
     )
 for definition in topology['topology']['nodes'].values():
+    definition['mgmt-ipv6'] = 'fd00:250:ffff::' + definition['mgmt-ipv4'].rsplit('.', 1)[1]
     if 'startup-config' in definition:
         definition['startup-config'] = str(Path(definition['startup-config']).resolve())
     if 'license' in definition:
@@ -147,4 +159,5 @@ if node in ('sonic', 'exos', 'voss', 'xrd', 'iosv', 'nexus', 'timos', 'routeros6
 Path('data/platforms/active.clab.yml').write_text(yaml.safe_dump(topology, sort_keys=False))
 PY
 sudo -n containerlab deploy -t data/platforms/active.clab.yml
+"$PYTHON" scripts/check-platform.py "$NODE"
 echo "Started $NODE. Fixture BGP peers start disabled. Stop with: sh platform.sh stop"
