@@ -83,11 +83,12 @@ MATRIX = {
         # The shared standard traceroute parser now gives Arista structured hops.
         ("__hyperglass_arista_eos_traceroute__", "traceroute_v4", V4, "structured", None),
     ],
-    # Huawei CE12800 VRP (V200R005). A full table crashes the slow emulated
+    # Huawei CE12800 V200R005C10SPC607B607, which runs VRP 8.180 (platform
+    # huawei_vrpv8). A full table crashes the slow emulated
     # control plane, so the lab caps what the core sends it (see lab-up.sh /
     # gobgpd.toml). Detailed and brief BGP formats have captured regression
     # coverage; AS-path and community queries must return routes (issue #20).
-    "lab-huawei": [
+    "lab-huawei-vrpv8": [
         ("__hyperglass_huawei_bgp_route_table__", "bgp_route_v4", V4, "structured", None),
         ("__hyperglass_huawei_bgp_route_table__", "bgp_route_v6", V6, "structured", None),
         ("__hyperglass_huawei_bgp_aspath_table__", "bgp_aspath", ASPATH, "structured", None),

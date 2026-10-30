@@ -154,6 +154,7 @@ After testing, disable both probe sessions and shut down both appliance neighbor
 - Junos forwarding requires an online FPC. Check `show chassis fpc` after boot.
 - Restart an existing main-lab node with `python3 scripts/start-node.py <node>`. This restores Containerlab data links and Linux interface settings while preserving the appliance disk.
 - MikroTik uses fixed NIC addresses and accepts saved credentials after restart. Its wrapper repairs interface references left by the previous launcher.
+- The `huawei` node is a CE12800 V200R005C10SPC607B607, which runs VRP 8.180 (VRPv8). Its locations use platform `huawei_vrpv8`: `lab-huawei-vrpv8` and `lab-huawei-vrpv8-vrf` (#103).
 - Huawei preserves its saved configuration and binds guest interfaces to PCI slots. The startup helper waits for SSH before applying the data-port configuration.
 - IOL and IOL-L2 need host-side checksum offloading disabled on their management links. The startup helper reapplies this after Docker creates each link.
 - Huawei data ports require routed mode and committed configuration. `lab-up.sh` calls `scripts/configure-huawei.py` after boot.
@@ -174,7 +175,7 @@ After testing, disable both probe sessions and shut down both appliance neighbor
 | VyOS | 192.168.250.31 | admin / admin |
 | Junos | 192.168.250.16 | admin / admin@123 |
 | Arista | 192.168.250.17 | admin / admin |
-| Huawei | 192.168.250.18 | admin / admin |
+| Huawei CE12800 (VRP 8.180, `lab-huawei-vrpv8`) | 192.168.250.18 | admin / admin |
 | IOL | 192.168.250.19 | admin / admin |
 | IOL-L2 | 192.168.250.20 | admin / admin |
 | SONiC | 192.168.250.21 | admin / admin |
@@ -213,7 +214,7 @@ Use `scripts/silent-hop.sh on` to test traceroute through a silent hop. Run it w
 
 ### VRF and interface checks
 
-The supplied Arista and FRR configurations create VRF `LAB`, and `scripts/configure-huawei.py` creates vpn-instance `LAB` on the Huawei with LoopBack100 (`192.0.2.108`, `2001:db8:100::8`) inside it. Select `lab-arista-vrf`, `lab-frr-vrf` or `lab-huawei-vrf` for BGP checks using `198.51.100.0/24` and `2001:db8:100::/48`. FRR's VRF location offers BGP queries only.
+The supplied Arista and FRR configurations create VRF `LAB`, and `scripts/configure-huawei.py` creates vpn-instance `LAB` on the Huawei with LoopBack100 (`192.0.2.108`, `2001:db8:100::8`) inside it. Select `lab-arista-vrf`, `lab-frr-vrf` or `lab-huawei-vrpv8-vrf` for BGP checks using `198.51.100.0/24` and `2001:db8:100::/48`. FRR's VRF location offers BGP queries only.
 
 Add another VRF location as a separate device entry with a unique name and `vrf: LAB`. Configure the corresponding VRF, routes and BGP address families on that router first.
 

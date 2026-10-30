@@ -26,9 +26,9 @@ LAB = Path(__file__).parents[4] / "lab" / "configs"
 
 @pytest.fixture(params=["ultraglass", "ultraglass-text"])
 def lab_state(request):
-    """Load the lab-huawei-vrf entry exactly as the lab device file defines it."""
+    """Load the lab-huawei-vrpv8-vrf entry exactly as the lab device file defines it."""
     entries = yaml.safe_load((LAB / request.param / "devices.yaml").read_text())["devices"]
-    (entry,) = (e for e in entries if e["name"] == "lab-huawei-vrf")
+    (entry,) = (e for e in entries if e["name"] == "lab-huawei-vrpv8-vrf")
     _use_state.cache_clear()
     state = use_state()
     params = Params()
@@ -43,14 +43,14 @@ def lab_state(request):
 
 
 def commands(state, name, target):
-    device = state.devices["lab-huawei-vrf"]
+    device = state.devices["lab-huawei-vrpv8-vrf"]
     directive = next(d for d in device.directives if d.name == name)
     query = Query(queryLocation=device.name, queryTarget=target, queryType=directive.id)
     return Construct(device=device, query=query).queries()
 
 
 def test_lab_huawei_vrf_offers_all_query_types(lab_state):
-    device = lab_state.devices["lab-huawei-vrf"]
+    device = lab_state.devices["lab-huawei-vrpv8-vrf"]
     assert device.vrf == "LAB"
     assert {d.name for d in device.directives} == {
         "BGP Route",

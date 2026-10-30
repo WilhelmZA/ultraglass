@@ -110,4 +110,4 @@ fi
 
 echo
 echo "Lab up on $IMAGE. Ultraglass structured: http://127.0.0.1:8001  text: http://127.0.0.1:8002"
-echo "Query a device by its name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei, lab-junos, lab-iol, lab-ioll2"
+echo "Query a device by its name: lab-frr, lab-bird, lab-openbgpd, lab-mikrotik, lab-arista, lab-vyos, lab-huawei-vrpv8, lab-junos, lab-iol, lab-ioll2"

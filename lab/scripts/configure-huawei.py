@@ -6,7 +6,7 @@ data port (GE1/0/0) and the eBGP session to the GoBGP core are configured here,
 after the VM is up. The CE12800 is a two-stage-commit switch whose GE ports are
 L2 by default, so the port is made routed with `undo portswitch` before it gets
 an address, and every change is committed. It also creates vpn-instance LAB for
-the lab-huawei-vrf location (#130). Safe to re-run: each part is skipped when the
+the lab-huawei-vrpv8-vrf location (#130). Safe to re-run: each part is skipped when the
 device already has it.
 
 Needs netmiko (pip install netmiko). lab-up.sh calls this for the huawei node.

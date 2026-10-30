@@ -86,18 +86,6 @@ devices:
       source4: 10.250.7.1
       source6: fd00:250:7::1
 
-  - name: lab-huawei
-    address: 192.168.250.18
-    group: Huawei
-    credential:
-      username: admin
-      password: admin
-    platform: huawei
-    structured_output: true
-    attrs:
-      source4: 10.250.8.1
-      source6: fd00:250:8::1
-
   - name: lab-huawei-vrpv8
     address: 192.168.250.18
     group: Huawei
@@ -218,19 +206,6 @@ devices:
       source6: fd00:250:1::1
 
   # Huawei vpn-instance LAB (#130). source4/source6 are LoopBack100 inside the instance.
-  - name: lab-huawei-vrf
-    address: 192.168.250.18
-    group: VRF
-    credential:
-      username: admin
-      password: admin
-    platform: huawei
-    vrf: LAB
-    structured_output: true
-    attrs:
-      source4: 192.0.2.108
-      source6: 2001:db8:100::8
-
   - name: lab-huawei-vrpv8-vrf
     address: 192.168.250.18
     group: VRF

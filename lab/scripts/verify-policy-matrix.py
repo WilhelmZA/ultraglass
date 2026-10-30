@@ -25,10 +25,10 @@ TEST_PREFIXES = {"1.0.0.0/24", "2606:4700:4700::/48"}
 # EOS `show ip bgp regexp`, Huawei brief AS-path output, FRR `regexp` JSON (FRR, VyOS)
 # and the Cisco IOS, IOS-XR and NX-OS summary tables omit them.
 CISCO_IOS = {"lab-iol", "lab-ioll2", "lab-xrd", "lab-nexus"}
-NO_ASPATH_COMMUNITIES = {"lab-arista", "lab-huawei", "lab-frr", "lab-vyos", *CISCO_IOS}
+NO_ASPATH_COMMUNITIES = {"lab-arista", "lab-huawei-vrpv8", "lab-frr", "lab-vyos", *CISCO_IOS}
 NO_COMMUNITY_COMMUNITIES = CISCO_IOS
 # Huawei brief community output omits the AS path, so RPKI and organisations cannot apply.
-NO_COMMUNITY_ASPATH = {"lab-huawei"}
+NO_COMMUNITY_ASPATH = {"lab-huawei-vrpv8"}
 # Ultraglass resolves a vendor directive id to each device's equivalent by name.
 QUERIES = (
     ("BGP AS Path", "__hyperglass_arista_eos_bgp_aspath_table__", "_64999_"),
@@ -90,7 +90,7 @@ def main():
             assert routes, (device, kind, [r["prefix"] for r in output["routes"]])
             # Every device holds both test routes, except Huawei, which the lab feeds a
             # bounded IPv4-only subset.
-            if device != "lab-huawei":
+            if device != "lab-huawei-vrpv8":
                 assert {r["prefix"] for r in routes} == TEST_PREFIXES, (device, kind, routes)
             organization = output.get("asn_organizations", {}).get("13335", {}).get("name")
             if has_path:

@@ -110,6 +110,8 @@ topology:
       mgmt-ipv6: fd00:250:ffff::17
       startup-config: configs/arista/ceos.cfg
 
+    # CE12800 V200R005C10SPC607B607 runs VRP 8.180: Ultraglass platform huawei_vrpv8,
+    # locations lab-huawei-vrpv8 and lab-huawei-vrpv8-vrf (#103).
     huawei:
       kind: huawei_vrp
       image: ultraglass-lab/huawei_vrp:ce12800-V200R005C10SPC607B607
