@@ -89,8 +89,11 @@ class HuaweiRouteEntry(HuaweiBase):
 
     @property
     def weight(self) -> int:
-        """Get weight (preference)."""
-        return self.preference
+        """Get weight from the VRP preferred value (`pref-val`, `PrefVal`).
+
+        `preference` holds the route preference (`pre`), which is not the BGP weight.
+        """
+        return self.preference_value
 
     @property
     def med(self) -> int:
@@ -331,7 +334,7 @@ def _brief_route(prefix: str, flags: str, values: dict) -> HuaweiRouteEntry:
         original_next_hop=str(ip_address(values.get("NextHop", "").strip())),
         metric=int(values.get("MED", "").strip() or 0),
         local_preference=int(values.get("LocPrf", "").strip() or 100),
-        preference=int(values.get("PrefVal", "").strip() or 0),
+        preference_value=int(values.get("PrefVal", "").strip() or 0),
         duration=-1,
         as_path=as_path,
         communities=re.findall(r"\d+:\d+(?::\d+)?", values.get("Community", "")),

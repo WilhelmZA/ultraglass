@@ -73,6 +73,21 @@ def test_brief_table_rejects_out_of_range_asdot():
         parse_huawei((text,))
 
 
+def test_detailed_route_weight_is_pref_val_not_route_preference():
+    """Regression for #132: `pre 255` is the route preference; weight is `pref-val`."""
+    table = parse_huawei((sample("route4-asdot"),))
+    (route,) = table.routes
+    assert route.weight == 0
+    assert route.as_path == [65000, 327960, 13335]
+    raised = sample("route4-asdot").replace("pref-val 0", "pref-val 300")
+    assert parse_huawei((raised,)).routes[0].weight == 300
+
+
+def test_brief_table_weight_is_prefval():
+    lines = sample("aspath4").replace("     0      65000", "   200      65000")
+    assert {route.weight for route in parse_huawei((lines,)).routes} == {200}
+
+
 def test_captured_trace_reaches_destination():
     trace = parse_huawei_traceroute(sample("trace"), "1.1.1.1", "lab-huawei")
     assert len(trace.hops) == 9
