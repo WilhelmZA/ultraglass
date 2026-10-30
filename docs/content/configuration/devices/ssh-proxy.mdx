@@ -6,7 +6,7 @@ When devices sit behind a jump box or other intermediary server, Ultraglass can 
 | :----------------- | :------ | :------------ | :----------------------------------------------------------------------------------- |
 | `proxy.address`    | String  |               | IPv4 address, IPv6 address, or hostname of SSH proxy. A hostname must resolve when Ultraglass starts. |
 | `proxy.port`       | Number  | `22`          | TCP port to use for connecting to the SSH proxy.                                     |
-| `proxy.platform`   | String  | `linux_ssh`   | Currently, only `linux_ssh` is supported.                                            |
+| `proxy.platform`   | String  |               | Required. Currently, only `linux_ssh` is supported.                                  |
 | `proxy.credential` | Mapping |               | Mapping/dict of a [credential configuration](/configuration/devices/credentials.mdx). |
 
 ### Examples
@@ -23,6 +23,7 @@ devices:
           password: your password
       proxy:
           address: 203.0.113.1
+          platform: linux_ssh
           credential:
               username: your proxy username
               password: your proxy password

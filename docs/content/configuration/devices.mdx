@@ -19,7 +19,7 @@ Each configured device may have the following parameters:
 | `structured_output` | Boolean         | `false`            | Set `true` for parsed tables on supported platforms. Every platform returns text without it; see [platform support](/platforms.mdx#structured-output). |
 | `vrf` | String | | Run built-in queries in this VRF. Supported on Arista EOS, Extreme EXOS and VOSS, FRRouting, Huawei VRP, MikroTik RouterOS, SONiC and VyOS. Built-in query types without a VRF form on the platform (ping and traceroute on FRRouting and SONiC) are not offered for the device. To offer the same router in several VRFs, define it once per VRF with a different `name`. |
 | `directives`        | List of Strings |               | Enable referenced directives configured in the [directives config file](/configuration/directives.mdx). Add a `builtins` entry to disable or select built-in directives, as in the [examples](#examples). |
-| `driver`            | String          | `netmiko`     | Specify which driver to use for this device. Currently, only `netmiko` is supported. HTTP devices always use the HTTP client.              |
+| `driver`            | String          | `netmiko`     | Specify which driver to use for this device. Currently, only `netmiko` is supported. HTTP devices use the HTTP client unless `driver` is set. |
 | `driver_config`     | Mapping         |               | Mapping/dict of options to pass to the connection driver. Values here override the driver defaults. For example, `global_delay_factor` defaults to `0.1`, `1` on MikroTik and `2` on telnet platforms. Raise it for a router on a slow or high-latency link. A MikroTik BGP query that returns no routes is retried at delay factors 3, 6 and 10, and the log names the value that worked. |
 | `disable_paging`    | Boolean         | True          | Send the driver's paging and terminal width commands, such as `terminal length 0`, after login. Set to `false` when a login policy rejects them; directives must then disable paging themselves, for example with `\| no-more`. |
 | `connect_retries` | Number | `3` on `cisco_xr`, `0` on other platforms | Retries when the device drops a new SSH session before login, with `Error reading SSH protocol banner`, `Connection reset by peer` or `Connection refused`. IOS-XR accepts about one new SSH session per second, so back-to-back queries hit this. Each wait doubles from 1 s to at most 4 s, plus up to 1 s of jitter. Retries stop at half of `request_timeout`. A query that fails after the session opens is never retried. Range `0` to `10`; `0` turns retries off. |
@@ -55,13 +55,15 @@ devices:
       attrs:
           source4: 192.0.2.1
           source6: "2001:db8::1"
+      credential:
+          username: you
+          password: your password
 ```
 
 </Callout>
 
 <Callout type="warning">
-    If you do not utilize IPv6 in your network, you'll need to create your own directive that only
-    has IPv4 commands.
+    If you do not utilize IPv6 in your network, you'll need to create your own directive that only has IPv4 commands.
 </Callout>
 
 ## Examples
@@ -81,9 +83,6 @@ devices:
       credential:
           username: looking-glass
           password: replace-me
-      attrs:
-          source4: 192.0.2.1
-          source6: "2001:db8::1"
 ```
 
 On Huawei VRP, `vrf` names the vpn-instance (`ip vpn-instance CUSTOMER_A`). Ultraglass runs the `display bgp vpnv4 vpn-instance` and `display bgp vpnv6 vpn-instance` forms for BGP queries, and `ping -vpn-instance` and `tracert -vpn-instance` for IPv4 ping and traceroute. IPv6 ping and traceroute use `ping ipv6 vpn-instance` and `tracert ipv6 vpn-instance`, without the dash, which is the form VRP 8 accepts. The VRF forms do not set a source address, so the device picks one from the vpn-instance. `source4` and `source6` are not used.
@@ -97,9 +96,6 @@ devices:
       credential:
           username: looking-glass
           password: replace-me
-      attrs:
-          source4: 198.51.100.1
-          source6: "2001:db8:100::1"
 ```
 
 Define separate device entries with distinct names to offer multiple VRFs on one router. Built-in queries without a VRF form are hidden. For FRRouting and SONiC, this hides ping and traceroute. Setting `vrf` on a platform without VRF-capable built-ins causes a configuration error unless built-ins are disabled.

@@ -115,7 +115,7 @@ This isn't the best real-world example, since the above plugin would be run on e
 
 Say one of your directives might show some sensitive information in the query output. Using an output plugin, we can replace any text matching a pattern (or multiple patterns) with some other text.
 
-An output plugin enabled by a directive runs only on devices whose platform is in the plugin's `platforms` list. Ultraglass calls `process()` with keyword arguments `output` and `query`. `output` is a tuple of strings, one per command, or a parsed table when the device has `structured_output` set. Each plugin receives the previous plugin's result.
+An output plugin enabled by a directive runs only on devices whose platform is in the plugin's `platforms` list. Ultraglass calls `process()` with keyword arguments `output` and `query`. `output` is a tuple of strings, one per command. Only common plugins can receive a parsed table, on built-in queries to a device with `structured_output` set. Each plugin receives the previous plugin's result.
 
 ```python filename="/etc/hyperglass/plugins/redact.py"
 import re

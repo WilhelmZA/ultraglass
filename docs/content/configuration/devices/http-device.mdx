@@ -1,6 +1,6 @@
 Ultraglass can collect output from a generic HTTP endpoint.
 
-Set `platform: http` and an `http` mapping on every HTTP device. Setting `platform: http` without that mapping causes a configuration error. The device also needs a `credential`, although the HTTP client does not use it. HTTP devices do not support an SSH `proxy`.
+Set `platform: http` and an `http` mapping on every HTTP device. Setting `platform: http` without that mapping causes a configuration error. The device also needs a `credential`, although the HTTP client does not use it. HTTP devices do not support an SSH `proxy`. The `http` platform has no built-in directives, so list the directives the device offers in `directives` and define each one in the [directives file](/configuration/directives.mdx). The `example_directive` in the examples below is such a directive.
 
 ## HTTP Configuration
 
@@ -43,6 +43,8 @@ devices:
           basic_auth:
               username: you
               password: your password
+      directives:
+          - example_directive
 ```
 
 Given the following Ultraglass query:
@@ -78,6 +80,8 @@ devices:
       http:
           path: /path/to/query/device
           scheme: http
+      directives:
+          - example_directive
 ```
 
 #### Header Authentication
@@ -96,4 +100,6 @@ devices:
           path: /path/to/query/device
           headers:
               Authorization: your special token
+      directives:
+          - example_directive
 ```

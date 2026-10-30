@@ -36,10 +36,10 @@ A rule is a way of saying "if a query target matches the rule's conditions, run 
 | :---------- | :-------------- | :------------ | :--------------------------------------------------------------------------------------------- |
 | `condition` | String          |               | IP prefix in which the target must be contained, or a regular expression the target must match. `null` disables validation. |
 | `action`    | String          | permit        | `permit` or `deny` the directive target when this rule is matched.                             |
-| `commands`  | List of Strings |               | Commands to run when this rule matches. `{target}` is replaced with the query target, and `{mask}` with its IPv4 netmask. Other placeholders are filled from device `attrs` or directive [variables](#variables). `command` is an alias for one command. |
+| `commands`  | List of Strings |               | Commands to run when this rule matches. `{target}` is replaced with the query target. Other placeholders are filled from device `attrs` or directive [variables](#variables). `command` is an alias for one command. |
 | `vrf_command` | String | | Single command form used when the device has `vrf` set. Use `{vrf}` for the validated VRF name. |
 | `vrf_commands` | List of Strings | | Multiple-command alternative to `vrf_command`. |
-| `fallback_command` | String | | Command to run when the device rejects `command`, for older software. The device's error output is replaced by the fallback output, and a warning names the device. Applies to SSH devices. A device with `vrf` set runs `vrf_command` instead and does not use fallbacks. |
+| `fallback_command` | String | | Command to run when the device rejects `command`, for older software. The device's error output is replaced by the fallback output, and a warning names the device. Applies to SSH devices. A device with `vrf` set runs the rule's `vrf_command` instead, when the rule has one, and then does not use fallbacks. |
 | `fallback_commands` | List of Strings | | Multiple-command alternative to `fallback_command`, matched to `commands` by position. |
 | `fallback_os_version` | String | | Version filter, such as `<16` or `>=12,<16`. A device whose `os_version` meets it runs the fallback commands directly, without trying `command` first. Only the leading dotted numbers of `os_version` are compared. |
 
@@ -57,22 +57,22 @@ A rule is a way of saying "if a query target matches the rule's conditions, run 
 
 ##### Require IPv4 Queries between /8 and /24
 
-```yaml filename="directives.yaml" {5-6} /{target} {mask}/ copy
+```yaml filename="directives.yaml" {5-6} /{target}/ copy
 your-directive:
     name: IP Route
     rules:
         - condition: 0.0.0.0/0
           ge: 8
           le: 24
-          command: "show ip route {target} {mask}"
+          command: "show ip route {target}"
     field:
         description: IP address or prefix
 ```
 
 Given a query target of 198.18.0.0/15, the command run on the device would be:
 
-```none /255.254.0.0/
-show ip route 198.18.0.0/15 255.254.0.0
+```none
+show ip route 198.18.0.0/15
 ```
 
 `{target}` keeps the prefix length. To send only the network address, rewrite the target with an [input plugin](/plugins.mdx#convert-a-cidr-prefix-to-network-and-mask).
@@ -178,7 +178,7 @@ Each select option uses the following schema:
 
 Example of a text directive expecting a string value matching a regex pattern:
 
-```yaml filename="directives.yaml" copy {6-7}
+```yaml filename="directives.yaml" copy {6-8}
 your-directive:
     name: IP Route
     rules:
@@ -219,7 +219,7 @@ A directive can declare extra template variables next to `{target}`. Each variab
 
 Variable keys must be valid identifiers and cannot be `target` or `mask`. A variable placeholder needs no matching device `attrs` entry. On BIRD, FRR, OpenBGPD, SONiC and VyOS devices, Ultraglass shell-quotes the selected value.
 
-```yaml filename="directives.yaml" copy {6-17}
+```yaml filename="directives.yaml" copy {7-18}
 show-bgp-summary:
     name: BGP Summary
     rules:
