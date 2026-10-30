@@ -215,6 +215,13 @@ class DnsOverHttps(HyperglassModel):
                 "name": "custom",
                 "url": url,
             }
+        if name not in DNS_OVER_HTTPS:
+            known = ", ".join(DNS_OVER_HTTPS)
+            raise ValueError(
+                f"web.dns_provider: {name!r} is not a known provider. "
+                f"Use one of: {known}, or set 'url' to a custom DNS over HTTPS URL "
+                "('url' is required with 'custom')."
+            )
         url = DNS_OVER_HTTPS[name]
         return {
             "name": name,
