@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- A device without structured output no longer offers the table-output BGP directives. The UI sent them for some query types, so a text deployment showed raw JSON or XML (#132, #133, #134, #138, #139, #140, #141, #142).
 - MikroTik community queries now match a community anywhere in a route's community list. RouterOS 6 separates the list with `;`, so the query missed every community except the last (#117).
 
 ## 3.5.0-rc.2 - 2026-10-30
