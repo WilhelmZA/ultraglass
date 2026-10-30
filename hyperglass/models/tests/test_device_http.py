@@ -59,3 +59,17 @@ def test_http_client_base_url_unset_port(scheme):
     client = device.http.create_client(device=device)
 
     assert str(client.base_url).rstrip("/") == f"{scheme}://192.0.2.10"
+
+
+@pytest.mark.parametrize(
+    ("port", "expected"),
+    [(None, "https://[2001:db8::10]"), (8443, "https://[2001:db8::10]:8443")],
+)
+def test_http_client_base_url_ipv6(port, expected):
+    """An IPv6 device address is bracketed in the base URL (#188)."""
+    extra = {} if port is None else {"port": port}
+    config = {**CONFIG, "address": "2001:db8::10"}
+    device = Device(**config, platform="http", http={"scheme": "https"}, **extra)
+    client = device.http.create_client(device=device)
+
+    assert str(client.base_url).rstrip("/") == expected

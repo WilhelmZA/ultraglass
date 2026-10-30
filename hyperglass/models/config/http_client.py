@@ -2,6 +2,7 @@
 
 # Standard Library
 import typing as t
+from ipaddress import IPv6Address, ip_address
 
 # Third Party
 import httpx
@@ -105,7 +106,15 @@ class HttpConfiguration(HyperglassModel):
 
         # Add the port to the URL unless it is unset or the scheme default.
         # An unset port is the device model's SSH default (22), not an HTTP port.
-        base_url = f"{self.scheme}://{device.address!s}".strip("/")
+        # An IPv6 literal must be bracketed in a URL (RFC 3986).
+        # The address may arrive as a string, so parse it rather than check its type.
+        host = str(device.address)
+        try:
+            if isinstance(ip_address(host), IPv6Address):
+                host = f"[{host}]"
+        except ValueError:
+            pass  # A hostname needs no brackets.
+        base_url = f"{self.scheme}://{host!s}".strip("/")
         port_set = "port" in device.model_fields_set
         if port_set and device.port != DEFAULT_PORTS[self.scheme]:
             base_url += f":{device.port!s}"
