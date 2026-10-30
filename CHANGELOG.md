@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- `logging.samples.backup_count` sets how many rotated query sample files are kept. The default stays 1. One structured full-table result can be tens of MB, so a capture run lost most of its samples to rotation (#144).
 - MikroTik RouterOS 6 support for BGP route, AS path and community queries, as text or structured output. Set `os_version` on RouterOS 6 devices to send the RouterOS 6 commands directly. Without it, Ultraglass falls back to them when the router rejects the RouterOS 7 command (#117).
 
 ### Fixed

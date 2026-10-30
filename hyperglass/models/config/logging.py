@@ -94,8 +94,10 @@ class QuerySamples(HyperglassModel):
     path: t.Optional[Path] = None
     include_raw: bool = True
     include_parsed: bool = True
-    # Size-based rotation threshold; a single "<name>.1" backup is kept.
+    # Size-based rotation threshold.
     max_size: ByteSize = "50MB"
+    # Rotated files kept as "<name>.1" (newest) to "<name>.<backup_count>".
+    backup_count: int = Field(1, ge=1)
 
 
 class Logging(HyperglassModel):

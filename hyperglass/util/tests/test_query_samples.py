@@ -88,3 +88,21 @@ def test_rotation_keeps_single_backup(tmp_path):
     live = tmp_path / "hyperglass_query_log.jsonl"
     backup = tmp_path / "hyperglass_query_log.jsonl.1"
     assert live.exists() and backup.exists()
+
+
+def test_rotation_keeps_backup_count(tmp_path):
+    """A full-table run must not rotate its captures away (#144)."""
+    cfg = QuerySamples(enable=True, max_size="200B", backup_count=3)
+    q = _fake_query()
+    for index in range(40):
+        log_query_sample(q, cfg, tmp_path, raw=[f"{index:02d}" + "x" * 40], parsed=None)
+    names = sorted(p.name for p in tmp_path.iterdir())
+    assert names == [
+        "hyperglass_query_log.jsonl",
+        "hyperglass_query_log.jsonl.1",
+        "hyperglass_query_log.jsonl.2",
+        "hyperglass_query_log.jsonl.3",
+    ]
+    first = [json.loads(x)["raw"][0][:2] for x in (tmp_path / names[1]).read_text().splitlines()]
+    third = [json.loads(x)["raw"][0][:2] for x in (tmp_path / names[3]).read_text().splitlines()]
+    assert max(third) < min(first)

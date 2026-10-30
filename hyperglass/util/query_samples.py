@@ -39,18 +39,23 @@ def _resolve_path(cfg: "QuerySamples", directory: Path) -> Path:
     return Path(directory) / DEFAULT_FILENAME
 
 
-def _rotate_if_needed(path: Path, max_size: int) -> None:
+def _rotate_if_needed(path: Path, max_size: int, backup_count: int = 1) -> None:
     """Size-based rotation: when the file reaches max_size, move it to '<name>.1'.
 
-    A single backup is kept; a log shipper following the live file re-opens on
-    rotation. Best-effort — rotation failures never block a write.
+    Older backups shift up one number and the one past `backup_count` is dropped;
+    a log shipper following the live file re-opens on rotation. Best-effort —
+    rotation failures never block a write.
     """
     try:
         if max_size and path.exists() and path.stat().st_size >= max_size:
-            backup = path.with_name(path.name + ".1")
-            if backup.exists():
-                backup.unlink()
-            path.rename(backup)
+            oldest = path.with_name(f"{path.name}.{backup_count}")
+            if oldest.exists():
+                oldest.unlink()
+            for number in range(backup_count - 1, 0, -1):
+                backup = path.with_name(f"{path.name}.{number}")
+                if backup.exists():
+                    backup.rename(path.with_name(f"{path.name}.{number + 1}"))
+            path.rename(path.with_name(path.name + ".1"))
     except Exception:  # noqa: BLE001 - rotation is best-effort
         pass
 
@@ -112,9 +117,7 @@ def build_sample(
         },
         "structured": structured,
         "runtime_s": runtime,
-        "error": None
-        if error is None
-        else {"type": type(error).__name__, "message": str(error)},
+        "error": None if error is None else {"type": type(error).__name__, "message": str(error)},
     }
     if cfg.include_raw:
         record["raw"] = _normalize_raw(raw)
@@ -149,12 +152,12 @@ def log_query_sample(
             structured=structured,
         )
         line = json.dumps(record, default=str, ensure_ascii=False)
-        _emit(path, line + "\n", int(cfg.max_size))
+        _emit(path, line + "\n", int(cfg.max_size), cfg.backup_count)
     except Exception as err:  # noqa: BLE001 - sample logging must not break queries
         log.bind(error=str(err)).debug("Failed to write query sample")
 
 
-def _emit(path: Path, line: str, max_size: int) -> None:
+def _emit(path: Path, line: str, max_size: int, backup_count: int = 1) -> None:
     """Rotate-if-needed, then append one line. No lock files, no cross-process locks.
 
     Safe under multiple uvicorn workers because:
@@ -166,12 +169,12 @@ def _emit(path: Path, line: str, max_size: int) -> None:
       step against other async tasks in the same worker.
     * The one thing not serialized across *processes* is the rotation rename. At a
       looking-glass query rate against a large ``max_size`` that collision is
-      vanishingly rare, and its only effect would be clobbering a redundant ``.1``
+      vanishingly rare, and its only effect would be clobbering a redundant
       backup whose lines a shipper (Alloy) has already delivered to Loki. This is
       an intentional trade to avoid lock-file machinery in a best-effort logger.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     with _write_lock:
-        _rotate_if_needed(path, max_size)
+        _rotate_if_needed(path, max_size, backup_count)
         with path.open("a", encoding="utf-8") as handle:
             handle.write(line)

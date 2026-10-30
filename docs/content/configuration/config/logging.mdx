@@ -21,6 +21,19 @@ Ultraglass appends sessions to a per-device file dated in UTC. Ensure the applic
 
 For devices that reject automatic paging or terminal-width commands, set `disable_paging: false` in `devices.yaml`. Directives must then prevent paging themselves, for example with a platform-supported `| no-more` suffix.
 
+### Query samples
+
+`logging.samples` writes each query's request, raw device output and parsed result as one JSON line to `<directory>/hyperglass_query_log.jsonl`. It is off by default. Raw output can contain internal addresses and communities.
+
+| Parameter        | Type    | Default Value | Description |
+| :--------------- | :------ | :------------ | :---------- |
+| `enable`         | Boolean | false         | Write query samples. |
+| `path`           | String  |               | Output file. Defaults to `<directory>/hyperglass_query_log.jsonl`. |
+| `include_raw`    | Boolean | true          | Include the raw device output. |
+| `include_parsed` | Boolean | true          | Include the parsed result. |
+| `max_size`       | String  | 50MB          | File size at which the file rotates to `<name>.1`. |
+| `backup_count`   | Number  | 1             | Rotated files kept, `<name>.1` (newest) to `<name>.<backup_count>`. One structured full-table result can be tens of MB, so raise this for fixture capture runs. |
+
 ### Syslog
 
 | Parameter | Type   | Default Value | Description             |
