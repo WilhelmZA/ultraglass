@@ -2,13 +2,31 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.5.0-rc.2**, a release candidate. The latest stable release is **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.5.0-rc.3**, a release candidate. The latest stable release is **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.5.0-rc.3 - 2026-10-30
+
+**This is a release candidate for 3.5.0.** It is published for testing and is not for production. Run it in a lab or staging deployment, not in front of users.
+
+Pull the release candidate by its version tag: `wilhelmza/ultraglass:3.5.0-rc.3` or `ghcr.io/wilhelmza/ultraglass:3.5.0-rc.3`. The `latest` tag stays on 3.4.0 on both registries.
+
+This candidate fixes every finding from the 3.5.0-rc.2 lab run (#132 to #144). Two faults affected most platforms: text devices offered the table-output BGP directives, and structured results with RPKI validation ran one lookup per path. Both are fixed. Retest each platform from the rc.2 run.
+
+These platforms need tester attention. Each line names the configuration key that enables it:
+
+- Cisco IOS-XR: device `platform: cisco_xr`, with `structured_output: true` for parsed BGP tables and the new `connect_retries` device setting (#113, #140).
+- Cisco NX-OS: device `platform: cisco_nxos`, with `structured_output: true` for parsed BGP tables (#110).
+- Extreme EXOS: device `platform: extreme_exos`, with `structured_output: true` for parsed BGP tables (#73).
+- Extreme VOSS (VSP and Fabric Engine): device `platform: extreme_vsp` (#73).
+- Community SONiC: device `platform: sonic`, with `structured_output: true` for parsed BGP and traceroute tables (#76).
+- MikroTik RouterOS 6: device `platform: mikrotik_routeros` with `os_version` set to the RouterOS 6 version (#117).
+- Huawei VRP in a VRF: device `vrf` set to the vpn-instance name, with `structured_output: true` for parsed BGP tables (#130, #132).
+
+Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass/issues). Put `3.5.0-rc.3` in the issue title.
 
 ### Added
 
@@ -28,6 +46,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Huawei VRP BGP route queries accept prefix targets again. The execution recheck validated the `a b` form the Huawei input plugin produces and rejected every CIDR target. Rules now check the target as sent, and the command syntax check still covers the rewritten form (#132).
 - Huawei VRP structured AS path and community tables parse 4-byte ASNs that VRP prints in asdot, such as `5.280`, and convert them to asplain. Before, the parser rejected the whole response (#132).
 - Huawei VRP structured routes take Weight from `pref-val`. The detailed route showed the route preference (`pre 255`) as Weight (#132).
+
+### Changed
+
+- Updated the Python package, runtime metadata and UI package to 3.5.0-rc.3.
 
 ## 3.5.0-rc.2 - 2026-10-30
 
