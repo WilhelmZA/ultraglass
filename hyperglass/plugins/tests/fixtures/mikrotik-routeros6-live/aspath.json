@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-10-30T01:09:37.833824+00:00",
+  "device": {
+    "id": "lab-routeros6",
+    "name": "lab-routeros6",
+    "platform": "mikrotik_routeros"
+  },
+  "query": {
+    "type": "__hyperglass_mikrotik_bgp_aspath_table__",
+    "target": "_13335$",
+    "location": "lab-routeros6"
+  },
+  "raw": [
+    "Flags: X - disabled, A - active, D - dynamic, C - connect, S - static, r - rip, b - bgp, o - ospf, m - mme, B - blackhole, U - unreachable, P - prohibit \n 0 ADb  dst-address=1.0.0.0/24 gateway=10.251.8.2 gateway-status=10.251.8.2 reachable via  ether2 distance=20 scope=40 target-scope=10 bgp-as-path=\"65000,64999,13335\" bgp-med=50 bgp-origin=incomplete bgp-communities=65000:777,65000:778 received-from=fixture4 \n\n 1 ADb  dst-address=1.1.1.0/24 gateway=10.251.8.2 gateway-status=10.251.8.2 reachable via  ether2 distance=20 scope=40 target-scope=10 bgp-as-path=\"65000,13335\" bgp-origin=incomplete bgp-communities=37195:302 received-from=fixture4 \n\nFlags: X - disabled, A - active, D - dynamic, C - connect, S - static, r - rip, o - ospf, b - bgp, U - unreachable \n 0 ADb  dst-address=2606:4700::/44 gateway=fd00:251:8::2 gateway-status=fd00:251:8::2 reachable via  ether2 distance=20 scope=40 target-scope=10 bgp-as-path=\"65000,13335\" bgp-origin=incomplete bgp-communities=37195:302 received-from=fixture6 \n\n 1 ADb  dst-address=2606:4700:4700::/48 gateway=fd00:251:8::2 gateway-status=fd00:251:8::2 reachable via  ether2 distance=20 scope=40 target-scope=10 bgp-as-path=\"65000,64999,13335\" bgp-origin=incomplete bgp-communities=65000:777 received-from=fixture6"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-10-30T01:08:50.363458+00:00",
+  "device": {
+    "id": "lab-routeros6",
+    "name": "lab-routeros6",
+    "platform": "mikrotik_routeros"
+  },
+  "query": {
+    "type": "__hyperglass_mikrotik_bgp_route_table__",
+    "target": "9.9.9.0/24",
+    "location": "lab-routeros6"
+  },
+  "raw": [
+    "Flags: X - disabled, A - active, D - dynamic, C - connect, S - static, r - rip, b - bgp, o - ospf, m - mme, B - blackhole, U - unreachable, P - prohibit"
+  ]
+}

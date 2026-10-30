@@ -4,6 +4,7 @@ https://github.com/ktbyers/netmiko
 """
 
 # Standard Library
+import re
 import math
 import typing as t
 from contextvars import ContextVar
@@ -68,6 +69,9 @@ def device_delay_factor(device: "Device") -> float:
     return device_driver_args(device)["global_delay_factor"]
 
 
+# RouterOS 7 (`routing route`) and RouterOS 6 (`ip route`, `ipv6 route`) BGP route scans.
+ROUTE_PRINT = re.compile(r"(?:routing|ip|ipv6) route ")
+
 netmiko_device_send_args = {
     "mikrotik_routeros": {"last_read": 5.0},
     "mikrotik_switchos": {"last_read": 5.0},
@@ -88,7 +92,7 @@ def collect_commands(
         responses = []
         for index, query in enumerate(queries):
             # RouterOS BGP scans can be silent for a minute before the first row.
-            timing = platform in netmiko_device_send_args and not query.startswith("routing route ")
+            timing = platform in netmiko_device_send_args and not ROUTE_PRINT.match(query)
             send = connection.send_command_timing if timing else connection.send_command
             args = netmiko_device_send_args[platform] if timing else {}
             response = send(query, read_timeout=timeout, **args)

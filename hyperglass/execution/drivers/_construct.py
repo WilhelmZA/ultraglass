@@ -273,7 +273,7 @@ class Formatter:
         """Build a RouterOS ``where ~`` regex for an AS-path or community query.
 
         AS-path uses ``_`` as an element boundary; community is anchored between
-        commas or the ends of the community list. Each ``$`` anchor must reach
+        list separators or the ends of the community list. Each ``$`` anchor must reach
         the RouterOS console as ``\\$`` so the console passes a literal ``$`` to
         the regex engine, which reads it as the end anchor. A bare ``$`` is taken
         as console variable interpolation and a doubled ``\\\\$`` as an escaped
@@ -284,7 +284,8 @@ class Formatter:
         if self.query_type == "bgp_aspath":
             target = target.replace("_", "(^|[ ,]|$)")
         else:
-            target = "(^|,)" + target.replace(".", r"\.") + "(,|$)"
+            # RouterOS 6 joins a community list with `;`, RouterOS 7 with `,`.
+            target = "(^|[,;])" + target.replace(".", r"\.") + "([,;]|$)"
         return target.replace("$", r"\$")
 
     def _exos_bgp_community(self, target: str) -> str:

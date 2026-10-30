@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-10-30T00:12:00+00:00",
+  "device": {
+    "id": "lab-routeros6",
+    "name": "lab-routeros6",
+    "platform": "mikrotik_routeros"
+  },
+  "query": {
+    "type": "__hyperglass_mikrotik_bgp_route__",
+    "target": "1.1.1.0/24",
+    "location": "lab-routeros6"
+  },
+  "command": "routing route print detail without-paging where 1.1.1.0/24 in dst-address bgp and dst-address !=0.0.0.0/0",
+  "raw": [
+    "syntax error (line 1 column 96)"
+  ]
+}

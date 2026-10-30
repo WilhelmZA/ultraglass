@@ -8,6 +8,16 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- MikroTik RouterOS 6 support for BGP route, AS path and community queries, as text or structured output. Set `os_version` on RouterOS 6 devices to send the RouterOS 6 commands directly. Without it, Ultraglass falls back to them when the router rejects the RouterOS 7 command (#117).
+
+### Fixed
+
+- MikroTik community queries now match a community anywhere in a route's community list. RouterOS 6 separates the list with `;`, so the query missed every community except the last (#117).
+
 ## 3.5.0-rc.2 - 2026-10-30
 
 **This is a release candidate for 3.5.0.** It is published for testing and is not for production. Run it in a lab or staging deployment, not in front of users.

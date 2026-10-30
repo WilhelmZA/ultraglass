@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-10-30T01:08:49.962080+00:00",
+  "device": {
+    "id": "lab-routeros6",
+    "name": "lab-routeros6",
+    "platform": "mikrotik_routeros"
+  },
+  "query": {
+    "type": "__hyperglass_mikrotik_bgp_route_table__",
+    "target": "2606:4700::/44",
+    "location": "lab-routeros6"
+  },
+  "raw": [
+    "Flags: X - disabled, A - active, D - dynamic, C - connect, S - static, r - rip, o - ospf, b - bgp, U - unreachable \n 0 ADb  dst-address=2606:4700::/44 gateway=fd00:251:8::2 gateway-status=fd00:251:8::2 reachable via  ether2 distance=20 scope=40 target-scope=10 bgp-as-path=\"65000,13335\" bgp-origin=incomplete bgp-communities=37195:302 received-from=fixture6"
+  ]
+}

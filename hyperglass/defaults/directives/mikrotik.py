@@ -22,6 +22,15 @@ __all__ = (
 
 NAME = "Mikrotik"
 PLATFORMS = ["mikrotik_routeros", "mikrotik_switchos"]
+# RouterOS 6 has no `routing route` menu. Its BGP routes are in `ip route` and `ipv6 route`,
+# with `bgp-` attributes. A device without `os_version` falls back when it rejects the
+# RouterOS 7 command. VRF queries use RouterOS 7 commands only.
+ROUTEROS6 = "<7"
+# One command, so the automatic fallback also covers both address families.
+ROUTEROS6_BOTH_FAMILIES = (
+    'ip route print detail without-paging where bgp and {attr}~"{{target}}"; '
+    'ipv6 route print detail without-paging where bgp and {attr}~"{{target}}"'
+)
 
 Mikrotik_BGPRoute = BuiltinDirective(
     id="__hyperglass_mikrotik_bgp_route__",
@@ -31,12 +40,16 @@ Mikrotik_BGPRoute = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0",
+            fallback_command="ip route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0",
+            fallback_os_version=ROUTEROS6,
             vrf_command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0 and routing-table={vrf}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0",
+            fallback_command="ipv6 route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0",
+            fallback_os_version=ROUTEROS6,
             vrf_command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0 and routing-table={vrf}",
         ),
     ],
@@ -56,6 +69,8 @@ Mikrotik_BGPASPath = BuiltinDirective(
             commands=[
                 'routing route print detail without-paging where bgp and bgp.as-path~"{target}"',
             ],
+            fallback_command=ROUTEROS6_BOTH_FAMILIES.format(attr="bgp-as-path"),
+            fallback_os_version=ROUTEROS6,
             vrf_commands=[
                 'routing route print detail without-paging where bgp and bgp.as-path~"{target}" and routing-table={vrf}',
             ],
@@ -77,6 +92,8 @@ Mikrotik_BGPCommunity = BuiltinDirective(
             commands=[
                 'routing route print detail without-paging where bgp and bgp.communities~"{target}"',
             ],
+            fallback_command=ROUTEROS6_BOTH_FAMILIES.format(attr="bgp-communities"),
+            fallback_os_version=ROUTEROS6,
             vrf_commands=[
                 'routing route print detail without-paging where bgp and bgp.communities~"{target}" and routing-table={vrf}',
             ],
@@ -140,12 +157,16 @@ MikrotikBGPRouteTable = BuiltinDirective(
             condition="0.0.0.0/0",
             action="permit",
             command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0",
+            fallback_command="ip route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0",
+            fallback_os_version=ROUTEROS6,
             vrf_command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=0.0.0.0/0 and routing-table={vrf}",
         ),
         RuleWithIPv6(
             condition="::/0",
             action="permit",
             command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0",
+            fallback_command="ipv6 route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0",
+            fallback_os_version=ROUTEROS6,
             vrf_command="routing route print detail without-paging where {target} in dst-address bgp and dst-address !=::/0 and routing-table={vrf}",
         ),
     ],
@@ -163,6 +184,8 @@ MikrotikBGPASPathTable = BuiltinDirective(
             commands=[
                 'routing route print detail without-paging where bgp and bgp.as-path~"{target}"',
             ],
+            fallback_command=ROUTEROS6_BOTH_FAMILIES.format(attr="bgp-as-path"),
+            fallback_os_version=ROUTEROS6,
             vrf_commands=[
                 'routing route print detail without-paging where bgp and bgp.as-path~"{target}" and routing-table={vrf}',
             ],
@@ -182,6 +205,8 @@ MikrotikBGPCommunityTable = BuiltinDirective(
             commands=[
                 'routing route print detail without-paging where bgp and bgp.communities~"{target}"',
             ],
+            fallback_command=ROUTEROS6_BOTH_FAMILIES.format(attr="bgp-communities"),
+            fallback_os_version=ROUTEROS6,
             vrf_commands=[
                 'routing route print detail without-paging where bgp and bgp.communities~"{target}" and routing-table={vrf}',
             ],

@@ -91,10 +91,18 @@ def test_empty_or_unreachable_results_are_not_command_errors(output):
     assert not command_error((output,))
 
 
-def test_mikrotik_bgp_scan_waits_for_prompt():
+@pytest.mark.parametrize(
+    "command",
+    [
+        'routing route print detail without-paging where bgp.as-path~"13335"',
+        # RouterOS 6 (#117).
+        'ip route print detail without-paging where bgp and bgp-as-path~"13335"',
+        'ipv6 route print detail without-paging where bgp and bgp-as-path~"13335"',
+    ],
+)
+def test_mikrotik_bgp_scan_waits_for_prompt(command):
     session = Mock()
     session.send_command.return_value = "complete route output"
-    command = 'routing route print detail without-paging where bgp.as-path~"13335"'
     assert ssh_netmiko.collect_commands(session, "mikrotik_routeros", [command], 300) == (
         "complete route output",
     )

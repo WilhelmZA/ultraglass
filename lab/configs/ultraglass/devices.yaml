@@ -161,6 +161,20 @@ devices:
       source4: 10.251.6.1
       source6: fd00:251:6::1
 
+  # RouterOS 6 appliance (#117). `os_version` selects the RouterOS 6 commands.
+  - name: lab-routeros6
+    address: 192.168.250.28
+    group: MikroTik
+    credential:
+      username: admin
+      password: Lab-Router9
+    platform: mikrotik_routeros
+    os_version: "6.49.19"
+    structured_output: true
+    attrs:
+      source4: 10.251.8.1
+      source6: fd00:251:8::1
+
   # VRF locations (#50). Arista and FRR hold VRF LAB from their startup configs, with
   # 198.51.100.0/24 and 2001:db8:100::/48 originated into BGP. FRR in a VRF offers BGP
   # queries only.

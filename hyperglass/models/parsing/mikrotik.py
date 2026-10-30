@@ -35,8 +35,9 @@ def remove_prefix(text: str, prefix: str) -> str:
 TOKEN_RE = re.compile(r'([a-zA-Z0-9_.-]+)=(".*?"|\S+)')
 
 # Regex to find flags at the beginning of a line (e.g., "Ab   dst-address=...").
+# RouterOS 6 prints the route index first (e.g., "0 ADb  dst-address=...").
 # Include filtered/disabled/unreachable flags so those routes split into their own entries.
-FLAGS_RE = re.compile(r"^\s*([DXUuIAFfcmsroivmyH\+b]+)\s+")
+FLAGS_RE = re.compile(r"^\s*(?:\d+\s+)?([DXUuIAFfcmsroivmyH\+b]+)\s+")
 
 
 class MikrotikBase(HyperglassModel, extra="ignore"):

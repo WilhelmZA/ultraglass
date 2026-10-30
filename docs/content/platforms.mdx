@@ -39,6 +39,14 @@ Without it, colon-form community queries fail on the router, and route results s
 
 Classic IOS releases before IOS XE 16, such as IOSv 15.9, accept no options after an IPv6 traceroute destination. Set `os_version` on these devices, for example `os_version: "15.9(3)M6"`. Ultraglass then sends `traceroute ipv6 <target>`, and the router traces from its routed source address instead of `source6`. Without `os_version`, Ultraglass sends the full command first, runs the destination-only form when the router rejects it, and logs a warning that names the device.
 
+### MikroTik RouterOS 6
+
+RouterOS 6 has no `routing route` menu. Its BGP routes are in `ip route` and `ipv6 route`. Set `os_version` on RouterOS 6 devices, for example `os_version: "6.49.19"`. Ultraglass then sends the RouterOS 6 commands directly. Without `os_version`, Ultraglass sends the RouterOS 7 command first, runs the RouterOS 6 command when the router rejects it, and logs a warning that names the device.
+
+- BGP route, AS path, community, ping and traceroute queries work on RouterOS 6, as text or with `structured_output: true`.
+- AS path and community queries read IPv4 and IPv6 routes in one command.
+- VRF queries use RouterOS 7 commands only.
+
 ### Extreme EXOS and VOSS
 
 Use `extreme_exos` for ExtremeXOS and `extreme_vsp` for VOSS (VSP and Fabric Engine). Both connect with their Netmiko drivers.
@@ -73,7 +81,7 @@ Structured traceroute also parses standard numbered CLI output from EOS, Junos, 
 
 ### VRF queries
 
-Built-in VRF forms support EOS, Extreme EXOS (`vr`) and VOSS, FRRouting, Huawei VRP, MikroTik RouterOS, SONiC, and VyOS 1.4+. FRRouting and SONiC expose only BGP queries when `vrf` is set. See [device VRF configuration](/configuration/devices.mdx#vrf-queries).
+Built-in VRF forms support EOS, Extreme EXOS (`vr`) and VOSS, FRRouting, Huawei VRP, MikroTik RouterOS 7, SONiC, and VyOS 1.4+. FRRouting and SONiC expose only BGP queries when `vrf` is set. See [device VRF configuration](/configuration/devices.mdx#vrf-queries).
 
 ## Other Platforms
 
