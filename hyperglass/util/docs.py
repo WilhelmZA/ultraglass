@@ -31,17 +31,16 @@ def get_directive_variable(path: Path, variable: str) -> t.Any:
     return value
 
 
-def create_platform_list() -> str:
-    """Create a list of platforms as a JSON file for use by the docs."""
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+PLATFORMS_JSON = PROJECT_ROOT / "docs" / "platforms.json"
+
+
+def build_platform_list() -> t.List[PlatformSpec]:
+    """Build the list of platforms that the docs show."""
     # Third Party
     from netmiko.ssh_dispatcher import CLASS_MAPPER  # type: ignore
 
-    project_root = Path(__file__).parent.parent.parent
-
-    dir_ = project_root / "docs"
-    file_ = dir_ / "platforms.json"
-
-    builtin_directives = project_root / "hyperglass" / "defaults" / "directives"
+    builtin_directives = PROJECT_ROOT / "hyperglass" / "defaults" / "directives"
 
     platforms: t.Tuple[PlatformSpec] = ()
 
@@ -69,6 +68,14 @@ def create_platform_list() -> str:
     sorted_platforms = list(platforms)
     sorted_platforms.sort(key=lambda x: x["keys"][0])
     sorted_platforms.sort(key=lambda x: not x["native"])
+    return sorted_platforms
+
+
+def create_platform_list(file_: t.Optional[Path] = None) -> str:
+    """Create a list of platforms as a JSON file for use by the docs."""
+    if file_ is None:
+        file_ = PLATFORMS_JSON
+    sorted_platforms = build_platform_list()
 
     with file_.open("w+") as opened_file:
         json.dump(sorted_platforms, opened_file)

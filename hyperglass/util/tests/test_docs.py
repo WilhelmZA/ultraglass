@@ -2,35 +2,28 @@
 
 # Standard Library
 import json
-from pathlib import Path
 
 # Third Party
 from netmiko.ssh_dispatcher import CLASS_MAPPER  # type: ignore
 
 # Local
-from ..docs import create_platform_list
-
-PLATFORMS_JSON = Path(__file__).parent.parent.parent.parent / "docs" / "platforms.json"
+from ..docs import PLATFORMS_JSON, create_platform_list
 
 
-def _run_create_platform_list():
-    """Run create_platform_list, return its output, and restore the committed file."""
-    committed = PLATFORMS_JSON.read_bytes()
-    try:
-        create_platform_list()
-        generated = json.loads(PLATFORMS_JSON.read_text())
-    finally:
-        PLATFORMS_JSON.write_bytes(committed)
-    return json.loads(committed), generated
+def _run_create_platform_list(tmp_path):
+    """Write the platform list to a temporary file and return it with the committed file."""
+    output = tmp_path / "platforms.json"
+    create_platform_list(output)
+    return json.loads(PLATFORMS_JSON.read_text()), json.loads(output.read_text())
 
 
-def test_create_platform_list_matches_platforms_json():
+def test_create_platform_list_matches_platforms_json(tmp_path):
     """The generator runs, and its native rows match docs/platforms.json exactly.
 
     The installed netmiko version decides the non-native key set, so those rows are
     checked against the installed netmiko instead of the committed file.
     """
-    committed, generated = _run_create_platform_list()
+    committed, generated = _run_create_platform_list(tmp_path)
 
     committed_native = [p for p in committed if p["native"]]
     generated_native = [p for p in generated if p["native"]]
