@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - HTTP devices with an IPv6 address build a valid URL. The address is now bracketed, as in `https://[2001:db8::10]:8443` (#188).
 - Connection errors show the device name again. The default `messages.connection_error` template failed with `KeyError: 'device_name'`, so users saw the general error. Error templates now accept both `{device_name}` and `{device}`, and an unknown placeholder is blanked instead of raising (#167).
 - Error messages no longer repeat the device error. A template that already contains `{error}`, such as the default connection error, showed it twice as `boom (boom)` (#187).
+- `create_platform_list`, which builds `docs/platforms.json`, no longer raises `TypeError` on the first directive file. A test now runs it and compares its output with `docs/platforms.json` (#174).
 
 ## 3.5.0-rc.3 - 2026-10-30
 

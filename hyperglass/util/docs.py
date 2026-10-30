@@ -53,7 +53,7 @@ def create_platform_list() -> str:
             if not isinstance(name, str):
                 raise RuntimeError("'NAME' variable is missing or invalid in '{!s}'".format(path))
             _platforms = get_directive_variable(path, "PLATFORMS")
-            if not isinstance(_platforms, t.Tuple, t.List):
+            if not isinstance(_platforms, (tuple, list)):
                 raise RuntimeError(
                     "'PLATFORMS' variable is missing or invalid in '{!s}'".format(path)
                 )
