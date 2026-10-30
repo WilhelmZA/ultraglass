@@ -10,21 +10,21 @@ Each configured device may have the following parameters:
 | :------------------ | :-------------- | :------------ | :----------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`              | String          |               | Display name of the device.                                                                                                                |
 | `description`       | String          |               | Description of the device, displayed as a subtle label.                                                                                    |
-| `avatar`            | String          |               | Path to an avatar/logo image for this site. Used when [`web.location_display_mode`](/configuration/config/web-ui.mdx) is set to `gallery`. |
-| `address`           | String          |               | IPv4 address, IPv6 address, or hostname of the device.                                                                                     |
+| `avatar`            | String          |               | Path to an avatar/logo image for this site. The file must exist. Ultraglass scales images wider than 512 pixels down to 512 pixels. Used when [`web.location_display_mode`](/configuration/config/web-ui.mdx) is set to `gallery`. |
+| `address`           | String          |               | IPv4 address, IPv6 address, or hostname of the device. A hostname must resolve when Ultraglass starts. |
 | `group`             | String          |               | Group name, used to visually group devices in the UI.                                                                                      |
-| `port`              | Number          |               | TCP port on which to connect to the device.                                                                                                |
+| `port`              | Number          | `22`          | TCP port on which to connect to the device.                                                                                                |
 | `platform`          | String          |               | Device platform/OS. Must be a [supported platform](/platforms.mdx).                                                                        |
 | `os_version` | String | | The device's software version, such as `15.9(3)M6` or `17.18.02`. Built-in directives use it to pick commands that older releases accept. Quote it in YAML so `15.10` is not read as `15.1`. |
 | `structured_output` | Boolean         | `false`            | Set `true` for parsed tables on supported platforms. Every platform returns text without it; see [platform support](/platforms.mdx#structured-output). |
 | `vrf` | String | | Run built-in queries in this VRF. Supported on Arista EOS, Extreme EXOS and VOSS, FRRouting, Huawei VRP, MikroTik RouterOS, SONiC and VyOS. Built-in query types without a VRF form on the platform (ping and traceroute on FRRouting and SONiC) are not offered for the device. To offer the same router in several VRFs, define it once per VRF with a different `name`. |
-| `directives`        | List of Strings |               | Enable referenced directives configured in the [directives config file](/configuration/directives.mdx).                                    |
-| `driver`            | String          | netmiko       | Specify which driver to use for this device. Currently, only `netmiko` is supported.                                                       |
+| `directives`        | List of Strings |               | Enable referenced directives configured in the [directives config file](/configuration/directives.mdx). Add a `builtins` entry to disable or select built-in directives, as in the [examples](#examples). |
+| `driver`            | String          | `netmiko`     | Specify which driver to use for this device. Currently, only `netmiko` is supported. HTTP devices always use the HTTP client.              |
 | `driver_config`     | Mapping         |               | Mapping/dict of options to pass to the connection driver. Values here override the driver defaults. For example, `global_delay_factor` defaults to `0.1`, `1` on MikroTik and `2` on telnet platforms. Raise it for a router on a slow or high-latency link. A MikroTik BGP query that returns no routes is retried at delay factors 3, 6 and 10, and the log names the value that worked. |
 | `disable_paging`    | Boolean         | True          | Send the driver's paging and terminal width commands, such as `terminal length 0`, after login. Set to `false` when a login policy rejects them; directives must then disable paging themselves, for example with `\| no-more`. |
 | `connect_retries` | Number | `3` on `cisco_xr`, `0` on other platforms | Retries when the device drops a new SSH session before login, with `Error reading SSH protocol banner`, `Connection reset by peer` or `Connection refused`. IOS-XR accepts about one new SSH session per second, so back-to-back queries hit this. Each wait doubles from 1 s to at most 4 s, plus up to 1 s of jitter. Retries stop at half of `request_timeout`. A query that fails after the session opens is never retried. Range `0` to `10`; `0` turns retries off. |
 | `attrs`             | Mapping         |               | Mapping/dict of variables, as referenced in configured directives.                                                                         |
-| `credential`        | Mapping         |               | Mapping/dict of a [credential configuration](/configuration/devices/credentials.mdx).                                                      |
+| `credential`        | Mapping         |               | Mapping/dict of a [credential configuration](/configuration/devices/credentials.mdx). Required on every device, including HTTP devices.     |
 | `http`              | Mapping         |               | Mapping/dict of [HTTP client options](/configuration/devices/http-device.mdx), if this device is connected via HTTP.                       |
 | `proxy`             | Mapping         |               | Mapping/dict of [SSH proxy config](/configuration/devices/ssh-proxy.mdx) to use for this device's requests.                                |
 
@@ -32,7 +32,7 @@ Ultraglass logs a warning at startup for each device key it does not recognise, 
 
 <Callout type="tip">
 
-Ultraglass ships with predefined [directives](/configuration/directives.mdx) (commands) for the following [platforms](platforms.mdx):
+Ultraglass ships with predefined [directives](/configuration/directives.mdx) (commands) for the following [platforms](/platforms.mdx):
 
 <SupportedPlatforms />
 
@@ -42,6 +42,8 @@ All built in directives require that the following `attrs` be defined on each de
 | :-------- | :-------------------------------------------------------- |
 | `source4` | IPv4 address used to source Ping and Traceroute commands. |
 | `source6` | IPv6 address used to source Ping and Traceroute commands. |
+
+A device with `vrf` set on Arista EOS, FRRouting, Huawei VRP, MikroTik RouterOS, SONiC or VyOS does not need these attributes, because the VRF command forms do not use them. Extreme EXOS and VOSS VRF commands still use them.
 
 **Example**
 
@@ -84,7 +86,7 @@ devices:
           source6: "2001:db8::1"
 ```
 
-On Huawei VRP, `vrf` names the vpn-instance (`ip vpn-instance CUSTOMER_A`). Ultraglass runs the `display bgp vpnv4 vpn-instance` and `display bgp vpnv6 vpn-instance` forms for BGP queries, and `ping -vpn-instance` and `tracert -vpn-instance` for IPv4 ping and traceroute. IPv6 ping and traceroute use `ping ipv6 vpn-instance` and `tracert ipv6 vpn-instance`, without the dash, which is the form VRP 8 accepts. Set `source4` and `source6` to addresses on an interface bound to the same vpn-instance, for example a loopback with `ip binding vpn-instance CUSTOMER_A`.
+On Huawei VRP, `vrf` names the vpn-instance (`ip vpn-instance CUSTOMER_A`). Ultraglass runs the `display bgp vpnv4 vpn-instance` and `display bgp vpnv6 vpn-instance` forms for BGP queries, and `ping -vpn-instance` and `tracert -vpn-instance` for IPv4 ping and traceroute. IPv6 ping and traceroute use `ping ipv6 vpn-instance` and `tracert ipv6 vpn-instance`, without the dash, which is the form VRP 8 accepts. The VRF forms do not set a source address, so the device picks one from the vpn-instance. `source4` and `source6` are not used.
 
 ```yaml filename="devices.yaml" copy
 devices:
@@ -114,12 +116,18 @@ devices:
       credential:
           username: you
           password: your password
+      attrs:
+          source4: 192.0.2.1
+          source6: "2001:db8::1"
     - name: San Francisco, CA
       address: 192.0.2.2
       platform: juniper
       credential:
           username: you
           password: your password
+      attrs:
+          source4: 192.0.2.2
+          source6: "2001:db8::2"
 ```
 
 <h3 className="_font-semibold _tracking-tight _text-slate-900 dark:_text-slate-100 _mt-8 _text-2xl">
@@ -139,6 +147,9 @@ devices:
           password: your password
       directives:
           - cisco-show-lldp-neighbors
+      attrs:
+          source4: 192.0.2.1
+          source6: "2001:db8::1"
 ```
 
 <h3 className="_font-semibold _tracking-tight _text-slate-900 dark:_text-slate-100 _mt-8 _text-2xl">
@@ -157,13 +168,13 @@ devices:
           username: you
           password: your password
       directives:
-          - builtin: false
+          - builtins: false
           - cisco-show-lldp-neighbors
 ```
 
 <h3 className="_font-semibold _tracking-tight _text-slate-900 dark:_text-slate-100 _mt-8 _text-2xl">
     {" "}
-    <DocsButton href="/configuration/directives" /> Enable Specifc Built-in Directives
+    <DocsButton href="/configuration/directives" /> Enable Specific Built-in Directives
 </h3>
 
 In this example, only specified built-in directives are made available.
@@ -177,5 +188,8 @@ devices:
           username: you
           password: your password
       directives:
-          - builtin: [bgp_route, traceroute]
+          - builtins: [bgp_route, traceroute]
+      attrs:
+          source4: 192.0.2.1
+          source6: "2001:db8::1"
 ```

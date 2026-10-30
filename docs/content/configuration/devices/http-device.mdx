@@ -1,37 +1,41 @@
 Ultraglass can collect output from a generic HTTP endpoint.
 
-Configure an `http` mapping on every HTTP device. Setting `platform: http` without that mapping causes a configuration error. If `platform` is omitted, an `http` mapping selects the HTTP platform automatically.
+Set `platform: http` and an `http` mapping on every HTTP device. Setting `platform: http` without that mapping causes a configuration error. The device also needs a `credential`, although the HTTP client does not use it. HTTP devices do not support an SSH `proxy`.
 
 ## HTTP Configuration
 
 | Parameter               | Type    | Default Value | Description                                                                                                            |
 | :---------------------- | :------ | :------------ | :--------------------------------------------------------------------------------------------------------------------- |
-| `http.attribute_map`    | Mapping |               | Mapping of Ultraglass query fields to the replacements sent to the HTTP endpoint.                    |
-| `http.basic_auth`       | Mapping |               | If basic authentication is required, provide a mapping/dict containing the basic authentication username and password. |
-| `http.body_format`      | String  | json          | Body format, options are `json` `yaml` `xml` `text`                                                                    |
+| `http.attribute_map`    | Mapping |               | Mapping of Ultraglass query fields (`query_target`, `query_location`, `query_type`) to the names sent to the HTTP endpoint. |
+| `http.basic_auth`       | Mapping |               | If basic authentication is required, provide a mapping/dict with `username` and `password`. |
+| `http.body_format`      | String  | `json`        | Body format, options are `json` `yaml` `xml` `text`. Ultraglass sends a body only with `POST`, `PUT` and `PATCH`. |
 | `http.follow_redirects` | Boolean | `false`       | Follow HTTP redirects from server.                                                                                     |
 | `http.headers`          | Mapping |               | Mapping/dict of http headers to append to requests.                                                                    |
-| `http.method`           | String  | GET           | HTTP method to use for requests.                                                                                       |
-| `http.path`             | String  | /             | HTTP URI/Path.                                                                                                         |
-| `http.query`            | Mapping |               | Mapping/Dict of URL Query Parameters.                                                                                  |
-| `http.retries`          | Number  | 0             | Number of retries to perform before request failure.                                                                   |
-| `http.scheme`           | String  | https         | HTTP schema, must be `http` or `https`                                                                                 |
-| `http.source`           | String  |               | Request source IP address.                                                                                             |
-| `http.ssl_ca`           | String  |               | Path to SSL CA certificate file for SSL validation.                                                                    |
-| `http.ssl_client`       | String  |               | Path to client SSL certificates for request.                                                                           |
-| `http.timeout`          | Number  | 5             | Request timeout in seconds.                                                                                            |
+| `http.method`           | String  | `GET`         | HTTP method to use for requests. Case-insensitive.                                                                     |
+| `http.path`             | String  | `/`           | HTTP URI/Path.                                                                                                         |
+| `http.query`            | Mapping |               | Mapping/Dict of URL Query Parameters. When unset, Ultraglass sends the three query fields as URL query parameters. Set `false` to send none. |
+| `http.retries`          | Number  | `0`           | Number of connection retries to perform before request failure.                                                       |
+| `http.scheme`           | String  | `https`       | HTTP scheme, must be `http` or `https`.                                                                                |
+| `http.source`           | String  |               | Local IP address from which Ultraglass sends requests.                                                                 |
+| `http.ssl_ca`           | String  |               | Path to SSL CA certificate file for SSL validation. The file must exist.                                               |
+| `http.ssl_client`       | String  |               | Path to a client SSL certificate file. The file must exist.                                                            |
+| `http.timeout`          | Number  | `5`           | Request timeout in seconds.                                                                                            |
 | `http.verify_ssl`       | Boolean | `true`        | If `false`, invalid certificates for HTTPS hosts will be ignored.                                                      |
 
 ### Example
 
 #### Basic
 
-The following example will send an HTTP POST request to `https://192.0.2/path/to/query/device` with HTTP basic authentication, and will not verify the SSL certificate.
+The following example will send an HTTP POST request to `https://192.0.2.1/path/to/query/device` with HTTP basic authentication, and will not verify the SSL certificate.
 
 ```yaml filename="devices.yaml" copy
 devices:
     - name: New York, NY
       address: 192.0.2.1
+      platform: http
+      credential:
+          username: you
+          password: your password
       http:
           path: /path/to/query/device
           method: POST
@@ -49,7 +53,7 @@ Given the following Ultraglass query:
 | Query Location | `your_location`     |
 | Query Type     | `example_directive` |
 
-The body of the request will be:
+The body of the request will be as follows. Because `http.query` is unset, the same three fields are also sent as URL query parameters.
 
 ```json
 {
@@ -63,10 +67,14 @@ The body of the request will be:
 
 The following example will send an HTTP GET request to `http://192.0.2.1/path/to/query/device`:
 
-```yaml filename="devices.yaml" {6} copy
+```yaml filename="devices.yaml" {10} copy
 devices:
     - name: New York, NY
       address: 192.0.2.1
+      platform: http
+      credential:
+          username: you
+          password: your password
       http:
           path: /path/to/query/device
           scheme: http
@@ -76,10 +84,14 @@ devices:
 
 The following example will send an HTTP GET request to `https://192.0.2.1/path/to/query/device` with an `Authorization` header:
 
-```yaml filename="devices.yaml" {6-7} copy
+```yaml filename="devices.yaml" {10-11} copy
 devices:
     - name: New York, NY
       address: 192.0.2.1
+      platform: http
+      credential:
+          username: you
+          password: your password
       http:
           path: /path/to/query/device
           headers:

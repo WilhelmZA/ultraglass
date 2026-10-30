@@ -4,10 +4,10 @@ When devices sit behind a jump box or other intermediary server, Ultraglass can 
 
 | Parameter          | Type    | Default Value | Description                                                                          |
 | :----------------- | :------ | :------------ | :----------------------------------------------------------------------------------- |
-| `proxy.address`    | String  |               | IPv4 address, IPv6 address, or hostname of SSH proxy.                                |
-| `proxy.port`       | Number  | 22            | TCP port to use for connecting to the SSH proxy.                                     |
-| `proxy.platform`   | String  | linux_ssh     | Currently, only `linux_ssh` is supported.                                            |
-| `proxy.credential` | Mapping |               | Mapping/dict of a [credential configuration](/configuration/config/credentials.mdx). |
+| `proxy.address`    | String  |               | IPv4 address, IPv6 address, or hostname of SSH proxy. A hostname must resolve when Ultraglass starts. |
+| `proxy.port`       | Number  | `22`          | TCP port to use for connecting to the SSH proxy.                                     |
+| `proxy.platform`   | String  | `linux_ssh`   | Currently, only `linux_ssh` is supported.                                            |
+| `proxy.credential` | Mapping |               | Mapping/dict of a [credential configuration](/configuration/devices/credentials.mdx). |
 
 ### Examples
 
@@ -17,6 +17,7 @@ When devices sit behind a jump box or other intermediary server, Ultraglass can 
 devices:
     - name: New York, NY
       address: 192.0.2.1
+      platform: cisco_ios
       credential:
           username: you
           password: your password
@@ -25,6 +26,9 @@ devices:
           credential:
               username: your proxy username
               password: your proxy password
+      attrs:
+          source4: 192.0.2.1
+          source6: "2001:db8::1"
 ```
 
 In the example above, the proxy credentials authenticate the Ultraglass server to the SSH proxy. The device credentials then authenticate the proxy connection to the target device.

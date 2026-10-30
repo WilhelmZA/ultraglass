@@ -10,7 +10,12 @@ Ultraglass supports custom plugins. There are two main types of plugins:
 -   [**Input Plugins**](#input-plugins): Apply custom validation logic to or transform user input before the query is sent to a device.
 -   [**Output Plugins**](#output-plugins): Interact with the output from a device before it's displayed to the user.
 
-Plugins are associated with a directive.
+A plugin is a Python file with one or more classes that subclass `InputPlugin` or `OutputPlugin`. Put the file in the `plugins` folder of the Ultraglass app directory, for example `/etc/hyperglass/plugins/`. Reference it by file name, with or without the `.py` extension. Ultraglass ignores a name that does not match a file in that folder.
+
+There are two ways to enable a plugin:
+
+-   List it in a directive's [`plugins`](/configuration/directives.mdx) key. The plugin then runs for queries that use that directive.
+-   List it in the top-level [`plugins`](/configuration/config.mdx) key of the main configuration file. The plugin then runs for every query.
 
 ## Examples
 
@@ -30,14 +35,14 @@ In this example, the following query is sent to Ultraglass:
 
 The below plugin is defined and referenced by a directive:
 
-```python filename="/path/to/your/transform_plugin.py"
+```python filename="/etc/hyperglass/plugins/transform_plugin.py"
 from ipaddress import ip_network
 from hyperglass.plugins import InputPlugin
 
 
 class TransformCIDR(InputPlugin):
     def transform(self, query):
-        (target := query.query_target)
+        target = query.query_target
         target_network = ip_network(target)
         if target_network.version == 4:
             return f"{target_network.network_address!s} {target_network.netmask!s}"
@@ -48,7 +53,9 @@ class TransformCIDR(InputPlugin):
 ip_route_directive:
     name: IP Route
     plugins:
-        - "/path/to/your/transform_plugin.py"
+        - transform_plugin.py
+    field:
+        description: IP address or prefix
     rules:
         - condition: "0.0.0.0/0"
           action: permit
@@ -58,7 +65,7 @@ ip_route_directive:
           command: "show ipv6 route {target}"
 ```
 
-When the query is received, the query target is transformed, resulting in this being sent to the device:
+When the query is received, the query target is transformed after validation, resulting in this being sent to the device:
 
 ```text
 show ip route 192.0.2.0 255.255.255.0
@@ -74,7 +81,9 @@ show ip route 192.0.2.0/24
 
 In this example, we want to perform some custom validation not available via the directives `condition` API. For instance, say you wanted to ensure a query target isn't contained within a dynamic list of [bogon prefixes from Team Cymru](https://www.team-cymru.com/bogon-networks).
 
-```python filename="/path/to/your/validation_plugin.py"
+Ultraglass runs input plugin validation after the directive's rules pass. Return `False` to reject the query with the error `No matched validation rules`. Return `True` to accept it without running the remaining plugins. Return `None` to pass the decision to the next plugin.
+
+```python filename="/etc/hyperglass/plugins/validation_plugin.py"
 from ipaddress import ip_network
 
 from hyperglass.plugins import InputPlugin
@@ -87,13 +96,15 @@ class BogonPlugin(InputPlugin):
         with HTTPClient(base_url="https://team-cymru.org") as client:
             response = client.get("/Services/Bogons/fullbogons-ipv4.txt")
 
-        bogon_strings = [line.strip() for line in response.text.split("\n") if not line.startswith("#")]
+        bogon_strings = [
+            line.strip() for line in response.text.split("\n") if line.strip() and not line.startswith("#")
+        ]
         bogons = [ip_network(bogon) for bogon in bogon_strings]
 
         for bogon in bogons:
-            if target in bogon or target == bogon:
+            if target.version == bogon.version and target.subnet_of(bogon):
                 return False # Return false to fail validation.
-        return True
+        return None
 ```
 
 This isn't the best real-world example, since the above plugin would be run on every request, likely resulting in slow query responses, but it illustrates the power of plugins.
@@ -104,14 +115,19 @@ This isn't the best real-world example, since the above plugin would be run on e
 
 Say one of your directives might show some sensitive information in the query output. Using an output plugin, we can replace any text matching a pattern (or multiple patterns) with some other text.
 
-```python
+An output plugin enabled by a directive runs only on devices whose platform is in the plugin's `platforms` list. Ultraglass calls `process()` with keyword arguments `output` and `query`. `output` is a tuple of strings, one per command, or a parsed table when the device has `structured_output` set. Each plugin receives the previous plugin's result.
+
+```python filename="/etc/hyperglass/plugins/redact.py"
 import re
+import typing as t
 from hyperglass.plugins import OutputPlugin
 
 SENSITIVE_PATTERN = re.compile("SuperSecretInfo")
 
 class Redact(OutputPlugin):
-    def process(self, output, query):
+    platforms: t.Sequence[str] = ("cisco_ios", "juniper")
+
+    def process(self, *, output, query):
         result = []
         for each_output in output:
             redacted = SENSITIVE_PATTERN.sub("<REDACTED>", each_output)

@@ -19,10 +19,10 @@ Each directive has the following options:
 | Parameter            | Type            | Default Value | Description                                                                                                                                                                |
 | :------------------- | :-------------- | :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`               | String          |               | Display name of the directive.                                                                                                                                             |
-| `rules`              | List of Rules   |               | List of [rule configs](#rules)                                                                                                                                             |
-| `field`              | Mapping         |               | Mapping/dict of [fields config](#fields)                                                                                                                                   |
-| `info`               | String          |               | File path to markdown-formatted help information about the directive.                                                                                                      |
-| `plugins`            | List of Strings |               | List of plugin names to use with this directive.                                                                                                                           |
+| `rules`              | List of Rules   | One rule with no validation | List of [rule configs](#rules)                                                                                                                                             |
+| `field`              | Mapping         |               | Required. Mapping/dict of [fields config](#fields). Set `null` for a directive without an input field.                                                                    |
+| `info`               | String          |               | File path to markdown-formatted help information about the directive. The file must exist.                                                                                 |
+| `plugins`            | List of Strings |               | File names of [plugins](/plugins.mdx) to use with this directive. The files must be in the `plugins` folder of the Ultraglass app directory. The extension is optional. |
 | `groups`             | List of Strings |               | List of names by which directives are grouped in the UI.                                                                                                                   |
 | `multiple`           | Boolean         | `false`       | Command supports receiving multiple values. For example, Cisco IOS's `show ip bgp community` accepts multiple communities as arguments.                                    |
 | `multiple_separator` | String          | `" "`         | String by which multiple values are separated. For example, a list of values `[65001, 65002, 65003]` would be rendered as `65001 65002 65003` for when the command is run. |
@@ -34,12 +34,12 @@ A rule is a way of saying "if a query target matches the rule's conditions, run 
 
 | Parameter   | Type            | Default Value | Description                                                                                    |
 | :---------- | :-------------- | :------------ | :--------------------------------------------------------------------------------------------- |
-| `condition` | String          |               | Regular expression to match or IP prefix in which the value being evaluated must be contained. |
+| `condition` | String          |               | IP prefix in which the target must be contained, or a regular expression the target must match. `null` disables validation. |
 | `action`    | String          | permit        | `permit` or `deny` the directive target when this rule is matched.                             |
-| `commands`  | List of Strings |               | Commands to run when this rule matches. `{target}` is replaced with the query target.          |
+| `commands`  | List of Strings |               | Commands to run when this rule matches. `{target}` is replaced with the query target, and `{mask}` with its IPv4 netmask. Other placeholders are filled from device `attrs` or directive [variables](#variables). `command` is an alias for one command. |
 | `vrf_command` | String | | Single command form used when the device has `vrf` set. Use `{vrf}` for the validated VRF name. |
 | `vrf_commands` | List of Strings | | Multiple-command alternative to `vrf_command`. |
-| `fallback_command` | String | | Command to run when the device rejects `command`, for older software. The device's error output is replaced by the fallback output, and a warning names the device. |
+| `fallback_command` | String | | Command to run when the device rejects `command`, for older software. The device's error output is replaced by the fallback output, and a warning names the device. Applies to SSH devices. A device with `vrf` set runs `vrf_command` instead and does not use fallbacks. |
 | `fallback_commands` | List of Strings | | Multiple-command alternative to `fallback_command`, matched to `commands` by position. |
 | `fallback_os_version` | String | | Version filter, such as `<16` or `>=12,<16`. A device whose `os_version` meets it runs the fallback commands directly, without trying `command` first. Only the leading dotted numbers of `os_version` are compared. |
 
@@ -47,11 +47,11 @@ A rule is a way of saying "if a query target matches the rule's conditions, run 
 
 | Parameter           | Type    | Default Value | Description                                                                                                                                                                                                       |
 | :------------------ | :------ | :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ge`                | Number  | 0             | Prefix length greater than defined will be matched.                                                                                                                                                               |
-| `le`                | Number  | 32,128        | `32` for IPv4 evaluations, `128` for IPv6 evaluations. Prefix length less than defined will be matched.                                                                                                           |
-| `allow_reserved`    | Boolean | `false`       | Allow reserved ([RFC1918](https://www.rfc-editor.org/rfc/rfc1918), [RFC5735](https://www.rfc-editor.org/rfc/rfc5735), [RFC5737](https://www.rfc-editor.org/rfc/rfc5737.html), etc.) addresses to pass validation. |
-| `allow_unspecified` | Boolean | `false`       | Allow unspecified addresses (`0.0.0.0` `::`) to pass validation.                                                                                                                                                  |
-| `allow_loopback`    | Boolean | `false`       | Allow [loopback addresses](https://www.rfc-editor.org/rfc/rfc1700.html) (`127.0.0.0/8` `::1`) to pass validation.                                                                                                 |
+| `ge`                | Number  | 0             | Minimum prefix length to match, inclusive.                                                                                                                                                                        |
+| `le`                | Number  | 32,128        | `32` for IPv4 evaluations, `128` for IPv6 evaluations. Maximum prefix length to match, inclusive.                                                                                                                 |
+| `allow_reserved`    | Boolean | `false`       | Accepted but not enforced. Reserved ([RFC1918](https://www.rfc-editor.org/rfc/rfc1918), [RFC5735](https://www.rfc-editor.org/rfc/rfc5735), [RFC5737](https://www.rfc-editor.org/rfc/rfc5737.html), etc.) addresses pass when `condition` contains them. Use a `deny` rule to block them. |
+| `allow_unspecified` | Boolean | `false`       | Accepted but not enforced. Unspecified addresses (`0.0.0.0` `::`) pass when `condition` contains them.                                                                                                            |
+| `allow_loopback`    | Boolean | `false`       | Accepted but not enforced. [Loopback addresses](https://www.rfc-editor.org/rfc/rfc1700.html) (`127.0.0.0/8` `::1`) pass when `condition` contains them.                                                          |
 
 #### Examples
 
@@ -65,13 +65,17 @@ your-directive:
           ge: 8
           le: 24
           command: "show ip route {target} {mask}"
+    field:
+        description: IP address or prefix
 ```
 
 Given a query target of 198.18.0.0/15, the command run on the device would be:
 
-```none /198.18.0.0 255.254.0.0/
-show ip route 198.18.0.0 255.254.0.0
+```none /255.254.0.0/
+show ip route 198.18.0.0/15 255.254.0.0
 ```
+
+`{target}` keeps the prefix length. To send only the network address, rewrite the target with an [input plugin](/plugins.mdx#convert-a-cidr-prefix-to-network-and-mask).
 
 ##### Deny a Specific Prefix
 
@@ -83,6 +87,8 @@ your directive:
           action: deny
         - condition: "0.0.0.0/0"
           command: "show ip bgp {target}"
+    field:
+        description: IP address or prefix
 ```
 
 In this example, a query of any IP address or prefix contained within 192.0.2.0/24 will result in an error.
@@ -97,6 +103,8 @@ your-directive:
           commands:
               - "show route table inet.0 community {target} detail"
               - "show route table inet6.0 community {target} detail"
+    field:
+        description: BGP community
 ```
 
 In this example, a query of `65000:1` would result in the following commands being sent to the device:
@@ -110,13 +118,16 @@ The output for both commands will be shown as the query result.
 
 ### Regex Validation
 
-To validate input by regex pattern, just specify a regex pattern as the `condition`
+To validate input by regex pattern, specify a regex pattern as the `condition`. Matching is case-insensitive and starts at the beginning of the target. A `condition` of `*` matches any non-empty target.
 
 ```yaml filename="directives.yaml" copy
 your-directive:
     name: DNS Query
     rules:
         - condition: '^.+\.yourdomain\.com$'
+          command: dig {target}
+    field:
+        description: Host name
 ```
 
 ### No Validation
@@ -127,6 +138,8 @@ your-directive:
     rules:
         - condition: null
           command: show ip route {target}
+    field:
+        description: IP address or prefix
 ```
 
 In this example, any query would pass, regardless of query input. For instance, if a user selected this directive/query type and queried `your mom`, the real command sent to the device will be:
@@ -202,9 +215,9 @@ A directive can declare extra template variables next to `{target}`. Each variab
 | `name`     | String        | Variable key  | Field label in the UI.                                                                   |
 | `command`  | String        | `""`          | Text inserted before the selected value, for example `" group "`.                        |
 | `required` | Boolean       | `false`       | If `false`, the variable can stay empty, and its placeholder renders as an empty string. |
-| `items`    | List of Items |               | Allowed values. Each item has `name`, `value` and `description`. `value` defaults to `name`. |
+| `items`    | List of Items |               | Allowed values, at least one. Each item has `name`, `value` and `description`. `value` defaults to `name`. |
 
-Variable keys must be valid identifiers and cannot be `target` or `mask`. A variable placeholder needs no matching device `attrs` entry. On BIRD, FRR, OpenBGPD and VyOS devices, Ultraglass shell-quotes the selected value.
+Variable keys must be valid identifiers and cannot be `target` or `mask`. A variable placeholder needs no matching device `attrs` entry. On BIRD, FRR, OpenBGPD, SONiC and VyOS devices, Ultraglass shell-quotes the selected value.
 
 ```yaml filename="directives.yaml" copy {6-17}
 show-bgp-summary:
