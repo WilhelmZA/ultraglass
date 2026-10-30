@@ -335,8 +335,8 @@ web:
 | `web.logo.light` | Path | Built-in logo | Logo image for light theme. The file must exist. |
 | `web.logo.dark` | Path | Built-in logo | Logo image for dark theme. The file must exist. |
 | `web.logo.favicon` | Path | Built-in icon | Favicon/icon image. The file must exist. |
-| `web.logo.width` | String | `50%` | Logo width as a percentage from `1` to `100`. The `%` sign is optional. Pixel values fail validation. |
-| `web.logo.height` | String | | Logo height as a percentage from `1` to `100`. The `%` sign is optional. Pixel values fail validation. |
+| `web.logo.width` | String | `50%` | Logo width as a percentage from `1` to `100`, for example `40%`. Include the `%` sign; the UI cannot use a bare number. Pixel values fail validation. |
+| `web.logo.height` | String | | Accepted as a percentage from `1` to `100`, but not used by the current UI. |
 
 #### Example: Custom Logo
 ```yaml filename="config.yaml"
