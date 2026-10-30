@@ -8,7 +8,9 @@ from types import SimpleNamespace
 import pytest
 
 # Project
+from hyperglass.state import use_state
 from hyperglass.models.directive import Directive, Directives
+from hyperglass.models.config.devices import Device
 from hyperglass.models.api.query import resolve_directive_by_name
 
 
@@ -151,5 +153,73 @@ def test_returns_none_when_target_device_lacks_the_name() -> None:
             device=huawei,
             directive_id=JUNIPER_TABLE.id,
         )
+        is None
+    )
+
+
+BUILTIN_TRACEROUTE = "__hyperglass_cisco_ios_traceroute__"
+
+
+def cisco_ios(name: str, *directives: t.Any) -> Device:
+    """Build a real structured Cisco IOS device, so its directive list is validated."""
+    return Device(
+        name=name,
+        address="192.0.2.10",
+        credential={"username": "admin", "password": "admin"},
+        platform="cisco_ios",
+        structured_output=True,
+        directives=list(directives),
+        attrs={"source4": "192.0.2.1", "source6": "2001:db8::1"},
+    )
+
+
+@pytest.fixture
+def custom_traceroute() -> Directive:
+    """Register a custom directive that shares the builtin traceroute's name (#139)."""
+    custom = directive("lab-iosv-traceroute", "Traceroute")
+    state = use_state()
+    directives = state.directives
+    directives.add(custom)
+    state.redis.set("directives", directives)
+    return custom
+
+
+def test_builtin_list_excludes_unlisted_builtins(custom_traceroute: Directive) -> None:
+    """Keep the builtin traceroute off a device limited to `builtins: [bgp, ping]` (#139)."""
+    iosv = cisco_ios("lab-iosv", {"builtins": ["bgp", "ping"]}, custom_traceroute.id)
+
+    ids = {d.id for d in iosv.directives}
+
+    assert BUILTIN_TRACEROUTE not in ids
+    assert custom_traceroute.id in ids
+    assert "__hyperglass_cisco_ios_ping__" in ids
+
+
+def test_builtin_id_runs_the_devices_own_same_name_directive(
+    custom_traceroute: Directive,
+) -> None:
+    """Run the device's custom Traceroute for a builtin traceroute id (#139).
+
+    A multi-location selection groups directives by name, so the builtin id reaches a
+    device that offers only its own Traceroute. That device runs its own directive.
+    """
+    iol = cisco_ios("lab-iol", {"builtins": True})
+    iosv = cisco_ios("lab-iosv", {"builtins": ["bgp", "ping"]}, custom_traceroute.id)
+
+    result = resolve_directive_by_name(
+        devices=[iol, iosv], device=iosv, directive_id=BUILTIN_TRACEROUTE
+    )
+
+    assert result is not None
+    assert result.id == custom_traceroute.id
+
+
+def test_builtin_id_refused_without_a_same_name_directive() -> None:
+    """Refuse a builtin traceroute id on a device that offers no Traceroute (#139)."""
+    iol = cisco_ios("lab-iol", {"builtins": True})
+    iosv = cisco_ios("lab-iosv", {"builtins": ["bgp", "ping"]})
+
+    assert (
+        resolve_directive_by_name(devices=[iol, iosv], device=iosv, directive_id=BUILTIN_TRACEROUTE)
         is None
     )
