@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Structured BGP results with external RPKI validation now finish in seconds instead of minutes. Each result validates its routes in one batch: Ultraglass deduplicates prefix and origin ASN pairs, reads the Redis cache once, and looks up the uncached pairs concurrently over one HTTP session (#133, #134, #138, #139).
 - Juniper structured BGP queries no longer return an error on routes that carry the Only-to-Customer attribute (RFC 9234). Junos emits two path attribute blocks for these routes, and the parser now merges them. An unexpected parse fault now reports its cause instead of a bare 500 (#133).
 - FRRouting, VyOS and SONiC structured BGP results in a VRF now carry the VRF name instead of `default`. The name comes from `vrfName` in the router output, or from the device `vrf` setting where FRR does not report it (#134).
+- MikroTik traceroute now shows a hop with no address as unanswered, with 100% loss and no RTT. RouterOS prints an in-flight probe as `0%  1  0ms`, and the parser showed it as 0% loss (#138).
 
 ## 3.5.0-rc.2 - 2026-10-30
 

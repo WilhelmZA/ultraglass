@@ -449,9 +449,11 @@ class MikrotikTracerouteTable(MikrotikBase):
 
                 # Check if this is a timeout line (starts with percentage)
                 if parts[0].endswith("%"):
-                    # Timeout hop: "100% 3 timeout"
+                    # Timeout hop: "100% 3 timeout". A row with no address never
+                    # got a reply, so it is unanswered whatever LOSS says: RouterOS
+                    # prints an in-flight probe as "0% 1 0ms" with no address.
                     ip_address = None
-                    loss_pct = int(parts[0].rstrip("%"))
+                    loss_pct = 100
                     sent_count = int(parts[1])
                     last_rtt = None
                     avg_rtt = None

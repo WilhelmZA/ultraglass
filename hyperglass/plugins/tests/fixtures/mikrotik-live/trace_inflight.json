@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-10-30T06:04:56.024169+00:00",
+  "device": {
+    "id": "lab-mikrotik",
+    "name": "lab-mikrotik",
+    "platform": "mikrotik_routeros"
+  },
+  "query": {
+    "type": "__hyperglass_mikrotik_traceroute__",
+    "target": "1.1.1.1",
+    "location": "lab-mikrotik"
+  },
+  "raw": [
+    "Columns: ADDRESS, LOSS, SENT, LAST, AVG, BEST, WORST, STD-DEV, STATUS\n#  ADDRESS         LOSS  SENT  LAST    AVG   BEST  WORST  STD-DEV  STATUS                        \n1  10.250.4.0      0%       1  0.2ms   0.2   0.2   0.2          0                                \n2  192.168.250.1   0%       1  0.1ms   0.1   0.1   0.1          0                                \n3  192.168.1.1     0%       1  0.4ms   0.4   0.4   0.4          0                                \n4  103.247.3.17    0%       1  19.2ms  19.2  19.2  19.2         0                                \n5  103.30.216.163  0%       1  11.7ms  11.7  11.7  11.7         0  <MPLS:L=4956,E=1 L=16,E=1,T=1>\n6  100.127.0.65    0%       1  16.2ms  16.2  16.2  16.2         0                                \n7  100.127.0.64    0%       1  14.6ms  14.6  14.6  14.6         0                                \n8  103.26.70.17    0%       1  43.8ms  43.8  43.8  43.8         0                                \n9                  0%       1  0ms                                                               \n"
+  ]
+}
