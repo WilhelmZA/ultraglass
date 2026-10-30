@@ -2,13 +2,31 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.5.0-rc.3**, a release candidate. The latest stable release is **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.5.0-rc.4**, a release candidate. The latest stable release is **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.5.0-rc.4 - 2026-10-31
+
+**This is a release candidate for 3.5.0.** It is published for testing and is not for production. Run it in a lab or staging deployment, not in front of users.
+
+Pull the release candidate by its version tag: `wilhelmza/ultraglass:3.5.0-rc.4` or `ghcr.io/wilhelmza/ultraglass:3.5.0-rc.4`. The `latest` tag stays on 3.4.0 on both registries.
+
+This candidate adds the Huawei VRP 8 fixes from the rc.3 lab run (#103, #155), a documentation audit of every configuration page against the code (#159 to #166), and fixes for the thirteen configuration and tooling faults that audit found (#167 to #179). No configuration key is removed. Four `messages.*` keys that no code displays now log a deprecation warning when set. Two behaviours change: IP rules now refuse loopback, unspecified and reserved targets unless the rule allows them (#173), and manual installs need Node.js 22.13 at startup (#175).
+
+These areas need tester attention. Each line names the configuration key that enables it:
+
+- Huawei VRP 8 (CE12800, NE40E): device `platform: huawei` or `huawei_vrpv8`, IPv6 traceroute and IPv6 ping and traceroute in a VRF (`vrf`) (#155).
+- Webhooks: `logging.http` with `headers`, `authentication`, `verify_ssl` and `timeout`, `provider: msteams` with a Teams Workflows URL, `provider: slack`, and `enable: false` on `logging.http` and `logging.syslog` (#170, #171, #172).
+- HTTP devices: `platform: http` with a non-default `port` or an IPv6 `address` (#169, #188).
+- Custom directives: `{mask}` in a command, and rules with `allow_loopback`, `allow_unspecified` or `allow_reserved` (#168, #173).
+- API documentation: `docs.base_url` and the `docs.query`, `docs.devices`, `docs.queries` and `docs.info` blocks (#179).
+- Error messages: a custom `messages.connection_error` with `{device_name}` or `{device}` (#167, #187).
+- Cisco IOS-XR: `connect_retries` (#140), Cisco NX-OS, Extreme EXOS and VOSS, SONiC and MikroTik RouterOS 6 as listed for rc.3.
+
+Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass/issues). Put `3.5.0-rc.4` in the issue title.
 
 ### Added
 
@@ -21,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Manual installs now need Node.js 22.13 or later at startup, not only at UI build. The startup check compares the minor version too, so Node.js 18 to 22.12 now fails at startup instead of in the pnpm install of the UI build (#175).
 - IP rules now enforce `allow_loopback`, `allow_unspecified` and `allow_reserved`. With the defaults, loopback (`127.0.0.0/8`, `::1`), unspecified (`0.0.0.0`, `::`) and reserved (`240.0.0.0/4`, IETF reserved IPv6 blocks) targets are refused, even when the rule's `condition` contains them, as the docs already said. Set the key to `true` on the rule to accept them. Configs that set the keys keep loading. Documentation, private and default route targets are not affected (#173).
 - The API documentation now uses `docs.base_url` as the server URL for request samples when it is set, and the `docs.query`, `docs.devices`, `docs.queries` and `docs.info` sections now set each endpoint's section heading, summary and description. Before, Ultraglass accepted these keys and ignored them (#179).
+- Updated the Python package, runtime metadata and UI package to 3.5.0-rc.4.
 
 ### Deprecated
 
