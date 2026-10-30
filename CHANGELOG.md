@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The sample manual `systemd` service now depends on `redis-server.service` and starts after it, and runs the Python in the `/opt/hyperglass/.venv` virtual environment. The manual install docs no longer need a `sed` step to fix `ExecStart` (#176).
 - Custom directives can use `{mask}`. Before, config validation treated `mask` as a missing device attribute, and setting `attrs.mask` made the query fail. The `{mask}` line is back in the directives docs (#168).
 - The `logging.http` webhook now sends the configured `headers` and `params`, the `api_key` header or HTTP basic authentication, and applies `verify_ssl` and `timeout`. Before, these keys were validated but not applied (#170).
+- `logging.syslog.enable: false` and `logging.http.enable: false` now turn syslog and webhook logging off. Before, both were sent whenever the block was set. The default stays `true` (#171).
 
 ## 3.5.0-rc.3 - 2026-10-30
 

@@ -40,7 +40,7 @@ For devices that reject automatic paging or terminal-width commands, set `disabl
 | :---------------------- | :------ | :------------ | :---------- |
 | `logging.syslog.host`   | String  |               | Syslog target host. Required. |
 | `logging.syslog.port`   | Number  | 514           | Syslog target UDP port. |
-| `logging.syslog.enable` | Boolean | true          | Accepted, but not checked. Ultraglass sends to syslog whenever `logging.syslog` is set. |
+| `logging.syslog.enable` | Boolean | true          | Send logs to syslog. Set to `false` to turn syslog off and keep the rest of the block. |
 
 ##### Syslog Example
 
@@ -53,7 +53,7 @@ logging:
 
 ### HTTP Logging
 
-If `logging.http` is set, Ultraglass sends one HTTP `POST` webhook for each query, after it returns the response. The webhook carries the query location, type and target, the requester's address, its network details from BGP.tools, selected request headers and a timestamp. It does not carry log records.
+If `logging.http` is set and `enable` is `true`, Ultraglass sends one HTTP `POST` webhook for each query, after it returns the response. The webhook carries the query location, type and target, the requester's address, its network details from BGP.tools, selected request headers and a timestamp. It does not carry log records.
 
 | Parameter              | Type    | Default Value | Description |
 | :--------------------- | :------ | :------------ | :---------- |
@@ -63,7 +63,7 @@ If `logging.http` is set, Ultraglass sends one HTTP `POST` webhook for each quer
 | `logging.http.headers`    | Map     |         | HTTP headers added to every webhook request. Values are sent as strings. |
 | `logging.http.verify_ssl` | Boolean | true    | Verify the webhook server's TLS certificate. Set to `false` for a self-signed endpoint. |
 | `logging.http.timeout`    | Number  | 5       | Webhook request timeout in seconds. |
-| `logging.http.enable`     | Boolean | true    | Accepted, but not checked. Ultraglass sends webhooks whenever `logging.http` is set. |
+| `logging.http.enable`     | Boolean | true    | Send webhooks. Set to `false` to turn webhooks off and keep the rest of the block. |
 
 #### Authentication
 

@@ -26,6 +26,7 @@ if t.TYPE_CHECKING:
 
     # Project
     from hyperglass.models.fields import LogFormat
+    from hyperglass.models.config.logging import Syslog
 
 _FMT_DEBUG = (
     "<lvl><b>[{level}]</b> {time:YYYYMMDD} {time:HH:mm:ss} <lw>|</lw>"
@@ -222,3 +223,11 @@ def enable_syslog_logging(*, host: str, port: int) -> None:
         colorize=False,
     )
     _loguru_logger.bind(host=host, port=port).debug("Logging to syslog target")
+
+
+def configure_syslog(syslog: t.Optional["Syslog"]) -> bool:
+    """Enable syslog logging if `logging.syslog` is set and enabled."""
+    if syslog is None or not syslog.enable:
+        return False
+    enable_syslog_logging(host=syslog.host, port=syslog.port)
+    return True

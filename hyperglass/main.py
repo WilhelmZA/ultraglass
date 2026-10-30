@@ -11,7 +11,7 @@ import logging
 import uvicorn
 
 # Local
-from .log import LibInterceptHandler, init_logger, enable_file_logging, enable_syslog_logging
+from .log import LibInterceptHandler, init_logger, configure_syslog, enable_file_logging
 from .util import get_node_version, remove_ipv6_networks_from_no_proxy
 from .settings import Settings
 from .constants import MIN_NODE_VERSION, MIN_PYTHON_VERSION, __version__
@@ -139,11 +139,7 @@ def run(workers: int = None):
             level=LOG_LEVEL,
         )
 
-        if state.params.logging.syslog is not None:
-            enable_syslog_logging(
-                host=state.params.logging.syslog.host,
-                port=state.params.logging.syslog.port,
-            )
+        configure_syslog(state.params.logging.syslog)
         _workers = workers if workers is not None else Settings.worker_count
 
         log.bind(
