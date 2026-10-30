@@ -21,10 +21,7 @@ class GenericHook(WebhookBase, name="Generic"):
     def __init__(self: "GenericHook", config: "Http") -> None:
         """Initialize external base class with http connection details."""
 
-        super().__init__(
-            config=config,
-            base_url=f"{config.host.scheme}://{config.host.host}:{config.host.port}",
-        )
+        super().__init__(config=config)
 
     async def send(self: "GenericHook", query: t.Dict[str, t.Any]):
         """Send an incoming webhook to http endpoint."""

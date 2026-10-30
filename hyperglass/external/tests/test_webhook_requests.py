@@ -2,6 +2,7 @@
 
 # Standard Library
 import ssl
+import json
 import base64
 import asyncio
 from datetime import UTC, datetime
@@ -139,3 +140,118 @@ def test_base_external_without_headers_keeps_default_user_agent(capture):
     assert "authorization" not in request.headers
     assert capture["clients"][0]["timeout"] == 10
     assert "auth" not in capture["clients"][0]
+
+
+TEAMS_WORKFLOW_URL = (
+    "https://prod-01.westeurope.logic.azure.com:443/workflows/abc123/triggers/manual/paths/invoke"
+    "?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=s1gn4ture"
+)
+
+
+@pytest.mark.parametrize(
+    ("provider", "host", "expected_host", "expected_path"),
+    (
+        ("generic", "https://relay.example.net:8443/hook", "relay.example.net", "/hook"),
+        (
+            "slack",
+            "https://hooks.slack.com/services/T0/B0/XYZ",
+            "hooks.slack.com",
+            "/services/T0/B0/XYZ",
+        ),
+        (
+            "slack",
+            "https://relay.example.net/services/T0/B0/XYZ",
+            "relay.example.net",
+            "/services/T0/B0/XYZ",
+        ),
+        (
+            "msteams",
+            "https://contoso.webhook.office.com/webhookb2/abc/IncomingWebhook/def",
+            "contoso.webhook.office.com",
+            "/webhookb2/abc/IncomingWebhook/def",
+        ),
+        (
+            "msteams",
+            TEAMS_WORKFLOW_URL,
+            "prod-01.westeurope.logic.azure.com",
+            "/workflows/abc123/triggers/manual/paths/invoke",
+        ),
+    ),
+)
+def test_provider_uses_configured_host(capture, provider, host, expected_host, expected_path):
+    _send(Http(provider=provider, host=host))
+
+    request = capture["requests"][0]
+    assert request.url.host == expected_host
+    assert request.url.path == expected_path
+
+
+def test_msteams_keeps_workflow_query_string(capture):
+    _send(Http(provider="msteams", host=TEAMS_WORKFLOW_URL, params={"extra": "1"}))
+
+    params = capture["requests"][0].url.params
+    assert params["api-version"] == "2016-06-01"
+    assert params["sp"] == "/triggers/manual/run"
+    assert params["sv"] == "1.0"
+    assert params["sig"] == "s1gn4ture"
+    assert params["extra"] == "1"
+
+
+def test_msteams_sends_adaptive_card(capture):
+    _send(Http(provider="msteams", host=TEAMS_WORKFLOW_URL))
+
+    body = json.loads(capture["requests"][0].content)
+    assert body["type"] == "message"
+    attachment = body["attachments"][0]
+    assert attachment["contentType"] == "application/vnd.microsoft.card.adaptive"
+    card = attachment["content"]
+    assert card["type"] == "AdaptiveCard"
+    facts = {
+        f["title"]: f["value"] for b in card["body"] if b["type"] == "FactSet" for f in b["facts"]
+    }
+    assert facts["Query Location"] == "lab-frr"
+    assert facts["Query Target"] == "`1.1.1.1`"
+    assert facts["ASN"] == "`64496`"
+    assert all(isinstance(v, str) for v in facts.values())
+
+
+def test_slack_sends_blocks(capture):
+    _send(Http(provider="slack", host="https://hooks.slack.com/services/T0/B0/XYZ"))
+
+    body = json.loads(capture["requests"][0].content)
+    assert body["blocks"]
+    assert body["text"]
+
+
+@pytest.mark.parametrize("provider", ("generic", "msteams", "slack"))
+@pytest.mark.parametrize("mode", ("none", "basic", "api_key"))
+def test_provider_auth_modes(capture, provider, mode):
+    kwargs = {}
+    if mode == "basic":
+        kwargs["authentication"] = {"mode": "basic", "username": "glass", "password": "pass"}
+    elif mode == "api_key":
+        kwargs["authentication"] = {"mode": "api_key", "header": "x-hook-key", "password": "k3y"}
+    config = Http(
+        provider=provider,
+        host="https://hooks.example.net/hook",
+        headers={"x-custom": "one"},
+        verify_ssl=False,
+        timeout=3,
+        **kwargs,
+    )
+    _send(config)
+
+    request = capture["requests"][0]
+    client = capture["clients"][0]
+    assert request.headers["x-custom"] == "one"
+    assert client["verify"].verify_mode == ssl.CERT_NONE
+    assert client["timeout"] == 3
+    if mode == "basic":
+        expected = base64.b64encode(b"glass:pass").decode()
+        assert request.headers["authorization"] == f"Basic {expected}"
+    else:
+        assert "authorization" not in request.headers
+    if mode == "api_key":
+        assert request.headers["x-hook-key"] == "k3y"
+    else:
+        assert "x-hook-key" not in request.headers

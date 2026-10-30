@@ -19,7 +19,7 @@ class MSTeams(WebhookBase, name="MSTeams"):
     def __init__(self: "MSTeams", config: "Http") -> None:
         """Initialize external base class with Microsoft Teams connection details."""
 
-        super().__init__(config=config, base_url="https://outlook.office.com", parse=False)
+        super().__init__(config=config, parse=False)
 
     async def send(self: "MSTeams", query: t.Dict[str, t.Any]):
         """Send an incoming webhook to Microsoft Teams."""

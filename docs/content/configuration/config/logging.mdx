@@ -58,8 +58,8 @@ If `logging.http` is set and `enable` is `true`, Ultraglass sends one HTTP `POST
 | Parameter              | Type    | Default Value | Description |
 | :--------------------- | :------ | :------------ | :---------- |
 | `logging.http.provider`   | String  | generic | Must be `generic`, `msteams`, or `slack`. |
-| `logging.http.host`       | URL     |         | Webhook URL. Required. The `msteams` provider sends to the path of this URL on `https://outlook.office.com`, and the `slack` provider sends to the path on `https://hooks.slack.com`. |
-| `logging.http.params`     | Map     |         | URL query parameters added to every webhook request. |
+| `logging.http.host`       | URL     |         | Webhook URL. Required. Every provider sends to the scheme, host, port, path and query string of this URL. |
+| `logging.http.params`     | Map     |         | URL query parameters added to every webhook request. A key that is also in the query string of `host` replaces it. |
 | `logging.http.headers`    | Map     |         | HTTP headers added to every webhook request. Values are sent as strings. |
 | `logging.http.verify_ssl` | Boolean | true    | Verify the webhook server's TLS certificate. Set to `false` for a self-signed endpoint. |
 | `logging.http.timeout`    | Number  | 5       | Webhook request timeout in seconds. |
@@ -97,8 +97,10 @@ In the example above, Ultraglass sends a `POST` request to `https://httpbin.org?
 logging:
     http:
         provider: msteams
-        host: <MS Teams webhook URL>
+        host: <Teams Workflows webhook URL>
 ```
+
+Microsoft retired Office 365 connector webhooks in Teams. Create the webhook URL with the Teams Workflows app, for example from the **Send webhook alerts to a channel** template, and paste the full URL, including its query string, into `host`. The `msteams` provider sends an Adaptive Card wrapped in a `message` envelope with an `attachments` list, the format that Teams Workflows webhooks read.
 
 ##### Slack
 

@@ -14,7 +14,6 @@ from hyperglass.log import log
 from .main import HyperglassModel
 
 _WEBHOOK_TITLE = "Ultraglass received a valid query with the following data"
-_ICON_URL = "https://raw.githubusercontent.com/WilhelmZA/ultraglass/main/hyperglass/images/ultraglass-icon.svg"
 
 
 def to_snake_case(value: str) -> str:
@@ -65,47 +64,82 @@ class Webhook(HyperglassModel):
         return values
 
     def msteams(self) -> t.Dict[str, t.Any]:
-        """Format the webhook data as a Microsoft Teams card."""
+        """Format the webhook data as a Microsoft Teams Adaptive Card message.
+
+        Teams Workflows webhooks (Power Automate) read the card from the
+        `attachments` list, so the card is wrapped in a message envelope.
+        """
 
         def code(value: t.Any) -> str:
             """Wrap argument in backticks for markdown inline code formatting."""
             return f"`{str(value)}`"
 
-        header_data = [
-            {"name": k, "value": code(v)} for k, v in self.headers.model_dump(by_alias=True).items()
-        ]
+        def fact_set(facts: t.List[t.Tuple[str, str]]) -> t.Dict[str, t.Any]:
+            return {
+                "type": "FactSet",
+                "facts": [{"title": title, "value": str(value)} for title, value in facts],
+            }
+
+        def heading(text: str) -> t.Dict[str, t.Any]:
+            return {
+                "type": "TextBlock",
+                "text": text,
+                "weight": "Bolder",
+                "separator": True,
+                "wrap": True,
+            }
+
+        header_data = [(k, code(v)) for k, v in self.headers.model_dump(by_alias=True).items()]
         time_fmt = self.timestamp.strftime("%Y %m %d %H:%M:%S")
+        card = {
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "type": "AdaptiveCard",
+            "version": "1.4",
+            "msteams": {"width": "Full"},
+            "body": [
+                {
+                    "type": "TextBlock",
+                    "text": _WEBHOOK_TITLE,
+                    "weight": "Bolder",
+                    "size": "Medium",
+                    "wrap": True,
+                },
+                {
+                    "type": "TextBlock",
+                    "text": f"{time_fmt} UTC",
+                    "isSubtle": True,
+                    "spacing": "None",
+                    "wrap": True,
+                },
+                fact_set(
+                    [
+                        ("Query Location", self.query_location),
+                        ("Query Target", code(self.query_target)),
+                        ("Query Type", self.query_type),
+                    ]
+                ),
+                heading("Source Information"),
+                fact_set(
+                    [
+                        ("IP", code(self.source)),
+                        ("Prefix", code(self.network.prefix)),
+                        ("ASN", code(self.network.asn)),
+                        ("Country", self.network.country),
+                        ("Organization", self.network.org),
+                    ]
+                ),
+                heading("Request Headers"),
+                fact_set(header_data),
+            ],
+        }
         payload = {
-            "@type": "MessageCard",
-            "@context": "http://schema.org/extensions",
-            "themeColor": "118ab2",
-            "summary": _WEBHOOK_TITLE,
-            "sections": [
+            "type": "message",
+            "attachments": [
                 {
-                    "activityTitle": _WEBHOOK_TITLE,
-                    "activitySubtitle": f"{time_fmt} UTC",
-                    "activityImage": _ICON_URL,
-                    "facts": [
-                        {"name": "Query Location", "value": self.query_location},
-                        {"name": "Query Target", "value": code(self.query_target)},
-                        {"name": "Query Type", "value": self.query_type},
-                    ],
-                },
-                {"markdown": True, "text": "**Source Information**"},
-                {"markdown": True, "text": "---"},
-                {
-                    "markdown": True,
-                    "facts": [
-                        {"name": "IP", "value": code(self.source)},
-                        {"name": "Prefix", "value": code(self.network.prefix)},
-                        {"name": "ASN", "value": code(self.network.asn)},
-                        {"name": "Country", "value": self.network.country},
-                        {"name": "Organization", "value": self.network.org},
-                    ],
-                },
-                {"markdown": True, "text": "**Request Headers**"},
-                {"markdown": True, "text": "---"},
-                {"markdown": True, "facts": header_data},
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "contentUrl": None,
+                    "content": card,
+                }
             ],
         }
         log.bind(type="MS Teams", payload=str(payload)).debug("Created webhook")
