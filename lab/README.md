@@ -89,6 +89,8 @@ docker exec clab-ultraglass-core gobgp neighbor "fd00:250:$N::1" "$ACTION"
 
 Disabled sessions show `Idle(Admin)`. Established sessions show `Establ`. Repeat the selection after the core restarts.
 
+MikroTik also starts with its router-side sessions `core4` and `core6` disabled. Enable them on the router with `/routing/bgp/connection enable [find name~"core"]`. Use `disable` after testing.
+
 The core rewrites route next hops to its data-link address. Test prefixes receive multiple paths where the peer supports ADD-PATH. Huawei receives a capped feed through its export policy.
 
 ## Optional appliances
