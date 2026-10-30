@@ -43,6 +43,7 @@ def main():
     brief = nc.send_command("display ip interface brief", read_timeout=60)
     if LOCAL_V4 in brief:
         print("Huawei already configured (GE1/0/0 has", LOCAL_V4 + "); nothing to do.")
+        print(nc.send_command('save force', read_timeout=90))
         nc.disconnect()
         return
 
@@ -88,6 +89,7 @@ def main():
 
     send("commit")
     nc.exit_config_mode()
+    print(nc.send_command('save force', read_timeout=90))
     print(nc.send_command("display ip interface brief", read_timeout=60))
     nc.disconnect()
     print("Huawei configured.")

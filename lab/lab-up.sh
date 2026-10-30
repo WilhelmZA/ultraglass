@@ -14,13 +14,20 @@
 # injected fresh on every start.
 set -e
 cd "$(dirname "$0")"
-IMAGE=ultraglass-lab/ultraglass:dev
+IMAGE=${ULTRAGLASS_IMAGE:-$(docker inspect -f '{{.Config.Image}}' clab-ultraglass-ultraglass 2>/dev/null || echo ultraglass-lab/ultraglass:dev)}
 if [ "${1:-}" = "--image" ]; then
     [ -n "${2:-}" ] || { echo "--image needs an image reference" >&2; exit 1; }
     IMAGE="$2"
     shift 2
 fi
 DEV="${1:-}"
+case " frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2 " in
+    *" $DEV "*) : ;;
+    *) [ -z "$DEV" ] || { echo "Unknown device '$DEV'" >&2; exit 1; } ;;
+esac
+PYTHON=${LAB_PYTHON:-../.venv/bin/python3}
+[ -x "$PYTHON" ] || PYTHON=python3
+"$PYTHON" -c 'import yaml, netmiko'
 
 # Ultraglass refuses to start without its (git-ignored) log directory.
 mkdir -p configs/ultraglass/logs configs/ultraglass-text/logs
@@ -46,7 +53,16 @@ for C in clab-ultraglass-ultraglass clab-ultraglass-ultraglass-text; do
     fi
 done
 
-if [ -n "$DEV" ]; then
+NODES="core redis ultraglass ultraglass-text ${DEV:-frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2}"
+EXISTING=true
+for N in $NODES; do
+    docker inspect "clab-ultraglass-$N" >/dev/null 2>&1 || EXISTING=false
+done
+if [ "$EXISTING" = true ]; then
+    for N in $NODES; do
+        "$PYTHON" scripts/start-node.py "$N"
+    done
+elif [ -n "$DEV" ]; then
     case " frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2 " in
         *" $DEV "*) : ;;
         *) echo "Unknown device '$DEV'. Pick one of: frr bird openbgpd mikrotik arista vyos huawei junos iol ioll2" >&2; exit 1 ;;
@@ -57,9 +73,18 @@ else
     echo "Starting the whole lab"
     sudo env ULTRAGLASS_IMAGE="$IMAGE" containerlab deploy -t ultraglass-lab.clab.yml
 fi
+if [ "$EXISTING" != true ]; then
+    for N in $NODES; do
+        "$PYTHON" scripts/start-node.py "$N"
+    done
+fi
 
 echo "Waiting for the core router..."
-until docker exec clab-ultraglass-core gobgp global rib summary -a ipv4 >/dev/null 2>&1; do sleep 2; done
+LIMIT=$(( $(date +%s) + 60 ))
+until docker exec clab-ultraglass-core gobgp global rib summary -a ipv4 >/dev/null 2>&1; do
+    [ "$(date +%s)" -lt "$LIMIT" ] || { echo "Core boot timed out" >&2; exit 1; }
+    sleep 2
+done
 
 # Core link addressing. ethN carries 10.250.N.0/31 + fd00:250:N::/127 (N matches the
 # device subnet). Applied idempotently here so it is correct no matter how the core
@@ -71,19 +96,6 @@ done
 # Save the first-boot IOL configuration before any later restart uses NVRAM.
 sh scripts/save-cisco-iol.sh
 
-# MikroTik is slow to boot and sometimes applies its config only partially.
-if [ -z "$DEV" ] || [ "$DEV" = mikrotik ]; then
-    if docker inspect clab-ultraglass-mikrotik >/dev/null 2>&1; then
-        echo "Waiting for MikroTik to finish booting..."
-        until [ "$(docker inspect -f '{{.State.Health.Status}}' clab-ultraglass-mikrotik 2>/dev/null)" = healthy ]; do sleep 5; done
-        MT="sshpass -p admin ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null admin@192.168.250.14"
-        if ! $MT '/ip/address/print' 2>/dev/null | grep -q 10.250.4.1; then
-            echo "Re-applying MikroTik config..."
-            $MT '/import file-name=config.auto.rsc' 2>/dev/null || true
-        fi
-    fi
-fi
-
 ./scripts/inject-table.sh
 
 # Arista cEOS defaults to a per-neighbor route limit and tears the session to
@@ -94,18 +106,6 @@ if docker inspect clab-ultraglass-arista >/dev/null 2>&1; then
     docker exec clab-ultraglass-arista Cli -p 15 -c "$(printf 'configure\nrouter bgp 65007\nneighbor 10.250.7.0 maximum-routes 0\nneighbor fd00:250:7:: maximum-routes 0\nend')" >/dev/null 2>&1 || true
     docker exec clab-ultraglass-arista Cli -p 15 -c 'clear ip bgp 10.250.7.0' >/dev/null 2>&1 || true
     docker exec clab-ultraglass-arista Cli -p 15 -c 'clear ipv6 bgp fd00:250:7::' >/dev/null 2>&1 || true
-fi
-
-# Huawei CE12800: vrnetlab only bootstraps mgmt/SSH, so the data port and eBGP
-# are applied after the VM is healthy. The core caps what it sends this peer
-# (gobgpd.toml) because the slow emulated switch cannot hold a full table.
-if docker inspect clab-ultraglass-huawei >/dev/null 2>&1; then
-    echo "Waiting for Huawei to finish booting..."
-    until [ "$(docker inspect -f '{{.State.Health.Status}}' clab-ultraglass-huawei 2>/dev/null)" = healthy ]; do sleep 5; done
-    echo "Configuring Huawei data port and eBGP..."
-    HWPY=python3
-    command -v netmiko >/dev/null 2>&1 || python3 -c 'import netmiko' 2>/dev/null || HWPY=../.venv/bin/python3
-    "$HWPY" scripts/configure-huawei.py || echo "  (configure-huawei.py needs netmiko: pip install netmiko)"
 fi
 
 echo

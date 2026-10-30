@@ -48,7 +48,7 @@ devices:
       source6: fd00:250:4::1
 
   - name: lab-vyos
-    address: 192.168.250.15
+    address: 192.168.250.31
     group: VyOS
     credential:
       username: admin

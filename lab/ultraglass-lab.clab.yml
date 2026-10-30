@@ -40,6 +40,7 @@ topology:
       kind: linux
       image: ultraglass-lab/frr:latest
       mgmt-ipv4: 192.168.250.11
+      mgmt-ipv6: fd00:250:ffff::11
       binds:
         - configs/frr/frr.conf:/etc/frr/frr.conf
         - configs/frr/vtysh.conf:/etc/frr/vtysh.conf
@@ -57,6 +58,7 @@ topology:
       kind: linux
       image: ultraglass-lab/bird:latest
       mgmt-ipv4: 192.168.250.12
+      mgmt-ipv6: fd00:250:ffff::12
       binds:
         - configs/bird/bird.conf:/etc/bird.conf:ro
       exec:
@@ -70,6 +72,7 @@ topology:
       kind: linux
       image: ultraglass-lab/openbgpd:latest
       mgmt-ipv4: 192.168.250.13
+      mgmt-ipv6: fd00:250:ffff::13
       binds:
         - configs/openbgpd/bgpd.conf:/etc/bgpd.conf:ro
       exec:
@@ -81,37 +84,43 @@ topology:
 
     mikrotik:
       kind: mikrotik_ros
-      image: vrnetlab/mikrotik_routeros:7.16.2
+      image: ultraglass-lab/mikrotik_routeros:7.16.2
       mgmt-ipv4: 192.168.250.14
+      mgmt-ipv6: fd00:250:ffff::14
       startup-config: configs/mikrotik/config.auto.rsc
 
     vyos:
       kind: vyosnetworks_vyos
       image: vyos:latest
-      mgmt-ipv4: 192.168.250.15
+      mgmt-ipv4: 192.168.250.31
+      mgmt-ipv6: fd00:250:ffff::31
       startup-config: configs/vyos/config.boot
 
     junos:
       kind: juniper_vjunosrouter
       image: ultraglass-lab/juniper_vjunos-router:26.2R1.7
       mgmt-ipv4: 192.168.250.16
+      mgmt-ipv6: fd00:250:ffff::16
       startup-config: configs/vjunos/config.conf
 
     arista:
       kind: arista_ceos
       image: ceos:4.36.3M
       mgmt-ipv4: 192.168.250.17
+      mgmt-ipv6: fd00:250:ffff::17
       startup-config: configs/arista/ceos.cfg
 
     huawei:
       kind: huawei_vrp
-      image: vrnetlab/huawei_vrp:ce12800-V200R005C10SPC607B607
+      image: ultraglass-lab/huawei_vrp:ce12800-V200R005C10SPC607B607
       mgmt-ipv4: 192.168.250.18
+      mgmt-ipv6: fd00:250:ffff::18
 
     iol:
       kind: cisco_iol
       image: ultraglass-lab/cisco_iol:17.18.02
       mgmt-ipv4: 192.168.250.19
+      mgmt-ipv6: fd00:250:ffff::19
       env:
         IOL_MEMORY: "4096"
       startup-config: configs/iol/config.partial.cfg
@@ -121,6 +130,7 @@ topology:
       type: l2
       image: ultraglass-lab/cisco_iol:L2-17.18.02
       mgmt-ipv4: 192.168.250.20
+      mgmt-ipv6: fd00:250:ffff::20
       env:
         IOL_MEMORY: "4096"
       startup-config: configs/ioll2/config.partial.cfg
@@ -129,6 +139,7 @@ topology:
       kind: linux
       image: redis:7-alpine
       mgmt-ipv4: 192.168.250.3
+      mgmt-ipv6: fd00:250:ffff::3
       cmd: redis-server --save "" --appendonly no
 
     ultraglass:
@@ -136,6 +147,7 @@ topology:
       # lab-up.sh --image sets ULTRAGLASS_IMAGE; the default is the local dev build.
       image: ${ULTRAGLASS_IMAGE:=ultraglass-lab/ultraglass:dev}
       mgmt-ipv4: 192.168.250.2
+      mgmt-ipv6: fd00:250:ffff::2
       env:
         HYPERGLASS_APP_PATH: /etc/hyperglass
         HYPERGLASS_HOST: 0.0.0.0
@@ -156,6 +168,7 @@ topology:
       # lab-up.sh --image sets ULTRAGLASS_IMAGE; the default is the local dev build.
       image: ${ULTRAGLASS_IMAGE:=ultraglass-lab/ultraglass:dev}
       mgmt-ipv4: 192.168.250.4
+      mgmt-ipv6: fd00:250:ffff::4
       env:
         HYPERGLASS_APP_PATH: /etc/hyperglass
         HYPERGLASS_HOST: 0.0.0.0
