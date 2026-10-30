@@ -8,7 +8,7 @@ import { DocsButton } from '~/components/docs-button'
 
 # Complete Configuration Reference
 
-This is a comprehensive reference for all available configuration options in Ultraglass. The configuration is written in YAML format and saved as `config.yaml` in your hyperglass configuration directory.
+This is a comprehensive reference for all available configuration options in Ultraglass. Write the configuration in YAML and save it as `config.yaml` in the Ultraglass application directory (default `/etc/hyperglass`). Ultraglass also reads `config.yml`, `config.json`, `config.toml` and `config.py`. Unknown keys fail validation.
 
 ## Top-Level Parameters
 
@@ -19,9 +19,9 @@ These parameters are configured at the root level of your `config.yaml` file.
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
 | `site_title` | String | `Ultraglass` | The name of your Ultraglass site. Used in HTML `<title>` tags and API documentation. |
-| `org_name` | String | `Beloved Hyperglass User` | Your organization's name. Used in UI, API documentation, and HTML meta tags for SEO. |
+| `org_name` | String | `Beloved Ultraglass User` | Your organization's name. Used in UI, API documentation, and HTML meta tags for SEO. |
 | `site_description` | String | `{org_name} Network Looking Glass` | Short description of your site. Used for HTML meta description tag. `{org_name}` is automatically replaced. |
-| `primary_asn` | String/Integer | `65001` | Your network's primary ASN. Used for defaults like subtitle and PeeringDB URL. |
+| `primary_asn` | String/Integer | `65001` | Your network's primary ASN. Ultraglass stores it as a string. Used for defaults like subtitle and PeeringDB URL. |
 
 #### Example: Basic Site Configuration
 ```yaml filename="config.yaml"
@@ -38,7 +38,7 @@ primary_asn: 65000
 | `request_timeout` | Integer | `90` | Global timeout in seconds for all requests. Frontend uses this exact value; backend uses value minus 1 second. |
 | `fake_output` | Boolean | `false` | Enable fake static output for development/testing purposes. |
 | `cors_origins` | Array | `[]` | List of allowed CORS hosts. By default, no CORS hosts are allowed. |
-| `plugins` | Array | `[]` | List of paths to custom plugin files. |
+| `plugins` | Array | `[]` | File names of common [plugins](/plugins) in the `plugins` folder of the application directory. The file extension is optional. Ultraglass ignores names with no matching file. |
 
 #### Example: System Configuration
 ```yaml filename="config.yaml"
@@ -48,7 +48,7 @@ cors_origins:
   - "https://network-tools.example.com"
   - "https://monitoring.example.com"
 plugins:
-  - "/etc/hyperglass/plugins/custom_validation.py"
+  - "custom_validation.py"  # /etc/hyperglass/plugins/custom_validation.py
 ```
 
 ---
@@ -73,56 +73,34 @@ cache:
 
 ## API Documentation Configuration
 
-Controls the automatically generated API documentation available at `/api/docs`.
+Controls the automatically generated API documentation. Ultraglass serves it at `docs.path`.
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
 | `docs.enable` | Boolean | `true` | Enable or disable API documentation. |
-| `docs.base_url` | String | `https://lg.example.net` | Base URL used in API request samples. |
-| `docs.path` | String | `/api/docs` | HTTP path where API documentation is accessible. |
+| `docs.path` | String | `/api/docs` | HTTP path where API documentation is accessible. Must start with `/`. |
 | `docs.title` | String | `{site_title} API Documentation` | API documentation title. `{site_title}` is automatically replaced. |
-| `docs.description` | String | `` | Description appearing below the API documentation title. |
-| `docs.mode` | String | `redoc` | Documentation UI style: `redoc` or `swagger`. |
+| `docs.description` | String | `""` | Description appearing below the API documentation title. |
+| `docs.base_url` | URL | `https://lg.example.net` | Accepted for compatibility. The generated documentation does not use it. |
 
 ### API Endpoint Documentation
 
-Each API endpoint's documentation can be customized:
+`docs.query`, `docs.devices`, `docs.queries` and `docs.info` are accepted for compatibility. The generated documentation does not use them. Each one takes `title`, `description` and `summary`. If you set one of these objects, set all three keys.
 
-| Parameter | Type | Description |
-| :-------- | :--- | :---------- |
-| `docs.query.title` | String | Title for the query submission endpoint |
-| `docs.query.description` | String | Description for the query submission endpoint |
-| `docs.query.summary` | String | Summary text for the query submission endpoint |
-| `docs.devices.title` | String | Title for the devices list endpoint |
-| `docs.devices.description` | String | Description for the devices list endpoint |
-| `docs.devices.summary` | String | Summary text for the devices list endpoint |
-| `docs.queries.title` | String | Title for the supported queries endpoint |
-| `docs.queries.description` | String | Description for the supported queries endpoint |
-| `docs.queries.summary` | String | Summary text for the supported queries endpoint |
-| `docs.info.title` | String | Title for the system information endpoint |
-| `docs.info.description` | String | Description for the system information endpoint |
-| `docs.info.summary` | String | Summary text for the system information endpoint |
+| Parameter | Default `title` | Default `summary` |
+| :-------- | :-------------- | :---------------- |
+| `docs.query` | `Submit Query` | `Query the Looking Glass` |
+| `docs.devices` | `Devices` | `Devices List` |
+| `docs.queries` | `Supported Queries` | `Query Types` |
+| `docs.info` | `System Information` | `System Information` |
 
 #### Example: API Documentation Configuration
 ```yaml filename="config.yaml"
 docs:
   enable: true
-  base_url: "https://lg.acmenetworks.com"
   path: "/api/docs"
   title: "ACME Networks Looking Glass API"
   description: "RESTful API for network diagnostic queries"
-  mode: "redoc"
-  
-  # Customize individual endpoints
-  query:
-    title: "Execute Network Query"
-    description: "Submit traceroute, ping, or BGP lookup requests"
-    summary: "Network Diagnostics"
-  
-  devices:
-    title: "Network Locations"
-    description: "Available routers and their capabilities"
-    summary: "Router List"
 ```
 
 ---
@@ -135,16 +113,30 @@ Controls log output, file logging, syslog, and HTTP webhooks for query notificat
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
-| `logging.directory` | Path | `/tmp` | Directory where log files are stored. |
+| `logging.directory` | Path | `/tmp` | Directory where log files are stored. The directory must exist. |
 | `logging.format` | String | `text` | Log format: `text` or `json`. |
 | `logging.max_size` | Size | `50MB` | Maximum log file size before rotation. |
+| `logging.session_log` | Boolean | `false` | Write each SSH session to `<directory>/<device id>-<YYYYMMDD>.log`. Netmiko redacts the device password and secret. |
+
+### Query Samples
+
+Write each query's request, raw device output and parsed result as one JSON line. Raw output can contain internal addresses and communities.
+
+| Parameter | Type | Default | Description |
+| :-------- | :--- | :------ | :---------- |
+| `logging.samples.enable` | Boolean | `false` | Write query samples. |
+| `logging.samples.path` | Path | `<directory>/hyperglass_query_log.jsonl` | Output file. |
+| `logging.samples.include_raw` | Boolean | `true` | Include the raw device output. |
+| `logging.samples.include_parsed` | Boolean | `true` | Include the parsed result. |
+| `logging.samples.max_size` | Size | `50MB` | File size at which the file rotates to `<name>.1`. |
+| `logging.samples.backup_count` | Integer | `1` | Rotated files kept, `<name>.1` (newest) to `<name>.<backup_count>`. Minimum `1`. |
 
 ### Syslog
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
 | `logging.syslog.enable` | Boolean | `true` | Enable syslog logging. |
-| `logging.syslog.host` | String | | Syslog server hostname or IP address. |
+| `logging.syslog.host` | String | | Required. Syslog server hostname or IP address. |
 | `logging.syslog.port` | Integer | `514` | Syslog server port. |
 
 ### HTTP Webhooks
@@ -155,7 +147,7 @@ Send query notifications to external systems (Slack, Teams, custom endpoints).
 | :-------- | :--- | :------ | :---------- |
 | `logging.http.enable` | Boolean | `true` | Enable HTTP webhook logging. |
 | `logging.http.provider` | String | `generic` | Webhook provider: `slack`, `msteams`, or `generic`. |
-| `logging.http.host` | URL | | Webhook endpoint URL. |
+| `logging.http.host` | URL | | Required. Webhook endpoint URL. |
 | `logging.http.verify_ssl` | Boolean | `true` | Verify SSL certificates for HTTPS webhooks. |
 | `logging.http.timeout` | Number | `5.0` | Webhook request timeout in seconds. |
 | `logging.http.headers` | Object | `{}` | Custom HTTP headers to send with webhooks. |
@@ -167,7 +159,7 @@ Send query notifications to external systems (Slack, Teams, custom endpoints).
 | :-------- | :--- | :------ | :---------- |
 | `logging.http.authentication.mode` | String | `basic` | Authentication mode: `basic` or `api_key`. |
 | `logging.http.authentication.username` | String | | Username for basic authentication. |
-| `logging.http.authentication.password` | String | | Password for basic auth or API key value. |
+| `logging.http.authentication.password` | String | | Required when `authentication` is set. Password for basic auth or API key value. |
 | `logging.http.authentication.header` | String | `x-api-key` | Header name for API key authentication. |
 
 #### Example: Complete Logging Configuration
@@ -229,6 +221,7 @@ Customize error messages and user-facing text shown in the UI and API responses.
 | `messages.authentication_error` | String | `Authentication error occurred.` | Shown for device authentication failures. |
 | `messages.no_response` | String | `No response.` | Shown when no output can be read from device. |
 | `messages.no_output` | String | `The query completed, but no matching results were found.` | Shown for successful queries with empty results. |
+| `messages.device_command_error` | String | `The query command failed on {device_name}.` | Shown when a device rejects a command or denies permission to run it. |
 
 #### Example: Custom Messages
 ```yaml filename="config.yaml"
@@ -252,15 +245,30 @@ Controls how Ultraglass processes and displays structured data from network devi
 | :-------- | :--- | :------ | :---------- |
 | `structured.communities.mode` | String | `deny` | How to handle communities: `permit`, `deny`, or `name`. |
 | `structured.communities.items` | Array | `[]` | List of community strings to permit/deny. |
-| `structured.communities.names` | Object | `{}` | Map community values to human-readable names. |
+| `structured.communities.names` | Object | `{}` | Map community values to human-readable names. Required, with at least one entry, when `mode` is `name`. |
 
 ### RPKI Validation
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
 | `structured.rpki.mode` | String | `router` | RPKI validation source: `router` or `external`. |
-| `structured.rpki.backend` | String | `cloudflare` | External RPKI validation backend to use. |
-| `structured.rpki.rpki_server_url` | String | `` | Custom RPKI validation server URL. |
+| `structured.rpki.backend` | String | `cloudflare` | External RPKI validation backend: `cloudflare` or `routinator`. |
+| `structured.rpki.rpki_server_url` | String | `""` | RPKI validation server URL. Required when `backend` is `routinator`. |
+
+### IP Enrichment
+
+| Parameter | Type | Default | Description |
+| :-------- | :--- | :------ | :---------- |
+| `structured.ip_enrichment.mode` | String | `inline` | `inline` enriches before the response. `async` enriches after the response is returned. |
+| `structured.ip_enrichment.enrich_traceroute` | Boolean | `false` | Add ASN, organization and IP data to traceroute hops from real-time BGP.tools lookups. |
+| `structured.ip_enrichment.enrich_bgproute` | Boolean | `false` | Add ASN and organization data to BGP routes. When `false`, the UI loads enrichment when you view the AS path. |
+
+### Structured Table Output
+
+| Parameter | Type | Default | Description |
+| :-------- | :--- | :------ | :---------- |
+| `structured.enable_for_traceroute` | Boolean | unset | When the `structured` section is present and this key is unset, structured traceroute output is on. Set `false` to show raw router output. |
+| `structured.enable_for_bgp_route` | Boolean | unset | When the `structured` section is present and this key is unset, structured BGP route output is on. Set `false` to show raw router output. |
 
 #### Example: Structured Output Configuration
 ```yaml filename="config.yaml"
@@ -289,8 +297,10 @@ Extensive customization options for the web interface appearance and behavior.
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
 | `web.location_display_mode` | String | `auto` | Location selector style: `auto`, `dropdown`, or `gallery`. |
-| `web.custom_javascript` | Path | | Path to custom JavaScript file to load. |
-| `web.custom_html` | Path | | Path to custom HTML content to display. |
+| `web.my_ip` | String | `server` | How the My IP button finds the visitor's address. `server` reads it from the request to Ultraglass. `external` looks it up with myip.wtf after the visitor confirms. `off` hides the button. |
+| `web.custom_javascript` | Path | | Path to custom JavaScript file to load. The file must exist. |
+| `web.custom_html` | Path | | Path to custom HTML content to display. The file must exist. |
+| `web.opengraph.image` | Path | Built-in image | OpenGraph image shown when you share a link. Must be `.jpg`, `.jpeg` or `.png`. |
 
 ### DNS over HTTPS
 
@@ -303,7 +313,7 @@ When users enter hostnames such as `example.com` instead of IP addresses, Ultrag
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
 | `web.dns_provider.name` | String | `cloudflare` | DNS provider: `cloudflare`, `google`, `server` (resolve on the Ultraglass server through `/api/dns`), or `custom`. |
-| `web.dns_provider.url` | String | Auto-detected | Custom DNS-over-HTTPS endpoint URL. |
+| `web.dns_provider.url` | String | Set from `name` | DNS-over-HTTPS endpoint URL. A URL that is not a built-in provider URL sets `name` to `custom`. |
 
 #### Example: DNS Configuration
 ```yaml filename="config.yaml"
@@ -322,11 +332,11 @@ web:
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
-| `web.logo.light` | Path | Built-in logo | Logo image for light theme. |
-| `web.logo.dark` | Path | Built-in logo | Logo image for dark theme. |
-| `web.logo.favicon` | Path | Built-in icon | Favicon/icon image. |
-| `web.logo.width` | String | `50%` | Logo width (percentage or pixels). |
-| `web.logo.height` | String | | Logo height (percentage or pixels). |
+| `web.logo.light` | Path | Built-in logo | Logo image for light theme. The file must exist. |
+| `web.logo.dark` | Path | Built-in logo | Logo image for dark theme. The file must exist. |
+| `web.logo.favicon` | Path | Built-in icon | Favicon/icon image. The file must exist. |
+| `web.logo.width` | String | `50%` | Logo width as a percentage from `1` to `100`. The `%` sign is optional. Pixel values fail validation. |
+| `web.logo.height` | String | | Logo height as a percentage from `1` to `100`. The `%` sign is optional. Pixel values fail validation. |
 
 #### Example: Custom Logo
 ```yaml filename="config.yaml"
@@ -335,8 +345,7 @@ web:
     light: "/etc/hyperglass/images/company-logo-light.svg"
     dark: "/etc/hyperglass/images/company-logo-dark.svg"
     favicon: "/etc/hyperglass/images/company-icon.svg"
-    width: "200px"
-    height: "60px"
+    width: "40%"
 ```
 
 ### Greeting Modal
@@ -350,7 +359,7 @@ The greeting modal is perfect for displaying terms of service, usage policies, o
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
 | `web.greeting.enable` | Boolean | `false` | Enable the greeting modal. |
-| `web.greeting.file` | Path | | Path to markdown/text file with greeting content. |
+| `web.greeting.file` | Path | | Path to markdown/text file with greeting content. Required when `enable` is `true`. The file must exist. |
 | `web.greeting.title` | String | `Welcome` | Greeting modal title. |
 | `web.greeting.button` | String | `Continue` | Greeting acknowledgment button text. |
 | `web.greeting.required` | Boolean | `false` | Whether users must acknowledge before using the looking glass. |
@@ -374,13 +383,15 @@ Customize almost all text displayed in the user interface.
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
-| `web.text.title` | String | `Ultraglass` | Main title text. |
-| `web.text.subtitle` | String | `Network Looking Glass` | Subtitle text. |
+| `web.text.title` | String | `Ultraglass` | Main title text. Maximum 32 characters. |
+| `web.text.subtitle` | String | `Network Looking Glass` | Subtitle text. Maximum 32 characters. |
 | `web.text.query_location` | String | `Location` | Label for location/router selection field. |
 | `web.text.query_type` | String | `Query Type` | Label for query type selection field. |
 | `web.text.query_target` | String | `Target` | Label for target input field. |
 
 #### Title Display Mode
+
+`web.text.title_mode` defaults to `logo_only`.
 
 | Parameter | Value | Description |
 | :-------- | :---- | :---------- |
@@ -394,7 +405,7 @@ Customize almost all text displayed in the user interface.
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
 | `web.text.fqdn_tooltip` | String | `Use {protocol}` | Tooltip for hostname resolution buttons. `{protocol}` shows IPv4/IPv6. |
-| `web.text.fqdn_message` | String | `Your browser has resolved {fqdn} to` | Message shown during hostname resolution. |
+| `web.text.fqdn_message` | String | `Your browser has resolved {fqdn} to` | Message shown during hostname resolution. When `web.dns_provider.name` is `server`, the default is `Ultraglass has resolved {fqdn} to`. |
 | `web.text.fqdn_error` | String | `Unable to resolve {fqdn}` | Error message for failed hostname resolution. |
 | `web.text.fqdn_error_button` | String | `Try Again` | Button text for retrying hostname resolution. |
 
@@ -410,12 +421,14 @@ The "My IP" button automatically detects the user's public IP address and popula
 | `web.text.ip_select` | String | `Select an IP Address` | Prompt for IP address selection. |
 | `web.text.ip_error` | String | `Unable to determine IP Address` | Error when IP detection fails. |
 | `web.text.no_ip` | String | `No {protocol} Address` | Message when specific IP version unavailable. |
+| `web.text.ip_lookup_notice` | String | `This sends your IP address to myip.wtf to look it up.` | Notice shown before the lookup when `web.my_ip` is `external`. |
+| `web.text.ip_lookup_confirm` | String | `Look up my IP` | Confirm button text when `web.my_ip` is `external`. |
 
 #### Results and Status Text
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
-| `web.text.cache_prefix` | String | `Results cached for ` | Prefix for cache countdown timer. |
+| `web.text.cache_prefix` | String | `Results cached for ` | Prefix for cache countdown timer. Ultraglass adds one trailing space. |
 | `web.text.cache_icon` | String | `Cached from {time} UTC` | Tooltip for cached result indicator. |
 | `web.text.complete_time` | String | `Completed in {seconds}` | Tooltip showing query completion time. |
 
@@ -458,7 +471,7 @@ web:
 
 ### Footer Links
 
-Add custom links to the footer for documentation, policies, or external resources.
+Add custom links to the footer for documentation, policies, or external resources. The default is one PeeringDB link to `https://www.peeringdb.com/asn/{primary_asn}`. Setting `web.links` replaces the default.
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
@@ -494,7 +507,7 @@ web:
 
 ### Footer Menus
 
-Add dropdown menus in the footer for longer content like terms of service or help documentation.
+Add dropdown menus in the footer for longer content like terms of service or help documentation. The defaults are a `Terms` menu and a `Help` menu. Setting `web.menus` replaces the defaults.
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
@@ -504,7 +517,7 @@ Add dropdown menus in the footer for longer content like terms of service or hel
 | `web.menus[].order` | Integer | `0` | Display order (lower numbers first). |
 
 <Callout type="info">
-For the `content` field, you can either provide the content directly in YAML (for short text) or specify a path to a markdown file (for longer content). Hyperglass automatically detects file paths and loads the content.
+For the `content` field, you can either provide the content directly in YAML (for short text) or specify a path to a markdown file (for longer content). If the value is shorter than 260 characters and names an existing file, Ultraglass loads the file. Content can use `{site_title}`, `{org_name}` and `{version}`.
 </Callout>
 
 #### Example: Footer Menus
@@ -566,18 +579,21 @@ web:
 ```
 
 **Functional Colors:**
+
+Each unset functional color takes the value of a palette color: `primary` from `cyan`, `secondary` from `blue`, `success` from `green`, `warning` from `yellow`, `error` from `orange` and `danger` from `red`. The example shows the defaults.
+
 ```yaml filename="config.yaml"
 web:
   theme:
     colors:
       # Main brand colors
       primary: "#118ab2"    # Main interactive elements
-      secondary: "#35b299"  # Secondary elements
-      
+      secondary: "#314cb6"  # Secondary elements
+
       # Status colors
       success: "#35b246"    # Success states
-      warning: "#edae49"    # Warning states  
-      error: "#d84b4b"      # Error states
+      warning: "#edae49"    # Warning states
+      error: "#ff6b35"      # Error states
       danger: "#d84b4b"     # Danger states
 ```
 
@@ -621,9 +637,9 @@ Highlight specific patterns in query results for better visibility.
 
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
-| `web.highlight[].pattern` | String | | Regular expression pattern to match. |
+| `web.highlight[].pattern` | String | | Required. Regular expression pattern to match. Use single quotes in YAML, so backslashes stay literal. |
 | `web.highlight[].label` | String | | Optional label for the highlight rule. |
-| `web.highlight[].color` | String | `primary` | Theme color to use for highlighting. |
+| `web.highlight[].color` | String | `primary` | Name of a `web.theme.colors` key, for example `primary`, `warning` or `blue`. |
 
 #### Example: Output Highlighting
 ```yaml filename="config.yaml"
@@ -635,12 +651,12 @@ web:
       color: "primary"
       
     # Highlight private IP ranges
-    - pattern: "192\.168\.\d+\.\d+"
+    - pattern: '192\.168\.\d+\.\d+'
       label: "RFC 1918"
       color: "warning"
-      
+
     # Highlight packet loss
-    - pattern: "\d+% loss"
+    - pattern: '\d+% loss'
       label: "Packet Loss"
       color: "error"
 ```
@@ -728,8 +744,8 @@ web:
   logo:
     light: "/etc/hyperglass/images/company-logo-light.svg"
     dark: "/etc/hyperglass/images/company-logo-dark.svg"
-    width: "200px"
-    
+    width: "40%"
+
   # Welcome message
   greeting:
     enable: true
@@ -775,8 +791,8 @@ web:
     - pattern: "65000"
       label: "Our ASN"
       color: "primary"
-    - pattern: "\d+% loss"
-      label: "Packet Loss" 
+    - pattern: '\d+% loss'
+      label: "Packet Loss"
       color: "error"
       
   # Developer credit
@@ -796,6 +812,6 @@ web:
 **Configure Directives** - Define available query types
 </DocsButton>
 
-<DocsButton href="/configuration/examples">
+<DocsButton href="/configuration/examples/basic-configuration">
 **See Examples** - View real-world configuration examples
 </DocsButton>

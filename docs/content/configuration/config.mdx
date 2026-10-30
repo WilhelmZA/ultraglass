@@ -7,24 +7,28 @@ The `config.yaml` file is broken into multiple sections:
 
 ## Top Level Parameters
 
-| Parameter          | Type            | Default Value                    | Description                                                   |
-| :----------------- | :-------------- | :------------------------------- | :------------------------------------------------------------ |
-| `org_name`         | String          | Beloved Hyperglass User          | Your organization's name.                                     |
-| `plugins`          | List of Strings |                                  | List of Ultraglass [plugins](/plugins) to load.               |
-| `primary_asn`      | String          | 65000                            | Your organization's primary ASN. Used to set default UI text. |
-| `request_timeout`  | Number          | 90                               | Global timeout in seconds for all requests.                   |
-| `site_description` | String          | `org_name` Network Looking Glass | `<meta>` description, also used in the API documentation.     |
-| `site_title`       | String          | `org_name`                       | Browser title, also used in the default terms & conditions.   |
+| Parameter          | Type            | Default Value                     | Description |
+| :----------------- | :-------------- | :-------------------------------- | :---------- |
+| `cors_origins`     | List of Strings |                                   | Allowed CORS hosts. By default, no CORS hosts are allowed. |
+| `fake_output`      | Boolean         | false                             | Return static fake output, for development and testing. |
+| `org_name`         | String          | Beloved Ultraglass User           | Your organization's name. |
+| `plugins`          | List of Strings |                                   | File names of common Ultraglass [plugins](/plugins) to load from the `plugins` folder of the application directory. |
+| `primary_asn`      | String          | 65001                             | Your organization's primary ASN. Used to set default UI text and the PeeringDB link. |
+| `request_timeout`  | Number          | 90                                | Global timeout in seconds for all requests. |
+| `site_description` | String          | `{org_name}` Network Looking Glass | `<meta>` description. `{org_name}` is replaced with `org_name`. |
+| `site_title`       | String          | Ultraglass                        | Browser title, also used in the API documentation title and the default terms & conditions. |
 
 #### Example with Defaults
 
 ```yaml filename="config.yaml"
-org_name: Beloved Hyperglass User
+cors_origins: []
+fake_output: false
+org_name: Beloved Ultraglass User
 plugins: []
-primary_asn: 65000
+primary_asn: 65001
 request_timeout: 90
-site_description: Beloved Hyperglass User Network Looking Glass
-site_title: Beloved Hyperglass User
+site_description: "{org_name} Network Looking Glass"
+site_title: Ultraglass
 ```
 
 ## Other Configuration Sections
@@ -32,6 +36,7 @@ site_title: Beloved Hyperglass User
 | Parameter    | Docs                                                                   | Description                                                      |
 | :----------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------- |
 | `cache`      | [Caching Docs](/configuration/config/caching.mdx)                      | Customise how Ultraglass caches responses.                       |
+| `docs`       | [API Docs](/configuration/config/api-docs.mdx)                         | Customise the generated API documentation.                       |
 | `logging`    | [Logging Docs](/configuration/config/logging.mdx)                      | Customize file logging, syslog, webhooks, etc.                   |
 | `messages`   | [Messages Docs](/configuration/config/messages.mdx)                    | Customize messages shown to users.                               |
 | `structured` | [Structured Output Docs](/configuration/config/structured-output.mdx) | Customise how Ultraglass handles structured output from devices. |
