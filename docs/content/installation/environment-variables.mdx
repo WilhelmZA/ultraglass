@@ -9,6 +9,23 @@ Set environment variables in the shell that starts Ultraglass, or in `/etc/hyper
 
 With Docker, `compose.yaml` mounts the host directory in `HYPERGLASS_APP_PATH` at `/etc/hyperglass` in the container. Inside the container, the application path is always `/etc/hyperglass`.
 
+## Docker
+
+With Docker, `hyperglass.env` sets values for `docker compose`, not for the container. The container receives only the variables that `compose.yaml` passes: `HYPERGLASS_HOST`, `HYPERGLASS_PORT`, `HYPERGLASS_DEBUG`, `HYPERGLASS_DEV_MODE`, `HYPERGLASS_REDIS_HOST`, `HYPERGLASS_DISABLE_UI` and `HYPERGLASS_APP_PATH`. The other variables in the table have no effect when you set them in `hyperglass.env`.
+
+To pass another variable, create `compose.override.yaml` next to `compose.yaml` in `/opt/hyperglass`. `docker compose` merges that file automatically. A file path, such as `HYPERGLASS_CA_CERT`, must be a path inside the container, for example under `/etc/hyperglass`.
+
+```yaml filename="/opt/hyperglass/compose.override.yaml"
+services:
+    hyperglass:
+        environment:
+            - HYPERGLASS_WORKERS=4
+            - HYPERGLASS_REDIS_DB=2
+            - HYPERGLASS_CA_CERT=/etc/hyperglass/ca.pem
+```
+
+## Variables
+
 | Variable Name               | Type    | Default           | Description                                                                                                        |
 | :-------------------------- | :------ | :---------------- | :----------------------------------------------------------------------------------------------------------------- |
 | `HYPERGLASS_DEBUG`          | boolean | `false`           | Enable debug logging                                                                                               |

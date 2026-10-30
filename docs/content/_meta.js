@@ -18,7 +18,7 @@ export default {
             },
             configuration: {
                 title: "Configuration",
-                href: "/configuration",
+                href: "/configuration/overview",
             },
             plugins: {
                 title: "Plugins",

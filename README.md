@@ -47,7 +47,7 @@ Open `http://localhost:8001` after the containers start. The sample device retur
 
 ### Manual installation
 
-Manual installation requires Python 3.11 or later and Redis 7. Install the `ui` extra when enabling the web UI; it adds the Python favicon dependencies, while Node.js 22 and pnpm 11 provide the frontend build tools. The optional `performance` extra enables `uvloop`. The full procedure is in the [manual installation guide](docs/content/installation/manual.mdx).
+Manual installation requires Python 3.11 or later and Redis 7. Install the `ui` extra when enabling the web UI; it adds the Python favicon dependencies, while Node.js 22.13 and pnpm 11 provide the frontend build tools. The optional `performance` extra enables `uvloop`. The full procedure is in the [manual installation guide](docs/content/installation/manual.mdx).
 
 ## Documentation
 
