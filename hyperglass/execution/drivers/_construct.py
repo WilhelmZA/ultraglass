@@ -280,13 +280,13 @@ class Formatter:
         return f"({','.join(parts)})"
 
     def _mikrotik_bgp_pattern(self, target: str) -> str:
-        """Build a RouterOS ``where ~`` regex for an AS-path or community query.
+        r"""Build a RouterOS ``where ~`` regex for an AS-path or community query.
 
         AS-path uses ``_`` as an element boundary; community is anchored between
         list separators or the ends of the community list. Each ``$`` anchor must reach
-        the RouterOS console as ``\\$`` so the console passes a literal ``$`` to
+        the RouterOS console as ``\$`` so the console passes a literal ``$`` to
         the regex engine, which reads it as the end anchor. A bare ``$`` is taken
-        as console variable interpolation and a doubled ``\\\\$`` as an escaped
+        as console variable interpolation and a doubled ``\\$`` as an escaped
         backslash; both fail the command with a syntax error. Do not double
         backslashes here. The target is already constrained to a safe charset by
         ``BuiltinDirective.validate_target``.
