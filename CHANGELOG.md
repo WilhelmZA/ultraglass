@@ -33,6 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Connection errors show the device name again. The default `messages.connection_error` template failed with `KeyError: 'device_name'`, so users saw the general error. Error templates now accept both `{device_name}` and `{device}`, and an unknown placeholder is blanked instead of raising (#167).
 - Error messages no longer repeat the device error. A template that already contains `{error}`, such as the default connection error, showed it twice as `boom (boom)` (#187).
 - `create_platform_list`, which builds `docs/platforms.json`, no longer raises `TypeError` on the first directive file. A test now runs it and compares its output with `docs/platforms.json` (#174).
+- The sample manual `systemd` service now depends on `redis-server.service` and starts after it, and runs the Python in the `/opt/hyperglass/.venv` virtual environment. The manual install docs no longer need a `sed` step to fix `ExecStart` (#176).
 
 ## 3.5.0-rc.3 - 2026-10-30
 

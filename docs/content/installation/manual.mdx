@@ -63,11 +63,10 @@ hyperglass start
 
 ### Create a `systemd` service
 
-The sample service runs the system `python3`. The `sed` command changes `ExecStart` to the Python in the virtual environment.
+The sample service runs the Python in the virtual environment, `/opt/hyperglass/.venv/bin/python3`. If you cloned Ultraglass to a different directory, change `ExecStart` in the `hyperglass.service` file.
 
 ```shell copy
 cp /opt/hyperglass/.samples/hyperglass-manual.service /etc/hyperglass/hyperglass.service
-sed -i 's|^ExecStart=python3|ExecStart=/opt/hyperglass/.venv/bin/python3|' /etc/hyperglass/hyperglass.service
 ln -s /etc/hyperglass/hyperglass.service /etc/systemd/system/hyperglass.service
 systemctl daemon-reload
 systemctl enable hyperglass

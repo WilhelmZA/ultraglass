@@ -1,13 +1,13 @@
 [Unit]
 Description=hyperglass
-After=network.target
-Requires=redis-server
+Requires=redis-server.service
+After=network.target redis-server.service
 
 [Service]
 User=root
 Group=root
 EnvironmentFile=/etc/hyperglass/hyperglass.env
-ExecStart=python3 -m hyperglass.console start
+ExecStart=/opt/hyperglass/.venv/bin/python3 -m hyperglass.console start
 
 [Install]
 WantedBy=multi-user.target
