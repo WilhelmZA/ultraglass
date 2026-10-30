@@ -51,9 +51,17 @@ class Construct:
         self.target = self.query.query_target
         self.directive = query.directive
 
-        # Recheck built-ins at the execution boundary, including transformed input.
+        # Recheck built-ins at the execution boundary. Rules apply to the target as the
+        # user sent it, because input plugins may rewrite it into a vendor form that the
+        # rules reject (Huawei `a/b` to `a b`). The syntax check also applies to the
+        # transformed target, so a plugin cannot introduce command syntax.
         if self.directive._hyperglass_builtin:
-            self.directive.validate_target(self.query.query_target)
+            validated = getattr(self.query, "_validated_target", None)
+            if validated is None:
+                validated = self.query.query_target
+            self.directive.validate_target(validated)
+            if self.query.query_target != validated:
+                self.directive.validate_target_syntax(self.query.query_target)
 
         # Set transport method based on NOS type
         self.transport = "scrape"

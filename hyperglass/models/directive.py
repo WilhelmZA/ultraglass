@@ -527,6 +527,11 @@ class BuiltinDirective(Directive, unique_by=("id", "table_output", "platforms"))
 
     def validate_target(self, target: str) -> bool:
         """Reject command syntax in built-in BGP targets before rule validation."""
+        self.validate_target_syntax(target)
+        return super().validate_target(target)
+
+    def validate_target_syntax(self, target: t.Union[t.List[str], str]) -> None:
+        """Reject command syntax in built-in BGP targets, without rule validation."""
         targets = target if isinstance(target, list) else [target]
         for value in targets:
             if self.query_kind == "bgp_aspath":
@@ -537,7 +542,6 @@ class BuiltinDirective(Directive, unique_by=("id", "table_output", "platforms"))
                 continue
             if not valid or len(value) > 256:
                 raise InputValidationError(error="Invalid BGP target syntax", target=value)
-        return super().validate_target(target)
 
 
 DirectiveT = t.Union[BuiltinDirective, Directive]

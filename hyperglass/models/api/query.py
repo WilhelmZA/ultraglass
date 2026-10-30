@@ -99,6 +99,8 @@ class Query(BaseModel):
     # Selected values of the directive's optional variables
     query_variables: t.Dict[str, str] = {}
     _kwargs: t.Dict[str, t.Any]
+    # The target as validated, before input plugins transform it.
+    _validated_target: t.Union[t.List[str], str, None] = None
 
     def __init__(self, **data) -> None:
         """Initialize the query with a UTC timestamp at initialization time."""
@@ -140,6 +142,7 @@ class Query(BaseModel):
         except InputValidationError as err:
             raise InputInvalid(**err.kwargs) from err
 
+        self._validated_target = self.query_target
         self.query_target = self.transform_query_target()
 
     def summary(self) -> SimpleQuery:
