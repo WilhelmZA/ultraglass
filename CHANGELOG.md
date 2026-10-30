@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Platform key guidance in the docs: which key to pick for Huawei VRP 5 and VRP 8, Juniper, MikroTik, Cisco and Arista, and structured output rows for Arista EOS, FRRouting, Huawei VRP, Juniper Junos and MikroTik RouterOS (#159).
 - Docs audit against the code: configuration reference, examples, installation, devices, directives, plugins and config section pages now match the models and defaults. Keys the code accepts but does not read are marked as such (#161, #162, #163, #164, #165, #166).
 
+### Changed
+
+- Manual installs now need Node.js 22.13 or later at startup, not only at UI build. The startup check compares the minor version too, so Node.js 18 to 22.12 now fails at startup instead of in the pnpm install of the UI build (#175).
+
 ### Fixed
 
 - Huawei VRP and VRPv8 structured routes keep route-target extended communities (`Ext-Community: RT 64501 : 1`) out of the community list, and fill Originator with the router ID that VRP prints in parentheses after `From:` (#103).

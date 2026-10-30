@@ -21,17 +21,23 @@ pretty_version = ".".join(tuple(str(v) for v in MIN_PYTHON_VERSION))
 if sys.version_info < MIN_PYTHON_VERSION:
     raise RuntimeError(f"Python {pretty_version}+ is required.")
 
+
+def check_node_version(node_version: t.Optional[t.Tuple[int, int, int]]) -> None:
+    """Raise an error if NodeJS is missing or older than the minimum version."""
+    pretty_node_version = ".".join(str(v) for v in MIN_NODE_VERSION)
+    if node_version is None:
+        raise RuntimeError(f"NodeJS {pretty_node_version}+ is required (NodeJS is not installed)")
+    # Compare major and minor, because pnpm needs a minimum minor version (#175).
+    if tuple(node_version[: len(MIN_NODE_VERSION)]) < MIN_NODE_VERSION:
+        installed = ".".join(str(v) for v in node_version)
+        raise RuntimeError(
+            f"NodeJS {pretty_node_version}+ is required (version {installed} installed)"
+        )
+
+
 # Ensure the NodeJS version meets the minimum requirements when the UI is enabled.
 if not Settings.disable_ui:
-    node_version = get_node_version()
-    if node_version is None:
-        raise RuntimeError(f"NodeJS {MIN_NODE_VERSION!s}+ is required (NodeJS is not installed)")
-    node_major, node_minor, node_patch = node_version
-    if node_major < MIN_NODE_VERSION:
-        installed = ".".join(str(v) for v in (node_major, node_minor, node_patch))
-        raise RuntimeError(
-            f"NodeJS {MIN_NODE_VERSION!s}+ is required (version {installed} installed)"
-        )
+    check_node_version(get_node_version())
 
 
 # Local

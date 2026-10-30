@@ -20,7 +20,7 @@ METADATA = (__name__, __version__, __author__, __copyright__, __license__)
 
 MIN_PYTHON_VERSION = (3, 11)
 
-MIN_NODE_VERSION = 18
+MIN_NODE_VERSION = (22, 13)
 
 TARGET_FORMAT_SPACE = ("huawei", "huawei_vrpv8")
 
