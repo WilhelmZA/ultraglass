@@ -89,6 +89,20 @@ class Logo(HyperglassModel):
     width: str = Field(default="50%", pattern=PERCENTAGE_PATTERN)
     height: t.Optional[str] = Field(default=None, pattern=PERCENTAGE_PATTERN)
 
+    @field_validator("width", "height", mode="before")
+    def coerce_percentage(cls, value: t.Any) -> t.Any:
+        """Accept a bare integer, such as `50`, before pattern validation."""
+        if isinstance(value, int) and not isinstance(value, bool):
+            return str(value)
+        return value
+
+    @field_validator("width", "height")
+    def append_percent(cls, value: t.Optional[str]) -> t.Optional[str]:
+        """Append `%` when it is missing, so the UI receives a valid CSS width."""
+        if value is not None and not value.endswith("%"):
+            return f"{value}%"
+        return value
+
 
 class LogoPublic(Logo):
     """Public logo configuration."""

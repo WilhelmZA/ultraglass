@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Huawei IPv6 traceroute works on VRP 8.180 devices that have no source option on `tracert ipv6`, such as the CE12800. Ultraglass sends `-a <source6>` and, when the device rejects it, runs the same trace without the source (#155).
 - Huawei IPv6 ping and traceroute in a VRF send `vpn-instance <vrf>` without the dash, the form VRP 8.180 accepts (#155).
 - A Huawei `Error: Too many parameters` or `Error[4]: ...` response is now a device command error. Before, it returned success, as raw text or as an empty traceroute hop table (#155).
+- `web.logo.width` and `web.logo.height` given as a bare number, such as `50`, are now normalised to `50%`, so the UI receives a valid CSS width. `web.logo.height` stays accepted but the UI does not use it (#177).
 
 ## 3.5.0-rc.3 - 2026-10-30
 

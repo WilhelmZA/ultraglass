@@ -39,8 +39,8 @@ Server DNS supports A and AAAA records. Its endpoint allows 120 requests per min
 | `web.logo.light`   | String           | Ultraglass light logo | Path to logo to show in light mode. |
 | `web.logo.dark`    | String           | Ultraglass dark logo  | Path to logo to show in dark mode. |
 | `web.logo.favicon` | String           | Ultraglass icon       | Path to icon/logo from which to generate favicons. |
-| `web.logo.width`   | String           | 50%                   | Maximum width of the logo on wide screens, as a percentage from 1 to 100, for example `50%`. Include the `%` sign. The model also accepts a bare number, but the UI cannot use it. |
-| `web.logo.height`  | String           |                       | Accepted, as a percentage from 1 to 100, but not used by the current UI. |
+| `web.logo.width`   | String           | 50%                   | Maximum width of the logo on wide screens, as a percentage from 1 to 100, for example `50%`. A bare number such as `50` is accepted and treated as `50%`. |
+| `web.logo.height`  | String           |                       | Accepted, as a percentage from 1 to 100, and normalised like `width`. The UI ignores it: the logo height follows its width. |
 
 ##### Example
 
