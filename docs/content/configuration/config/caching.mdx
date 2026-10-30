@@ -4,7 +4,7 @@ Ultraglass caches query responses in Redis, so a repeated query does not reach t
 
 | Parameter         | Type    | Default Value | Description                                                                     |
 | :---------------- | :------ | :------------ | :------------------------------------------------------------------------------ |
-| `cache.timeout`   | Number  | 120           | Number of seconds for which to cache device responses. The UI countdown for cached results uses the same value. |
+| `cache.timeout`   | Number  | 120           | Number of seconds for which to cache device responses. Each cache hit restarts the timeout, so a query repeated within the timeout keeps its cached response. The UI countdown for cached results uses the same value. |
 | `cache.show_text` | Boolean | `true`        | If `true`, the UI shows a cache icon and countdown on cached results. |
 
 ### Example with Defaults

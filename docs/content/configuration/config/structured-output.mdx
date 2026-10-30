@@ -17,7 +17,7 @@ For external validation, Ultraglass supports two backends:
 
 Ultraglass can also control which BGP communities are shown to the end user.
 
-For devices with structured traceroute support, Ultraglass can add ASN, organisation, country, prefix and IXP details using lookups from BGP.tools.
+For devices with structured traceroute support, Ultraglass can add ASN, organisation, prefix and IXP details using lookups from BGP.tools. It also adds reverse DNS names, from the server's resolver, to hops whose hostname the device did not print, with or without IP enrichment.
 
 | Parameter                                    | Type            | Default Value | Description |
 | :------------------------------------------- | :-------------- | :------------ | :---------- |
@@ -145,7 +145,7 @@ structured:
     - **MikroTik RouterOS/SwitchOS**: Parses multi-table format with statistics
     - **EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, TNSR, Extreme EXOS and VOSS**: Parses standard numbered CLI output, retaining unfamiliar formats as text. EOS, BIRD, OpenBGPD, and VyOS have captured lab fixtures. Remaining hardware formats require validation.
 
-    When IP enrichment is enabled, traceroute hops are enhanced with ASN numbers, organization names, country codes, prefixes, and IXP detection.
+    When IP enrichment is enabled, traceroute hops are enhanced with ASN numbers, organization names, prefixes, and IXP detection.
 </Callout>
 
 #### Complete Structured Traceroute Setup
@@ -191,7 +191,7 @@ structured:
     **IP Enrichment Dependency**
     
     Without IP enrichment enabled:
-    - Traceroute hops will only show IP addresses and RTT values
+    - Traceroute hops show IP addresses, RTT values and reverse DNS names, but no ASN or organization
     - BGP next-hop IPs will not show ASN/organization tooltips
     - No ASN organization names in copied BGP route text
     - AS path organization names load only when the user opens the AS path
