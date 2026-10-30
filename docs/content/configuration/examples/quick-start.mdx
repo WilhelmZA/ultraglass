@@ -11,7 +11,7 @@ Here are common configuration patterns to get you started with Ultraglass. For t
 
 ## Minimal Configuration
 
-The absolute minimum configuration needed:
+Every `config.yaml` key is optional, and Ultraglass starts without the file. Only `devices.yaml` is required. This file sets the site name and ASN:
 
 ```yaml filename="config.yaml"
 site_title: "My Network Looking Glass"
@@ -76,26 +76,18 @@ org_name: "SecureNet"
 primary_asn: 65001
 
 web:
-  # Use privacy-focused DNS
+  # Resolve FQDN targets on the Ultraglass server, not with a public DoH provider
   dns_provider:
-    name: "cloudflare"  # More privacy-focused than Google
-    
-  # Informative text about privacy
-  text:
-    ip_button: "Detect My IP (Private)"
-    fqdn_message: "Securely resolved {fqdn} to"
-    
-  # Privacy-focused greeting
+    name: "server"
+
+  # Read the visitor's IP address from the request, with no third-party lookup
+  my_ip: "server"
+
+  # Privacy notice, read from a Markdown file
   greeting:
     enable: true
     title: "Your Privacy Matters"
-    content: |
-      ## Privacy Notice
-      
-      - DNS queries use encrypted DNS-over-HTTPS
-      - Your IP detection happens in your browser
-      - We don't log sensitive query details
-      - All connections use HTTPS encryption
+    file: "/etc/hyperglass/privacy.md"
     required: false
     button: "I Understand"
 
@@ -103,6 +95,16 @@ web:
 logging:
   format: "text"
   # No HTTP webhooks for privacy
+```
+
+The greeting text comes from the file that `web.greeting.file` names:
+
+```markdown filename="/etc/hyperglass/privacy.md"
+## Privacy Notice
+
+- This server resolves hostnames. Your browser sends no DNS query to a third party.
+- The My IP button reads your address from your request to this server.
+- We don't log sensitive query details.
 ```
 
 ## High-Performance Setup
@@ -155,7 +157,7 @@ web:
   logo:
     light: "/etc/hyperglass/branding/globalnet-light.svg"
     dark: "/etc/hyperglass/branding/globalnet-dark.svg"
-    width: "250px"
+    width: "60%"
     
   # Comprehensive footer
   links:
@@ -250,15 +252,7 @@ web:
   greeting:
     enable: true
     title: "IT Policy Reminder"
-    content: |
-      ## Network Diagnostic Tools
-      
-      These tools are for authorized IT personnel only.
-      
-      - Use responsibly and only for legitimate troubleshooting
-      - Do not test external targets without approval
-      - Report any suspicious network activity
-      - Contact IT Security for questions: security@acme.com
+    file: "/etc/hyperglass/it-policy.md"
     required: true
     button: "I Acknowledge"
     
@@ -276,7 +270,7 @@ logging:
   format: "json"
   max_size: "200MB"
   
-  # Log to internal SIEM
+  # Send each query to the SIEM as a webhook
   http:
     enable: true
     provider: "generic"
@@ -285,6 +279,17 @@ logging:
       mode: "api_key"
       password: "your-siem-api-key"
       header: "X-API-Key"
+```
+
+```markdown filename="/etc/hyperglass/it-policy.md"
+## Network Diagnostic Tools
+
+These tools are for authorized IT personnel only.
+
+- Use responsibly and only for legitimate troubleshooting
+- Do not test external targets without approval
+- Report any suspicious network activity
+- Contact IT Security for questions: security@acme.com
 ```
 
 ## Development/Testing Setup
@@ -323,15 +328,7 @@ web:
   greeting:
     enable: true
     title: "Development Environment"
-    content: |
-      ## ⚠️ Development Environment
-      
-      This is a development and testing instance of Ultraglass.
-      
-      - Data may be fake or simulated
-      - Configuration changes frequently
-      - Not suitable for production use
-      - Contact developers: dev@example.com
+    file: "/etc/hyperglass/dev-notice.md"
     required: false
     button: "Continue to Testing"
 
@@ -358,6 +355,17 @@ docs:
   description: "API documentation for testing and development"
 ```
 
+```markdown filename="/etc/hyperglass/dev-notice.md"
+## ⚠️ Development Environment
+
+This is a development and testing instance of Ultraglass.
+
+- Data may be fake or simulated
+- Configuration changes frequently
+- Not suitable for production use
+- Contact developers: dev@example.com
+```
+
 ## Monitoring Integration
 
 With comprehensive monitoring and alerting:
@@ -377,7 +385,7 @@ logging:
   format: "json"        # Structured logs for monitoring
   max_size: "500MB"
   
-  # Multiple monitoring integrations
+  # Post each query to a Slack channel
   http:
     enable: true
     provider: "slack"
@@ -431,23 +439,23 @@ structured:
 
 ## Configuration File Location
 
-Place your `config.yaml` file in the Ultraglass configuration directory:
+Ultraglass reads `config`, `devices` and `directives` files from the directory that `HYPERGLASS_APP_PATH` names. The default is `/etc/hyperglass`. Each file can be YAML (`.yaml` or `.yml`), JSON, TOML or Python.
 
-- **Docker**: Mount to `/etc/hyperglass/config.yaml`
-- **System Install**: `/etc/hyperglass/config.yaml`
-- **Development**: `./config.yaml` in your project directory
+- **Docker**: the Compose file mounts `${HYPERGLASS_APP_PATH}` on the host to `/etc/hyperglass` in the container.
+- **System install**: place the files in `/etc/hyperglass`, or set `HYPERGLASS_APP_PATH` to another directory.
+
+Every file path in a config, such as `web.logo.light`, `web.greeting.file` and `logging.directory`, must exist when Ultraglass starts.
 
 ## Validation
 
-After creating your configuration, validate it with:
+Ultraglass validates its configuration when it starts. If a file is invalid, it logs the error and exits.
 
 ```bash
-# Check configuration syntax
-hyperglass --validate-config
+# Validate the configuration and start Ultraglass
+hyperglass start
 
-# Test with fake output
-hyperglass --fake-output
-
-# Full startup test
-hyperglass --debug
+# Log more detail during startup
+HYPERGLASS_DEBUG=true hyperglass start
 ```
+
+To test the UI without devices answering, set `fake_output: true` in `config.yaml`. Ultraglass then returns sample output for every query.

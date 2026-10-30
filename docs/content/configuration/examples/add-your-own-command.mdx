@@ -19,11 +19,17 @@ show-bgp-summary:
 
 ### Associate the Directive with the Device
 
-```yaml filename="devices.yaml" {5-6} copy
+```yaml filename="devices.yaml" {11-12} copy
 devices:
     - name: Your Router
       address: 192.0.2.1
       platform: cisco_ios
+      credential:
+          username: <username>
+          password: <password>
+      attrs:
+          source4: 192.0.2.1
+          source6: 2001:db8::1
       directives:
           - show-bgp-summary
 ```
@@ -34,11 +40,14 @@ devices:
 
 By default, all built-in directives are _also_ enabled. If you wish to _only_ enable directives you specify, you can use `builtins: false` as a directive:
 
-```yaml filename="devices.yaml" {6-7} copy
+```yaml filename="devices.yaml" {9-10} copy
 devices:
     - name: Your Router
       address: 192.0.2.1
       platform: cisco_ios
+      credential:
+          username: <username>
+          password: <password>
       directives:
           - builtins: false
           - show-bgp-summary
@@ -48,11 +57,17 @@ In the above example, _only_ the `show-bgp-summary` directive will be enabled.
 
 You can also selectively enable certain built-in directives:
 
-```yaml filename="devices.yaml" {6} copy
+```yaml filename="devices.yaml" {12} copy
 devices:
     - name: Your Router
       address: 192.0.2.1
       platform: cisco_ios
+      credential:
+          username: <username>
+          password: <password>
+      attrs:
+          source4: 192.0.2.1
+          source6: 2001:db8::1
       directives:
           - builtins: [bgp_route, traceroute]
 ```
