@@ -1,7 +1,7 @@
 """Validate error message configuration variables."""
 
 # Third Party
-from pydantic import Field, ConfigDict, model_validator
+from pydantic import Field, ConfigDict
 
 # Project
 from hyperglass.log import log
@@ -92,9 +92,13 @@ class Messages(HyperglassModel):
         description="Displayed when a device rejects a command or denies permission to run it.",
     )
 
-    @model_validator(mode="after")
     def warn_deprecated(self) -> "Messages":
-        """Warn once per deprecated message the operator sets explicitly."""
+        """Warn once per deprecated message the operator sets explicitly.
+
+        Called from `Params` only. `UIParameters` revalidates messages from a full
+        dump, which marks every key as set, so a model validator here would warn
+        for keys the operator never wrote.
+        """
         for key in DEPRECATED_MESSAGES:
             if key in self.model_fields_set:
                 log.bind(key=f"messages.{key}").warning(

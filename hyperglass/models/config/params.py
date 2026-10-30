@@ -119,6 +119,12 @@ class Params(ParamsPublic, HyperglassModel):
             return [str(f) for f in matching_plugins]
         return []
 
+    @field_validator("messages", mode="after")
+    @classmethod
+    def validate_messages(cls, messages: Messages) -> Messages:
+        """Warn for deprecated message keys set in the operator's config."""
+        return messages.warn_deprecated()
+
     @field_validator("web", mode="after")
     @classmethod
     def validate_web(cls, web: Web, info: ValidationInfo) -> Web:

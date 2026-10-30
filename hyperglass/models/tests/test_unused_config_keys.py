@@ -12,13 +12,14 @@ from litestar.openapi import OpenAPIConfig
 from hyperglass.models.config import messages
 from hyperglass.models.config.docs import Docs
 from hyperglass.models.config.devices import Device
+from hyperglass.models.config.params import Params
 from hyperglass.models.config.messages import DEPRECATED_MESSAGES, Messages
 
 
 def _warned_keys(monkeypatch, **config):
     log = Mock()
     monkeypatch.setattr(messages, "log", log)
-    Messages(**config)
+    Params(messages=config)
     return [call.args[1] for call in log.bind.return_value.warning.call_args_list]
 
 
@@ -37,6 +38,14 @@ def test_explicit_deprecated_message_warns(monkeypatch, key):
 
 def test_deprecated_message_set_to_its_default_still_warns(monkeypatch):
     assert _warned_keys(monkeypatch, no_response="No response.") == ["no_response"]
+
+
+def test_messages_rebuilt_from_a_full_dump_do_not_warn(monkeypatch):
+    """`UIParameters` revalidates messages from a dump that sets every key."""
+    log = Mock()
+    monkeypatch.setattr(messages, "log", log)
+    Messages(**Messages().model_dump())
+    assert log.bind.return_value.warning.call_args_list == []
 
 
 def test_base_url_unset_publishes_no_server():
