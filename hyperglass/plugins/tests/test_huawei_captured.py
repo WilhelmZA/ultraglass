@@ -54,6 +54,25 @@ def test_merge_address_families():
     }
 
 
+@pytest.mark.parametrize(
+    "name,paths",
+    [
+        ("aspath4-asdot", [[65000, 327960, 13335], [65000, 327960, 13335]]),
+        ("aspath6-asdot", [[65000, 327960, 174, 13335]]),
+    ],
+)
+def test_brief_table_converts_asdot_to_asplain(name, paths):
+    """Regression for #132: VRP prints 4-byte ASNs in asdot (`5.280` is 327960)."""
+    table = parse_huawei((sample(name),))
+    assert [route.as_path for route in table.routes] == paths
+
+
+def test_brief_table_rejects_out_of_range_asdot():
+    text = sample("aspath4-asdot").replace("5.280", "5.70000")
+    with pytest.raises(ParsingError):
+        parse_huawei((text,))
+
+
 def test_captured_trace_reaches_destination():
     trace = parse_huawei_traceroute(sample("trace"), "1.1.1.1", "lab-huawei")
     assert len(trace.hops) == 9

@@ -10,7 +10,7 @@ from pydantic import ConfigDict, field_validator, model_validator
 
 # Project
 from hyperglass.log import log
-from hyperglass.util import parse_as_path
+from hyperglass.util import parse_asn, parse_as_path
 from hyperglass.models.data.bgp_route import BGPRouteTable
 
 # Local
@@ -319,8 +319,12 @@ def _extract_route_entries(lines: t.List[str]) -> t.List[HuaweiRouteEntry]:
 def _brief_route(prefix: str, flags: str, values: dict) -> HuaweiRouteEntry:
     """Map only attributes present in a brief VRP response."""
     path = values.get("Path/Ogn", "").strip()
-    # AS sets and dotted ASNs cannot be represented losslessly by this model.
-    if path and not re.fullmatch(r"(?:\d+\s+)*\d*\s*[ie?]", path):
+    # VRP prints 4-byte ASNs in asdot (`5.280`). AS sets cannot be represented
+    # losslessly by this model.
+    if path and not re.fullmatch(r"(?:\d+(?:\.\d+)?\s+)*(?:\d+(?:\.\d+)?)?\s*[ie?]", path):
+        raise ValueError(f"Unsupported Huawei AS path: {path}")
+    as_path = [parse_asn(asn) for asn in re.findall(r"\d+(?:\.\d+)?", path)]
+    if None in as_path:
         raise ValueError(f"Unsupported Huawei AS path: {path}")
     return HuaweiRouteEntry(
         prefix=str(ip_network(prefix)),
@@ -329,7 +333,7 @@ def _brief_route(prefix: str, flags: str, values: dict) -> HuaweiRouteEntry:
         local_preference=int(values.get("LocPrf", "").strip() or 100),
         preference=int(values.get("PrefVal", "").strip() or 0),
         duration=-1,
-        as_path=[int(asn) for asn in re.findall(r"\d+", path)],
+        as_path=as_path,
         communities=re.findall(r"\d+:\d+(?::\d+)?", values.get("Community", "")),
         is_valid="*" in flags,
         is_best=">" in flags,
