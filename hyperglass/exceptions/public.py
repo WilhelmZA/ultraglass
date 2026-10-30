@@ -36,7 +36,9 @@ class ScrapeError(
         if not error_str or error_str.isspace():
             error_str = "Connection error occurred"
 
-        super().__init__(error=error_str, device=device.name, proxy=device.proxy)
+        super().__init__(
+            error=error_str, device=device.name, device_name=device.name, proxy=device.proxy
+        )
 
 
 class AuthError(PublicHyperglassError, template="authentication_error", level="danger"):
@@ -59,7 +61,9 @@ class AuthError(PublicHyperglassError, template="authentication_error", level="d
         if not error_str or error_str.isspace():
             error_str = "Authentication failed"
 
-        super().__init__(error=error_str, device=device.name, proxy=device.proxy)
+        super().__init__(
+            error=error_str, device=device.name, device_name=device.name, proxy=device.proxy
+        )
 
 
 class RestError(PublicHyperglassError, template="connection_error", level="danger"):
@@ -82,7 +86,7 @@ class RestError(PublicHyperglassError, template="connection_error", level="dange
         if not error_str or error_str.isspace():
             error_str = "REST API connection error"
 
-        super().__init__(error=error_str, device=device.name)
+        super().__init__(error=error_str, device=device.name, device_name=device.name)
 
 
 class DeviceTimeout(PublicHyperglassError, template="request_timeout", level="danger"):
@@ -105,7 +109,9 @@ class DeviceTimeout(PublicHyperglassError, template="request_timeout", level="da
         if not error_str or error_str.isspace():
             error_str = "Connection timed out"
 
-        super().__init__(error=error_str, device=device.name, proxy=device.proxy)
+        super().__init__(
+            error=error_str, device=device.name, device_name=device.name, proxy=device.proxy
+        )
 
 
 class InvalidQuery(PublicHyperglassError, template="request_timeout"):

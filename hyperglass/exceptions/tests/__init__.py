@@ -1,0 +1,1 @@
+"""hyperglass exception tests."""

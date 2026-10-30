@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `web.dns_provider` with `name: custom` and no `url`, or with an unknown name, now fails with a validation error that names `web.dns_provider` and lists the known providers. Before, config loading stopped with a bare `KeyError` (#178).
 - HTTP devices use the configured `port`. Before, a device on `port: 8080` was queried on the scheme default port. The port is left out of the URL only when it is unset or equals the scheme default, 80 for `http` and 443 for `https` (#169).
 - HTTP devices with an IPv6 address build a valid URL. The address is now bracketed, as in `https://[2001:db8::10]:8443` (#188).
+- Connection errors show the device name again. The default `messages.connection_error` template failed with `KeyError: 'device_name'`, so users saw the general error. Error templates now accept both `{device_name}` and `{device}`, and an unknown placeholder is blanked instead of raising (#167).
 
 ## 3.5.0-rc.3 - 2026-10-30
 

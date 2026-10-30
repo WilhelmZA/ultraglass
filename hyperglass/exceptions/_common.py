@@ -2,6 +2,7 @@
 
 # Standard Library
 import json as _json
+import string
 from typing import Any, Set, Dict, List, Union, Literal, Optional
 
 # Third Party
@@ -9,10 +10,27 @@ from pydantic import ValidationError
 
 # Project
 from hyperglass.log import log
-from hyperglass.util import get_fmt_keys, repr_from_attrs
+from hyperglass.util import repr_from_attrs
 from hyperglass.constants import STATUS_CODE_MAP
 
 ErrorLevel = Literal["danger", "warning"]
+
+
+class _BlankingFormatter(string.Formatter):
+    """String formatter that renders unknown placeholders as empty strings."""
+
+    def get_value(self, key: Union[int, str], args: Any, kwargs: Dict[str, Any]) -> Any:
+        """Return the value for a placeholder, or an empty string if it is unknown."""
+        if isinstance(key, str):
+            return kwargs.get(key, "")
+        return args[key] if key < len(args) else ""
+
+    def get_field(self, field_name: str, args: Any, kwargs: Dict[str, Any]) -> Any:
+        """Resolve a placeholder, blanking it if attribute or index access fails."""
+        try:
+            return super().get_field(field_name, args, kwargs)
+        except (AttributeError, IndexError, KeyError, TypeError, ValueError):
+            return "", field_name
 
 
 class HyperglassError(Exception):
@@ -56,16 +74,19 @@ class HyperglassError(Exception):
         return _json.dumps(self.__dict__())
 
     @staticmethod
-    def _safe_format(template: str, **kwargs: Dict[str, str]) -> str:
-        """Safely format a string template from keyword arguments."""
+    def _safe_format(template: str, **kwargs: Any) -> str:
+        """Safely format a string template from keyword arguments.
 
-        keys = get_fmt_keys(template)
-        for key in keys:
-            if key not in kwargs:
-                kwargs.pop(key)
-            else:
-                kwargs[key] = str(kwargs[key])
-        return template.format(**kwargs)
+        Placeholders with no matching keyword argument are blanked. If the
+        template cannot be parsed at all, it is returned unchanged. This
+        method never raises.
+        """
+        try:
+            return _BlankingFormatter().vformat(
+                str(template), (), {k: str(v) for k, v in kwargs.items()}
+            )
+        except Exception:  # noqa: BLE001
+            return str(template)
 
     def _parse_pydantic_errors(*errors: Dict[str, Any]) -> str:
         errs = ("\n",)
