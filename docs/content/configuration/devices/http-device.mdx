@@ -2,6 +2,8 @@ Ultraglass can collect output from a generic HTTP endpoint.
 
 Set `platform: http` and an `http` mapping on every HTTP device. Setting `platform: http` without that mapping causes a configuration error. The device also needs a `credential`, although the HTTP client does not use it. HTTP devices do not support an SSH `proxy`. The `http` platform has no built-in directives, so list the directives the device offers in `directives` and define each one in the [directives file](/configuration/directives.mdx). The `example_directive` in the examples below is such a directive.
 
+Set `port` to query the endpoint on a non-default port, for example `port: 8080`. When `port` is unset or equals the scheme default (80 for `http`, 443 for `https`), Ultraglass leaves it out of the URL.
+
 ## HTTP Configuration
 
 | Parameter               | Type    | Default Value | Description                                                                                                            |
