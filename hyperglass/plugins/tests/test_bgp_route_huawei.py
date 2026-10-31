@@ -82,3 +82,13 @@ def test_huawei_bgp_route_vrf_label(state):
 
     assert parse_huawei([SAMPLE], vrf="LAB").vrf == "LAB"
     assert parse_huawei([SAMPLE]).vrf == "default"
+
+
+def test_huawei_no_matching_routes_returns_none(state):
+    """A response with no routes gives no table, so the query reports no results (#196)."""
+    # Project
+    from hyperglass.plugins._builtin.bgp_routestr_huawei import parse_huawei
+
+    header = "\n BGP local router ID : 192.0.2.1\n Local AS number : 64500\n"
+    assert parse_huawei([header]) is None
+    assert parse_huawei([header, SAMPLE]).count == 2

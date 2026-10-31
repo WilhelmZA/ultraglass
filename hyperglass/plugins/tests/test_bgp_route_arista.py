@@ -98,3 +98,12 @@ def test_captured_vrf_local_route():
     # A locally originated route has an empty AS path; the source AS is the local AS.
     assert result.routes[0].as_path == []
     assert result.routes[0].source_as == 65007
+
+
+def test_arista_no_matching_routes_returns_none():
+    """No matching routes gives no table, so the query reports no results (#196)."""
+    empty = (
+        '{"vrfs":{"LAB":{"vrf":"LAB","routerId":"10.250.7.1","asn":"65007","bgpRouteEntries":{}}}}'
+    )
+    assert parse_arista((empty,)) is None
+    assert parse_arista((empty, empty)) is None

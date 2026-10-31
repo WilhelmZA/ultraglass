@@ -42,6 +42,10 @@ def parse_arista(output: t.Sequence[str]) -> "OutputDataModel":
             validated = AristaBGPTable(**routes)
             bgp_table = validated.bgp_table()
 
+            # A target or filter with no matching routes returns no paths.
+            if not bgp_table.routes:
+                continue
+
             if result is None:
                 result = bgp_table
             else:

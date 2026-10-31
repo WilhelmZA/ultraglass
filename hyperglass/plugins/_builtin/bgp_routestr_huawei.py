@@ -37,6 +37,11 @@ def parse_huawei(output: Sequence[str], vrf: Optional[str] = None) -> "OutputDat
         try:
             # Parse the text output using the Huawei parser
             validated = HuaweiBGPTable.parse_text(response)
+
+            # A target or filter with no matching routes returns no paths.
+            if not validated.routes:
+                continue
+
             bgp_table = validated.bgp_table(vrf=vrf or "default")
 
             if result is None:

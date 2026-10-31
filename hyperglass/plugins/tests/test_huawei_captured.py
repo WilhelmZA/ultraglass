@@ -31,6 +31,10 @@ def sample(name):
 def test_complete_captured_tables(name, count):
     use_state("params").structured.rpki.mode = "router"
     table = parse_huawei((sample(name),))
+    if count == 0:
+        # No matching routes gives no table, so the query reports no results (#196).
+        assert table is None
+        return
     assert table.count == len(table.routes) == count
     for route in table.routes:
         assert route.active

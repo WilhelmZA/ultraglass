@@ -42,7 +42,8 @@ def test_community_tables():
     table = parse_huawei((sample("community4"),))
     assert table.count == 38
     assert all(route.communities == ["37195:302"] for route in table.routes)
-    assert parse_huawei((sample("community6"),)).count == 0
+    assert parse_huawei((sample("community6"),)) is None
+    assert parse_huawei((sample("community4"), sample("community6"))).count == 38
 
 
 def test_route_detail():
