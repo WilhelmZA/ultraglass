@@ -64,7 +64,7 @@ The check reads configuration files afresh. It reports effective settings, inclu
 
 Self-hosted font detection examines the served UI under `static/ui`. A missing build is reported as unknown. A build that links Google Fonts is reported as off. Rebuild with `hyperglass build-ui` and working font-download access to self-host the fonts.
 
-Suggestions use dotted setting paths, such as `structured.rpki.mode: external`. Apply them as nested YAML in the relevant file. The command does not edit `config.yaml`. Structured output defaults to enabled in the current model, so an omitted `structured` block is not reported as disabled. Router-supplied RPKI remains valid when external RPKI is off. Redis reachability does not verify the external validator's health.
+Suggestions use dotted setting paths, such as `structured.rpki.mode: external`. Apply them as nested YAML in the relevant file. The command does not edit `config.yaml`. The global `structured.enable_for_bgp_route` and `structured.enable_for_traceroute` toggles default to enabled, so an omitted `structured` block is not reported as disabled. Each device still requires `structured_output: true` to opt in. The device prompt defaults to no unless the existing entry enables structured output. Router-supplied RPKI remains valid when external RPKI is off. Redis reachability does not verify the external validator's health.
 
 ## Scaffold a custom directive
 

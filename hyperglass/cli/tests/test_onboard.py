@@ -47,7 +47,10 @@ def config(tmp_path, monkeypatch):
     return tmp_path
 
 
-def test_device_prompts_validate_and_do_not_publish_credentials(config):
+@pytest.mark.parametrize("structured_answer, structured", [("", False), ("y", True)])
+def test_device_prompts_validate_and_do_not_publish_credentials(
+    config, structured_answer, structured
+):
     state = use_state()
     before = state.redis.instance.keys("*")
     result = runner.invoke(
@@ -65,7 +68,7 @@ def test_device_prompts_validate_and_do_not_publish_credentials(config):
                 "secret-new-device",
                 "",
                 "",
-                "y",
+                structured_answer,
                 "1.1.1.2",
                 "2606:4700::2",
                 "y",
@@ -82,7 +85,7 @@ def test_device_prompts_validate_and_do_not_publish_credentials(config):
     with runtime():
         device = Device(**data["devices"][1])
         assert device.model_extra == {}
-        assert device.structured_output is True
+        assert device.structured_output is structured
     assert state.redis.instance.keys("*") == before
 
 
@@ -101,7 +104,7 @@ def test_update_preserves_credentials_and_unrelated_fields(config):
                 "n",
                 "",
                 "",
-                "y",
+                "",
                 "",
                 "",
                 "y",
@@ -114,6 +117,7 @@ def test_update_preserves_credentials_and_unrelated_fields(config):
     assert after["routers"][0]["address"] == "127.0.0.3"
     assert after["routers"][0]["credential"] == ENTRY["credential"]
     assert after["routers"][0]["group"] == "Existing group"
+    assert after["routers"][0]["structured_output"] is True
     assert after["routers"][1] == data["routers"][1]
 
 

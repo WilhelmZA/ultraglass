@@ -79,7 +79,7 @@ def device_prompt(entry: dict) -> dict:
         entry.pop(field, None)
         if value and value != "-":
             entry[field] = value
-    previous_structured = entry.get("structured_output", True)
+    previous_structured = entry.get("structured_output", False)
     entry["structured_output"] = False
     if entry["platform"] in SUPPORTED_STRUCTURED_OUTPUT:
         entry["structured_output"] = confirm(
