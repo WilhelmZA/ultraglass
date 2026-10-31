@@ -1,0 +1,19 @@
+VRF : default
+BGP Local AS 2                 BGP Router-ID 1.1.1.2
+
+    Network                  : 10.0.0.0/16                        Nexthop                     : 1.1.1.1
+    Peer                     : 1.1.1.1                            Origin                      : IGP
+    Metric                   : 0                                  Local Pref                  : 100
+    Weight                   : 0                                  Calc. Local Pref            : 100
+    Best                     : Yes                                Valid                       : Yes
+    Type                     : external                           Stale                       : No
+    Originator ID            : 0.0.0.0                            Path ID                     : 0
+    Aggregator ID            :
+    Aggregator AS            :
+    Atomic Aggregate         :
+    RFD Flaps                : 0                                  RFD Penalty                 : 0
+    AS-Path                  : 1
+    Cluster List             :
+    Communities              :
+50:100,50:101,50:102,50:103,50:104,50:105,50:106,50:107,50:108,50:109,50:110,50:1
+    Extd. Communities        :

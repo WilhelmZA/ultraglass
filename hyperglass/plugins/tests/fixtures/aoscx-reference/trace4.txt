@@ -1,0 +1,4 @@
+traceroute to 10.0.10.1 (10.0.10.1), 1 hops min, 30 hops max, 3 sec. timeout, 3 probes
+  1    10.0.40.2 0.002ms 0.002ms 0.001ms
+  2    10.0.30.1 0.002ms 0.001ms 0.001ms
+  3    10.0.10.1 0.001ms 0.002ms 0.002ms

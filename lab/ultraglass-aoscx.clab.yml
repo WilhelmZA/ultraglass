@@ -1,0 +1,26 @@
+# Supply a locally built AOS-CX 10.14 image through AOSCX_IMAGE.
+name: ultraglass-aoscx
+mgmt:
+  network: ultraglass-aoscx-mgmt
+  ipv4-subnet: 192.168.254.0/24
+topology:
+  nodes:
+    core:
+      kind: linux
+      image: ultraglass-lab/core:latest
+      mgmt-ipv4: 192.168.254.10
+      binds:
+        - configs/aoscx/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro
+      exec:
+        - ip addr add 10.255.1.0/31 dev eth1
+        - ip addr add 2001:db8:255:1::/127 dev eth1
+        - ip addr add 198.51.100.1/32 dev lo
+        - ip addr add 2001:db8:100::1/128 dev lo
+    aoscx:
+      kind: aruba_aoscx
+      image: ${AOSCX_IMAGE}
+      mgmt-ipv4: 192.168.254.12
+      memory: 9GiB
+      cpu: 4
+  links:
+    - endpoints: ["core:eth1", "aoscx:eth1"]

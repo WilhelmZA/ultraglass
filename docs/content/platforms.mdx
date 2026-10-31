@@ -116,6 +116,16 @@ OcNOS detailed route output supports structured parsing. AS-path and community s
 
 The optional GoBGP/OcNOS lab is described in `lab/configs/ocnos/README.md`.
 
+### Aruba AOS-CX
+
+Use `aruba_aoscx` for AOS-CX 10.14 command forms. Built-ins provide IPv4/IPv6 exact-prefix BGP lookups, standard-community searches, ping and traceroute. An address queries its `/32` or `/128` host route. Configure `attrs.source4` and `attrs.source6` for diagnostics. Route, ping and traceroute commands support named VRFs.
+
+Structured BGP parses labelled prefix detail, including wrapped communities and multiple paths. AS sets, confederations, incomplete detail and unfamiliar replies remain text. Community results stay text. The command reference does not document an arbitrary AS-path search or dual-stack community VRF forms, so those built-ins are omitted. Age and router RPKI state remain unknown. Traceroute uses the standard numbered-hop parser.
+
+The REST API requires a login session cookie and, from 10.09, a CSRF token. Native support uses the existing Netmiko transport and documented CLI output. A REST adapter needs separately validated operational BGP payloads and session handling; the HTTP transport does not provide that login lifecycle.
+
+Tests use attributed command-reference excerpts and explicitly synthetic IPv6/multipath cases. Live VM validation remains pending. See `lab/configs/aoscx/README.md` for the optional GoBGP lab.
+
 ### Structured output
 
 Structured output is opt-in on every platform. Set `structured_output: true` on a device for structured BGP results. A device without it returns text.
@@ -123,6 +133,7 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | Platform | Structured BGP source | Limitations |
 | :------- | :-------------------- | :---------- |
 | Arista EOS | `show ip bgp` / `show ipv6 bgp` JSON; `show bgp ... community ... detail` JSON for communities | AS-path results omit communities. Router RPKI state is read when the router validates origins. |
+| Aruba AOS-CX | `show bgp [vrf ...] ipv4/ipv6 unicast <prefix>` detail text | Community summaries stay text. AS-path searches are not offered. Age and router RPKI state remain unknown. Live captures pending. |
 | BIRD | `show route all` text | Route age and router RPKI state remain unknown. |
 | Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Route results read route age only when the router prints the update time in UTC. Router RPKI state is read when the router validates origins. IPv6 route queries need a prefix, because IOS has no longest-match BGP lookup for an IPv6 address. |
 | Cisco IOS-XR | `show bgp` text | AS-path and community summary results omit communities. Route age remains unknown. Router RPKI state is read when the router validates origins. |

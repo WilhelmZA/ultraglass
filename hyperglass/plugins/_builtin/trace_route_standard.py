@@ -26,6 +26,7 @@ PLATFORMS = (
     "extreme_vsp",
     "hp_comware",
     "ipinfusion_ocnos",
+    "aruba_aoscx",
 )
 
 

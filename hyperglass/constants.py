@@ -47,6 +47,7 @@ SUPPORTED_STRUCTURED_OUTPUT = (
     "extreme_exos",
     "extreme_vsp",
     "sonic",
+    "aruba_aoscx",
     "cumulus_linux",
     "hp_comware",
     "ipinfusion_ocnos",

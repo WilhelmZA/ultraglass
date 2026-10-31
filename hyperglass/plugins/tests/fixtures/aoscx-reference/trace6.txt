@@ -1,0 +1,2 @@
+traceroute to 2001::2 (2001::2) from 2001::1, 30 hops max, 3 sec. timeout, 3 probes, 24 byte packets
+  1 2001::2 (2001::2) 0.4331 ms 0.3186 ms 0.1874 ms
