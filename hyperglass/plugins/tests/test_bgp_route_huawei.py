@@ -73,3 +73,12 @@ def test_huawei_bgp_route(state):
     other = by_prefix["203.0.113.128/25"]
     assert other.active is False, "non-best route should not be active"
     assert other.as_path == [64500, 64999]
+
+
+def test_huawei_bgp_route_vrf_label(state):
+    """The table reports the device's VRF, not `default` (#194)."""
+    # Project
+    from hyperglass.plugins._builtin.bgp_routestr_huawei import parse_huawei
+
+    assert parse_huawei([SAMPLE], vrf="LAB").vrf == "LAB"
+    assert parse_huawei([SAMPLE]).vrf == "default"

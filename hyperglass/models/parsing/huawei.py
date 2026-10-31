@@ -448,7 +448,7 @@ class HuaweiBGPTable(HuaweiBase):
         _log.debug(f"Parsed {len(instance.routes)} Huawei routes")
         return instance
 
-    def bgp_table(self) -> BGPRouteTable:
+    def bgp_table(self, vrf: str = "default") -> BGPRouteTable:
         """Convert to standard BGP table format."""
         routes = []
 
@@ -473,7 +473,7 @@ class HuaweiBGPTable(HuaweiBase):
             routes.append(route_data)
 
         return HuaweiBGPRouteTable(
-            vrf="default",
+            vrf=vrf,
             count=len(routes),
             routes=routes,
             winning_weight="high",

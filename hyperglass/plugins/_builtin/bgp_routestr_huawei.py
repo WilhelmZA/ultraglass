@@ -2,7 +2,7 @@
 
 # Standard Library
 import re
-from typing import TYPE_CHECKING, List, Sequence
+from typing import TYPE_CHECKING, List, Optional, Sequence
 
 # Third Party
 from pydantic import PrivateAttr, ValidationError
@@ -24,8 +24,11 @@ if TYPE_CHECKING:
     from .._output import OutputType
 
 
-def parse_huawei(output: Sequence[str]) -> "OutputDataModel":
-    """Parse a Huawei BGP text response."""
+def parse_huawei(output: Sequence[str], vrf: Optional[str] = None) -> "OutputDataModel":
+    """Parse a Huawei BGP text response.
+
+    VRP prints the VPN instance only in some formats, so the VRF comes from the device.
+    """
     result = None
 
     _log = log.bind(plugin=BGPSTRRoutePluginHuawei.__name__)
@@ -34,7 +37,7 @@ def parse_huawei(output: Sequence[str]) -> "OutputDataModel":
         try:
             # Parse the text output using the Huawei parser
             validated = HuaweiBGPTable.parse_text(response)
-            bgp_table = validated.bgp_table()
+            bgp_table = validated.bgp_table(vrf=vrf or "default")
 
             if result is None:
                 result = bgp_table
@@ -76,5 +79,5 @@ class BGPSTRRoutePluginHuawei(OutputPlugin):
             )
         )
         if should_process:
-            return parse_huawei(output)
+            return parse_huawei(output, vrf=getattr(query.device, "vrf", None))
         return output

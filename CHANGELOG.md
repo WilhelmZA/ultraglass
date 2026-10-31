@@ -8,6 +8,12 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- Huawei structured BGP results for a VRF location now report the device's VRF instead of `default` (#194).
+
 ## 3.5.0-rc.4 - 2026-10-31
 
 **This is a release candidate for 3.5.0.** It is published for testing and is not for production. Run it in a lab or staging deployment, not in front of users.
