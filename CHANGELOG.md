@@ -2,11 +2,100 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.5.0-rc.5**, a release candidate. The latest stable release is **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.5.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 3.5.0 - 2026-10-31
+
+This release adds four platforms and widens structured output. Extreme EXOS, Extreme VOSS, Community SONiC and MikroTik RouterOS 6 are supported natively, and Cisco IOS-XR and NX-OS gain opt-in structured BGP tables. Huawei VRP 8 devices such as the CE12800 and NE40E work in a VRF, including IPv6 ping and traceroute. Structured output is now opt-in on every platform. Structured results with RPKI validation finish in seconds instead of minutes. A documentation audit checked every configuration page against the code and found thirteen configuration keys that were accepted but ignored or broken, such as webhook headers and authentication, `enable: false` on syslog and webhook logging, HTTP device ports, `{mask}` in custom directives and the `docs.*` blocks. All of them now work. Queries with no matching routes return the "no matching results" warning on every platform.
+
+3.5.0 supersedes release candidates 3.5.0-rc.1 to rc.5, whose sections below record what each candidate added. Every change was validated against the containerlab lab in `lab/`, which now also runs a Huawei NE40E, with captured device output kept as parser regression fixtures. The rc.4 and rc.5 lab runs passed every feature in this release.
+
+Images: `wilhelmza/ultraglass:3.5.0` and `ghcr.io/wilhelmza/ultraglass:3.5.0`. The `latest` tag on both registries now points to 3.5.0.
+
+### Upgrading from 3.4.0
+
+A 3.4.0 configuration loads unchanged. No configuration key is removed. These behaviours differ from 3.4.0 without a configuration change:
+
+- Structured output is opt-in on every platform. Arista EOS, FRRouting, Huawei VRP, Juniper Junos, MikroTik RouterOS and SwitchOS devices without `structured_output` now return text. Set `structured_output: true` on each device that should keep the table view (#125).
+- IP rules now enforce `allow_loopback`, `allow_unspecified` and `allow_reserved`. With the defaults, loopback, unspecified and reserved targets are refused even when the rule's `condition` contains them. Set the key to `true` on the rule to accept them (#173).
+- Manual installs need Node.js 22.13 or later at startup. Node.js 18 to 22.12 now fails at startup instead of in the UI build (#175).
+- `logging.syslog.enable: false` and `logging.http.enable: false` now turn the output off. Before, both were sent whenever the block was set (#171).
+- The `msteams` and `slack` webhook providers send to the scheme, host and port of `logging.http.host`, as the `generic` provider does. The `msteams` provider sends an Adaptive Card in a `message` envelope instead of a MessageCard. Teams Workflows webhook templates read the card from the `attachments` list (#172).
+- The `logging.http` webhook now applies `headers`, `params`, `authentication`, `verify_ssl` and `timeout`, and HTTP devices now use their configured `port`. A value that was set and silently ignored before now takes effect (#169, #170).
+- `docs.base_url` is now the server URL in the API documentation when it is set, and the `docs.query`, `docs.devices`, `docs.queries` and `docs.info` blocks now set each endpoint's heading, summary and description (#179).
+- `messages.feature_not_enabled`, `messages.invalid_query`, `messages.invalid_field` and `messages.no_response` are deprecated. A config that sets one still loads and logs a warning. They will be removed in 4.0 (#179).
+- A query with no matching routes returns the "no matching results" warning on every platform, in structured and text mode. Before, Arista EOS and Huawei VRP structured queries and blank text responses returned `success` with an empty result (#195, #196).
+- A Huawei VRP `Error: Too many parameters` or `Error[4]: ...` response is a device command error. Before, it returned success (#155).
+- Cisco IOS-XR devices retry the SSH connect three times by default when the device drops the session before login. Set `connect_retries` on the device to change it (#140).
+
+Docker installs check out `v3.5.0` as described in the [upgrade guide](https://github.com/WilhelmZA/ultraglass/blob/main/docs/content/installation/upgrading.mdx).
+
+### Added
+
+- The `extreme_exos` platform, with built-in BGP route, AS path, community, ping and traceroute directives, `vr` forms, and opt-in structured BGP output parsed from `show bgp routes detail`. Route queries need a prefix. Community targets are sent in the `AS : value` form EXOS requires (#73).
+- The `extreme_vsp` platform for VOSS, with built-in BGP route, ping and traceroute directives and VRF forms. VOSS has no AS path or community filter, and its BGP output stays as text because it marks no best path. Route queries need a prefix (#73).
+- The `sonic` platform for community SONiC, which runs the FRRouting commands through `vtysh` in a Linux shell, with opt-in structured BGP and traceroute output from the FRR parsers (#76).
+- Opt-in structured BGP output for Cisco IOS-XR and NX-OS, with route detail, communities and best-path state. AS-path and community queries use the summary table, which carries no communities (#110, #113).
+- MikroTik RouterOS 6 support for BGP route, AS path and community queries, as text or structured output. Set `os_version` on RouterOS 6 devices to send the RouterOS 6 commands directly. Without it, Ultraglass falls back to them when the router rejects the RouterOS 7 command (#117).
+- Device `connect_retries`, the number of SSH connect retries with backoff when a device drops the session before login. The default is 3 on `cisco_xr` and 0 elsewhere (#140).
+- `logging.samples.backup_count` sets how many rotated query sample files are kept. The default stays 1 (#144).
+- Huawei VRP VRF example in the device docs, a `lab-huawei-vrf` lab location on vpn-instance `LAB`, and a lab NE40E node (`lab-huawei-ne40`, `lab-huawei-ne40-vrf`). The lab CE12800 runs VRP 8.180, so its locations are `lab-huawei-vrpv8` and `lab-huawei-vrpv8-vrf` with platform `huawei_vrpv8` (#103, #130).
+- Platform key guidance in the docs: which key to pick for Huawei VRP 5 and VRP 8, Juniper, MikroTik, Cisco and Arista, and structured output rows for Arista EOS, FRRouting, Huawei VRP, Juniper Junos and MikroTik RouterOS (#159).
+- Docs audit against the code: configuration reference, examples, installation, devices, directives, plugins and config section pages now match the models and defaults. Keys the code accepts but does not read are marked as such (#161, #162, #163, #164, #165, #166).
+- Each published image carries its release notes link in the `org.opencontainers.image.documentation` label, and every stable release refreshes the Docker Hub overview with the README, a release table and the latest release notes.
+- Lab test matrix with structured FRR AS path and community cases, VRF, IOL, IOL-L2 and IPv6 ping and traceroute cases, no-match cases that check the "no matching results" warning, and `ULTRAGLASS_LAB_TEXT=1` to run the suite against the text application (#197).
+
+### Changed
+
+- Structured output is opt-in on every platform (#125).
+- Manual installs now need Node.js 22.13 or later at startup, not only at UI build. The startup check compares the minor version too (#175).
+- IP rules now enforce `allow_loopback`, `allow_unspecified` and `allow_reserved`, as the docs already said. Configs that set the keys keep loading. Documentation, private and default route targets are not affected (#173).
+- The API documentation now uses `docs.base_url` and the `docs.query`, `docs.devices`, `docs.queries` and `docs.info` blocks. Before, Ultraglass accepted these keys and ignored them (#179).
+- Updated the Python package, runtime metadata, UI package, upgrade guide, installation docs and issue templates to 3.5.0.
+
+### Deprecated
+
+- `messages.feature_not_enabled`, `messages.invalid_query`, `messages.invalid_field` and `messages.no_response`. No code displays them. A config that sets one still loads and logs a deprecation warning. They will be removed in 4.0 (#179).
+
+### Fixed
+
+- A device without structured output no longer offers the table-output BGP directives. The UI sent them for some query types, so a text deployment showed raw JSON or XML (#132, #133, #134, #138, #139, #140, #141, #142).
+- Structured BGP results with external RPKI validation now finish in seconds instead of minutes. Each result validates its routes in one batch: Ultraglass deduplicates prefix and origin ASN pairs, reads the Redis cache once, and looks up the uncached pairs concurrently over one HTTP session (#133, #134, #138, #139).
+- Arista EOS and Huawei VRP structured AS path, community and route queries with no matching routes now return the "no matching results" warning instead of `success` with an empty table (#196).
+- Text queries whose device response is blank, such as an FRR AS path or community filter with no match, now return the "no matching results" warning instead of `success` with an empty panel (#195).
+- FRRouting, VyOS and SONiC structured BGP results in a VRF now carry the VRF name instead of `default`. The name comes from `vrfName` in the router output, or from the device `vrf` setting where FRR does not report it (#134).
+- Huawei structured BGP results for a VRF location report the device's VRF instead of `default` (#194).
+- Huawei VRP BGP route queries accept prefix targets again. Rules now check the target as sent, and the command syntax check still covers the rewritten form (#132).
+- Huawei VRP structured AS path and community tables parse 4-byte ASNs that VRP prints in asdot, such as `5.280`, and convert them to asplain. Before, the parser rejected the whole response (#132).
+- Huawei VRP structured routes take Weight from `pref-val`. The detailed route showed the route preference (`pre 255`) as Weight (#132).
+- Huawei VRP and VRPv8 structured routes keep route-target extended communities out of the community list, and fill Originator with the router ID that VRP prints after `From:` (#103).
+- Huawei IPv6 traceroute works on VRP 8.180 devices that have no source option on `tracert ipv6`, such as the CE12800. Ultraglass sends `-a <source6>` and, when the device rejects it, runs the same trace without the source (#155).
+- Huawei IPv6 ping and traceroute in a VRF send `vpn-instance <vrf>` without the dash, the form VRP 8.180 accepts (#155).
+- A Huawei `Error: Too many parameters` or `Error[4]: ...` response is now a device command error. Before, it returned success, as raw text or as an empty traceroute hop table (#155).
+- Cisco IOS-XR queries sent back to back no longer fail with `Error reading SSH protocol banner` or `Connection reset by peer` (#140).
+- An IOS-XR `%% Network not in table` reply is an empty result, not a command error (#113).
+- NX-OS `% Invalid command` and `% Incomplete` errors are recognised as command errors instead of being returned as results (#110).
+- A Cisco NX-OS BGP route query for a bare IPv6 address returns an input error instead of a device error, because NX-OS looks up an IPv6 route only by prefix (#110).
+- Device errors that start with `%%`, as EXOS prints them, are recognised as command errors instead of being returned as results (#73).
+- Juniper structured BGP queries no longer return an error on routes that carry the Only-to-Customer attribute (RFC 9234). Junos emits two path attribute blocks for these routes, and the parser now merges them. An unexpected parse fault now reports its cause instead of a bare 500 (#133).
+- MikroTik community queries now match a community anywhere in a route's community list. RouterOS 6 separates the list with `;`, so the query missed every community except the last (#117).
+- MikroTik traceroute now shows a hop with no address as unanswered, with 100% loss and no RTT. RouterOS prints an in-flight probe as `0%  1  0ms`, and the parser showed it as 0% loss (#138).
+- Connection errors show the device name again. The default `messages.connection_error` template failed with `KeyError: 'device_name'`, so users saw the general error. Error templates now accept both `{device_name}` and `{device}`, and an unknown placeholder is blanked instead of raising (#167).
+- Error messages no longer repeat the device error. A template that already contains `{error}` showed it twice as `boom (boom)` (#187).
+- The `logging.http` webhook now sends the configured `headers` and `params`, the `api_key` header or HTTP basic authentication, and applies `verify_ssl` and `timeout`. Before, these keys were validated but not applied (#170).
+- `logging.syslog.enable: false` and `logging.http.enable: false` now turn syslog and webhook logging off. The default stays `true` (#171).
+- The `msteams` and `slack` webhook providers now send to the scheme, host and port of `logging.http.host` and keep the query string of the URL. Before, they sent to `https://outlook.office.com` and `https://hooks.slack.com`, so Teams Workflows URLs and relay hosts could not be reached (#172).
+- HTTP devices use the configured `port`. The port is left out of the URL only when it is unset or equals the scheme default (#169).
+- HTTP devices with an IPv6 address build a valid URL. The address is now bracketed, as in `https://[2001:db8::10]:8443` (#188).
+- Custom directives can use `{mask}`. Before, config validation treated `mask` as a missing device attribute, and setting `attrs.mask` made the query fail (#168).
+- `web.logo.width` and `web.logo.height` given as a bare number, such as `50`, are now normalised to `50%`, so the UI receives a valid CSS width. `web.logo.height` stays accepted but the UI does not use it (#177).
+- `web.dns_provider` with `name: custom` and no `url`, or with an unknown name, now fails with a validation error that names `web.dns_provider` and lists the known providers. Before, config loading stopped with a bare `KeyError` (#178).
+- `create_platform_list`, which builds `docs/platforms.json`, no longer raises `TypeError` on the first directive file. A test now runs it and compares its output with `docs/platforms.json` (#174).
+- The sample manual `systemd` service now depends on `redis-server.service` and starts after it, and runs the Python in the `/opt/hyperglass/.venv` virtual environment. The manual install docs no longer need a `sed` step to fix `ExecStart` (#176).
 
 ## 3.5.0-rc.5 - 2026-10-31
 

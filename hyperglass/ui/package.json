@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0-rc.5",
+  "version": "3.5.0",
   "name": "ui",
   "description": "UI for Ultraglass, a maintained fork of the modern network looking glass hyperglass",
   "author": "Matt Love",
