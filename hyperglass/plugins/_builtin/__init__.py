@@ -22,7 +22,9 @@ from .bgp_route_enrichment import ZBgpRouteEnrichment
 from .bgp_route_aoscx import BGPRoutePluginAOSCX
 from .bgp_route_comware import BGPRoutePluginComware
 from .bgp_route_dell import BGPRoutePluginDell
+from .bgp_route_fortinet import BGPRoutePluginFortinet
 from .bgp_route_ocnos import BGPRoutePluginOcNOS
+from .bgp_route_panos import BGPRoutePluginPANOS
 from .trace_route_os9 import TraceroutePluginOS9
 
 __all__ = (
@@ -46,7 +48,9 @@ __all__ = (
     "BGPRoutePluginAOSCX",
     "BGPRoutePluginComware",
     "BGPRoutePluginDell",
+    "BGPRoutePluginFortinet",
     "BGPRoutePluginOcNOS",
+    "BGPRoutePluginPANOS",
     "TraceroutePluginOS9",
     "RemoveCommand",
 )
