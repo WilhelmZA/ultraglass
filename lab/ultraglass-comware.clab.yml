@@ -1,0 +1,27 @@
+# Optional VSR1000 lab. Supply COMWARE_IMAGE with a locally built vrnetlab image.
+name: ultraglass-comware
+mgmt:
+  network: ultraglass-comware-mgmt
+  ipv4-subnet: 192.168.252.0/24
+topology:
+  nodes:
+    core:
+      kind: linux
+      image: ultraglass-lab/core:latest
+      mgmt-ipv4: 192.168.252.10
+      binds:
+        - configs/comware/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro
+      exec:
+        - ip addr add 10.253.1.0/31 dev eth1
+        - ip addr add 2001:db8:253:1::/127 dev eth1
+        - ip addr add 198.51.100.1/32 dev lo
+        - ip addr add 2001:db8:100::1/128 dev lo
+    comware:
+      kind: generic_vm
+      image: ${COMWARE_IMAGE}
+      mgmt-ipv4: 192.168.252.12
+      memory: 2GiB
+      cpu: 1
+      cmd: /launch.py --username vrnetlab --password VR-netlab9
+  links:
+    - endpoints: ["core:eth1", "comware:eth1"]

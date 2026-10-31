@@ -1,0 +1,28 @@
+BGP local router ID: 192.168.1.135
+Local AS number: 200
+Paths: 2 available, 1 best
+BGP routing table information of 2::/64:
+ From            : 10.1.1.1 (192.168.1.136)
+ Relay nexthop   : ::FFFF:10.1.1.1
+ Original nexthop: ::FFFF:10.1.1.1
+ OutLabel        : NULL
+ RxPathID        : 0x0
+ TxPathID        : 0x0
+ AS-path         : 100
+ Origin          : igp
+ Attribute value : MED 0, pref-val 0
+ State           : valid, external, best, bgp-rib-only
+ Originator      : 176.1.1.2
+ Cluster list    : 80
+
+ Backup route.
+ From            : 1::1 (192.168.1.136)
+ Relay nexthop   : 1::1
+ Original nexthop: 1::1
+ OutLabel        : NULL
+ RxPathID        : 0x0
+ TxPathID        : 0x0
+ AS-path         : 100
+ Origin          : igp
+ Attribute value : MED 0, pref-val 0
+ State           : valid, external

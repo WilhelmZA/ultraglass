@@ -1,0 +1,4 @@
+traceroute to 2001:3::2(2001:3::2), 30 hops at most, 60 byte packets , press CTRL_C to break
+1 2001:1::2 0.661 ms 0.618 ms 0.579 ms
+2 2001:2::2 0.861 ms 0.718 ms 0.679 ms
+3 2001:3::2 [AS 65535] 0.822 ms 0.731 ms 0.708 ms

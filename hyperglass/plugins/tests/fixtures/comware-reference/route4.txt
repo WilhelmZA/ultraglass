@@ -1,0 +1,26 @@
+BGP local router ID: 192.168.100.1
+Local AS number: 100
+Paths: 2 available, 1 best
+BGP routing table information of 10.2.1.0/24:
+ Imported route.
+ Original nexthop: 10.2.1.1
+ OutLabel        : NULL
+ RxPathID        : 0x0
+ TxPathID        : 0x0
+ AS-path         : (null)
+ Origin          : igp
+ Attribute value : MED 0, pref-val 0, pre 0
+ State           : valid, local, best, bgp-rib-only
+ Originator      : 176.1.1.2
+ Cluster list    : 80
+
+ From            : 10.2.1.2 (192.168.100.2)
+ Rely nexthop    : not resolved
+ Original nexthop: 10.2.1.2
+ OutLabel        : NULL
+ RxPathID        : 0x0
+ TxPathID        : 0x0
+ AS-path         : 200
+ Origin          : igp
+ Attribute value : MED 0, pref-val 0, pre 255
+ State           : external

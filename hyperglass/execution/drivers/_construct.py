@@ -228,7 +228,14 @@ class Formatter:
 
     def _default(self, target: str) -> str:
         """Don't format targets by default."""
+        if self.platform == "hp_comware" and self.query_type == "bgp_route":
+            return self._comware_bgp_route(target)
         return target
+
+    def _comware_bgp_route(self, target: str) -> str:
+        """Request exact-prefix detail instead of an ambiguous summary table."""
+        network = ipaddress.ip_network(target, strict=False)
+        return f"{network.network_address} {network.prefixlen}"
 
     def _with_formatter(self, formatter: t.Callable[[str], str]) -> FormatterCallback:
         result: FormatterCallback

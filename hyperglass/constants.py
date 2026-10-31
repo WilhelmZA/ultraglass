@@ -48,6 +48,7 @@ SUPPORTED_STRUCTURED_OUTPUT = (
     "extreme_vsp",
     "sonic",
     "cumulus_linux",
+    "hp_comware",
 )
 
 CONFIG_EXTENSIONS = ("py", "yaml", "yml", "json", "toml")

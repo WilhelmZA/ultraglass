@@ -72,6 +72,16 @@ Use `extreme_exos` for ExtremeXOS and `extreme_vsp` for VOSS (VSP and Fabric Eng
 - VOSS has no BGP filter for an AS path or a community, so those query types are not offered. VOSS BGP results stay as text, because VOSS marks no best path.
 - Ultraglass enters privileged mode on VOSS, because VOSS runs traceroute only there.
 
+### HPE Comware 7
+
+Use `hp_comware` for Comware 7, including VSR1000. Built-ins provide exact-prefix BGP route lookup, ping, and traceroute for IPv4 and IPv6. All three support `vrf` through `vpn-instance`. Set `attrs.source4` and `attrs.source6` for ping; IPv4 traceroute also uses `source4`. IPv6 traceroute selects its source from the routing table because some releases omit its source option.
+
+An address queries a host route (`/32` or `/128`); enter the advertised prefix to inspect a network route. Structured BGP parses the documented Comware detail fields and checks the advertised path count. Unrecognized output, AS sets, and incomplete replies remain text. Route age and router RPKI state remain unknown. Structured traceroute uses the standard numbered-hop parser.
+
+Comware's documented AS-path and community filters require preconfigured ACL/list identifiers. The built-ins do not expose them as arbitrary AS-path or community searches. Configure custom directives for existing router lists. Comware 5 uses different commands and needs custom directives.
+
+Parser tests use attributed vendor-reference excerpts. VSR1000 live captures remain pending; see `lab/configs/comware/README.md` for the optional GoBGP lab.
+
 ### SONiC
 
 Use `sonic` for community SONiC. It connects as a Linux shell and runs the FRRouting commands through `vtysh`, so the login user must be able to run `vtysh`. The default `admin` user can. Dell Enterprise SONiC uses a different CLI; configure it as `dell_sonic` with custom directives.
@@ -114,6 +124,7 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | Extreme VOSS | Not supported | VOSS marks no best path, so BGP results stay as text. |
 | FRRouting | `show bgp ... json` through `vtysh` | AS-path results omit communities and route age, because `regexp` has no JSON detail form. Router RPKI state remains unknown. |
 | Huawei VRP | `display bgp routing-table` detail text for routes, brief tables for AS path and community | AS-path brief results omit communities. Community brief results omit the AS path, so RPKI state and AS organisations do not apply to them. Brief results omit route age. Router RPKI state remains unknown. |
+| HPE Comware 7 | `display bgp routing-table ipv4/ipv6 unicast <address> <length>` detail text | Exact prefixes only. AS-path and community searches require custom directives for configured lists. Age and router RPKI state remain unknown. Live captures pending. |
 | Juniper Junos | `show route ... detail \| display xml` | Route queries return the best path only. Router RPKI state is read when the router validates origins. |
 | MikroTik RouterOS | `print detail` text (RouterOS 6 and 7) | Route age remains unknown. Router RPKI state is read when the route detail carries an `rpki` value. |
 | Nokia SR OS | Not supported | Structured output covers traceroute only; BGP results stay as text. |

@@ -24,6 +24,7 @@ PLATFORMS = (
     "nokia_sros",
     "extreme_exos",
     "extreme_vsp",
+    "hp_comware",
 )
 
 
