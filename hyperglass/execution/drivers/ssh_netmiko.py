@@ -160,11 +160,12 @@ def open_session(driver_kwargs: t.Dict[str, t.Any], disable_paging: bool) -> t.A
 
 
 def collect_commands(
-    connection, platform: str, queries, timeout: int, fallbacks=(), device=None
+    connection, platform: str, queries, timeout: int, fallbacks=(), device=None, trace=None
 ) -> tuple:
     """Read each command fully and always release the SSH session.
 
     When the device rejects a command that has a fallback, run the fallback instead.
+    An optional trace list records attempted commands and their replies for CLI diagnostics.
     """
     try:
         # VOSS runs traceroute only in privileged mode.
@@ -176,7 +177,11 @@ def collect_commands(
             timing = platform in netmiko_device_send_args and not ROUTE_PRINT.match(query)
             send = connection.send_command_timing if timing else connection.send_command
             args = netmiko_device_send_args[platform] if timing else {}
+            attempt = {"command": query, "fallback": False, "output": None}
+            if trace is not None:
+                trace.append(attempt)
             response = send(query, read_timeout=timeout, **args)
+            attempt["output"] = response
             fallback = fallbacks[index] if index < len(fallbacks) else None
             if fallback is not None and command_error((response,)):
                 log.bind(device=device, command=query, fallback=fallback).warning(
@@ -186,7 +191,11 @@ def collect_commands(
                     query,
                     fallback,
                 )
+                attempt = {"command": fallback, "fallback": True, "output": None}
+                if trace is not None:
+                    trace.append(attempt)
                 response = send(fallback, read_timeout=timeout, **args)
+                attempt["output"] = response
             responses.append(response)
         return tuple(responses)
     finally:
@@ -268,6 +277,7 @@ class NetmikoConnection(SSHConnection):
                     params.request_timeout,
                     fallbacks=getattr(self, "fallbacks", ()),
                     device=self.device.name,
+                    trace=getattr(self, "command_trace", None),
                 )
 
             except (NetMikoTimeoutException, ReadTimeout) as scrape_error:

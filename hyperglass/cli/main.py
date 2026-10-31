@@ -11,6 +11,7 @@ import typer
 
 # Local
 from .echo import echo
+from .onboard import onboard
 
 
 def _version(value: bool) -> None:
@@ -23,6 +24,7 @@ def _version(value: bool) -> None:
 
 
 cli = typer.Typer(name="Ultraglass", help="Ultraglass command line interface", no_args_is_help=True)
+cli.add_typer(onboard, name="onboard")
 
 
 def run():

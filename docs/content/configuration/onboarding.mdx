@@ -1,0 +1,75 @@
+---
+title: Device onboarding
+---
+
+# Device onboarding
+
+Use `hyperglass onboard` to create a device entry, test its commands, and review feature settings. Run it inside the application container or with the same `HYPERGLASS_APP_PATH` and Redis settings as your installation.
+
+```shell
+hyperglass onboard device
+hyperglass onboard test my-router
+hyperglass onboard check
+hyperglass onboard directive my-router
+```
+
+Each command accepts `--json`. Prompts go to standard error. Standard output contains one JSON report when this flag is set. Test failures and invalid configuration return exit code `1`. Disabled optional features from `check` do not count as test failures.
+
+## Create or update a device
+
+```shell
+hyperglass onboard device
+```
+
+Enter a new device name, or an existing device name or ID to update it. The prompts collect the address, SSH port, platform, credential, OS version, VRF, structured-output preference, and required command attributes such as source addresses. Enter `?` at the platform prompt to list platform keys. Unknown platform keys produce spelling suggestions. The interactive editor supports SSH platforms; configure HTTP devices directly in the devices file.
+
+Use a password or an existing private-key file. Passwords and key passphrases stay hidden. Updating a device keeps its existing credential unless you choose to replace it. Press Enter to keep the displayed OS version or VRF. Enter `-` to unset either field.
+
+The command validates the entry with the application's `Device` model. It asks before saving. Unrelated device fields and other device entries remain intact. YAML comments and formatting are rewritten. Existing `main`, `devices`, and `routers` keys are supported. Convert Python, JSON, or TOML devices files to YAML before using the editor.
+
+The command creates new files with owner-only permissions. Existing file permissions remain intact. It rejects a save if another process edits the file during the prompts. Credentials stay in `devices.yaml`; the command does not publish the candidate configuration to Redis or write query/session logs. Restart Ultraglass after saving.
+
+## Test device commands
+
+```shell
+hyperglass onboard test my-router \
+  --ipv4 1.1.1.1 \
+  --ipv6 2606:4700:4700::1111 \
+  --route-ipv4 1.1.1.0/24 \
+  --route-ipv6 2606:4700::/44 \
+  --as-path '13335$' \
+  --community 37195:302 \
+  --json > onboard-report.json
+```
+
+These are the default targets. Choose route, AS path, and community targets that exist in your router's table. Choose a narrow AS path expression when testing large routing tables.
+
+The command runs each built-in directive the device actually offers. It tests IPv4 and IPv6 rules separately. AS path and community directives can send both address-family commands in one query. VRF devices use their VRF commands. Disabled built-ins and custom directives are excluded.
+
+Each result includes planned commands, commands sent, device command errors, fallback use, and parsed field coverage. Version-selected fallback commands are identified separately from retries after a rejected command. The report includes populated and empty counts for communities, RPKI state, age, and next hop. RPKI state `3` has a separate unverified count. Traceroute reports addresses, RTT fields, ASN, and organisation coverage.
+
+Coverage describes the parsed result after configuration policy and model defaults. A community policy can remove communities. A parser can supply zero for an unavailable age. Async enrichment fields can remain empty because this command reports the immediate parser result. An empty field alone does not fail the command.
+
+A pass means the command returns usable output through the configured driver and parser. It does not mean a ping succeeds or a traceroute reaches its destination. Command rejection, connection failure, parser failure, no output, and empty structured tables produce failed results. Later queries still run. A device with no built-in directives returns an error. Connection and command timeouts follow `request_timeout` in `config.yaml`.
+
+Successful built-in reports omit full router output to keep large route tables out of the report. Failed command output remains available. Test reports contain router commands and network data; inspect them before attaching them to a public issue.
+
+## Check feature settings
+
+```shell
+hyperglass onboard check --json
+```
+
+The check reads configuration files afresh. It reports effective settings, including defaults, for structured BGP and traceroute, external RPKI, the selected RPKI backend, Redis cache reachability, IP enrichment, server DNS, and My IP. Device checks cover structured-capable platforms left in text mode and missing OS versions where offered commands have version filters.
+
+Self-hosted font detection examines the served UI under `static/ui`. A missing build is reported as unknown. A build that links Google Fonts is reported as off. Rebuild with `hyperglass build-ui` and working font-download access to self-host the fonts.
+
+Suggestions use dotted setting paths, such as `structured.rpki.mode: external`. Apply them as nested YAML in the relevant file. The command does not edit `config.yaml`. Structured output defaults to enabled in the current model, so an omitted `structured` block is not reported as disabled. Router-supplied RPKI remains valid when external RPKI is off. Redis reachability does not verify the external validator's health.
+
+## Scaffold a custom directive
+
+```shell
+hyperglass onboard directive my-router
+```
+
+Enter a new directive ID, a command template for the selected device's platform, an IP-prefix or regular-expression target rule, and a test target. The command validates the directive, runs it once, and shows its output. A successful test offers to save it in `directives.yaml`. Add the reported directive ID to the device's `directives` list and restart Ultraglass to expose it in the application.

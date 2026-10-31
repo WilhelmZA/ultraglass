@@ -3,6 +3,8 @@
 # Standard Library
 import typing as t
 from functools import lru_cache
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 # Project
 from hyperglass.exceptions.private import StateError
@@ -10,6 +12,19 @@ from hyperglass.exceptions.private import StateError
 # Local
 from .store import HyperglassState
 from ..settings import Settings
+
+_scoped_state: ContextVar[t.Any] = ContextVar("scoped_state", default=None)
+
+
+@contextmanager
+def scoped_state(state: t.Any) -> t.Iterator[None]:
+    """Use a process-local configuration for CLI probes without publishing it to Redis."""
+    token = _scoped_state.set(state)
+    try:
+        yield
+    finally:
+        _scoped_state.reset(token)
+
 
 if t.TYPE_CHECKING:
     # Project
@@ -79,4 +94,7 @@ def use_state(attr: t.Optional[str] = None) -> "HyperglassState":
     themselves, so it is recovered whether it is reached from here or read directly off
     a state instance.
     """
+    local = _scoped_state.get()
+    if local is not None:
+        return local if attr is None else getattr(local, attr)
     return _use_state(attr)

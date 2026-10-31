@@ -8,6 +8,12 @@ Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream histor
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- `hyperglass onboard` builds validated device entries, tests offered built-in commands with fallback and field-coverage reports, checks feature settings, and scaffolds custom directives. Commands support plain-text and JSON reports (#128).
+
 ## 3.5.0 - 2026-10-31
 
 This release adds four platforms and widens structured output. Extreme EXOS, Extreme VOSS, Community SONiC and MikroTik RouterOS 6 are supported natively, and Cisco IOS-XR and NX-OS gain opt-in structured BGP tables. Huawei VRP 8 devices such as the CE12800 and NE40E work in a VRF, including IPv6 ping and traceroute. Structured output is now opt-in on every platform. Structured results with RPKI validation finish in seconds instead of minutes. A documentation audit checked every configuration page against the code and found thirteen configuration keys that were accepted but ignored or broken, such as webhook headers and authentication, `enable: false` on syslog and webhook logging, HTTP device ports, `{mask}` in custom directives and the `docs.*` blocks. All of them now work. Queries with no matching routes return the "no matching results" warning on every platform.
