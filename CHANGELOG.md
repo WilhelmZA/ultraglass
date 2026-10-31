@@ -2,13 +2,31 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.5.0-rc.4**, a release candidate. The latest stable release is **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.5.0-rc.5**, a release candidate. The latest stable release is **3.4.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.5.0-rc.5 - 2026-10-31
+
+**This is a release candidate for 3.5.0.** It is published for testing and is not for production. Run it in a lab or staging deployment, not in front of users.
+
+Pull the release candidate by its version tag: `wilhelmza/ultraglass:3.5.0-rc.5` or `ghcr.io/wilhelmza/ultraglass:3.5.0-rc.5`. The `latest` tag stays on 3.4.0 on both registries.
+
+This candidate fixes the four findings of the rc.4 lab run (#194 to #197). Every rc.4 feature passed that run. No configuration key changes.
+
+These areas need tester attention. Each line names the configuration key that enables it:
+
+- Huawei VRP 8 in a VRF: device `platform: huawei_vrpv8` with `vrf` and `structured_output: true`; the VRF name in the result (#194).
+- Empty results: an AS path, community or route query with no match on any platform, with `structured_output: true` and `false`, shows the "no matching results" warning (#195, #196).
+- Everything listed for rc.4: webhooks (`logging.http`), HTTP devices (`platform: http`), custom directives with `{mask}` and `allow_*` rules, `docs.*`, custom `messages.*`, Huawei VRP 8, Cisco IOS-XR, NX-OS, Extreme EXOS and VOSS, SONiC and MikroTik RouterOS 6.
+
+Report problems as GitHub issues on [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass/issues). Put `3.5.0-rc.5` in the issue title.
+
+### Changed
+
+- Updated the Python package, runtime metadata and UI package to 3.5.0-rc.5.
 
 ### Fixed
 
