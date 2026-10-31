@@ -17,6 +17,7 @@ Run the commands below from `lab/`.
 - `ultraglass-lab.clab.yml`: main topology and container settings.
 - `ultraglass-platforms.clab.yml`: optional appliances and their probe.
 - `ultraglass-aoscx.clab.yml`: optional AOS-CX and GoBGP lab; see [setup](configs/aoscx/README.md).
+- `ultraglass-dell.clab.yml`: isolated OS9 and GoBGP acceptance lab; see [setup](configs/os9/README.md).
 - `ultraglass-cumulus.clab.yml`: isolated Cumulus VX and GoBGP VRF lab; see [setup and capture instructions](configs/cumulus/README.md).
 - `ultraglass-comware.clab.yml`: optional VSR1000 and GoBGP lab; see [setup](configs/comware/README.md).
 - `ultraglass-ocnos.clab.yml`: optional OcNOS and GoBGP lab; see [setup](configs/ocnos/README.md).

@@ -1,0 +1,10 @@
+BGP routing table entry for 3.3.3.0/24
+Paths: (1 available, table Default-IP-Routing-Table.)
+Not advertised to any peer
+Received from :
+ 1.1.1.2 (3.3.3.1)   Best
+  AS_PATH :
+  Next-Hop : 1.1.1.2, Cost : 0
+  Origin IGP, Metric  0, LocalPref  100, Weight  0, internal
+ Extended Communities :
+  DMZ-Link Bw: 2000 kbytes*

@@ -230,7 +230,8 @@ class Formatter:
         """Don't format targets by default."""
         if self.platform == "hp_comware" and self.query_type == "bgp_route":
             return self._comware_bgp_route(target)
-        if self.platform == "aruba_aoscx" and self.query_type == "bgp_route":
+        exact_prefix = ("aruba_aoscx", "dell_os10", "dell_force10")
+        if self.platform in exact_prefix and self.query_type == "bgp_route":
             return str(ipaddress.ip_network(target, strict=False))
         return target
 

@@ -48,6 +48,8 @@ SUPPORTED_STRUCTURED_OUTPUT = (
     "extreme_vsp",
     "sonic",
     "aruba_aoscx",
+    "dell_os10",
+    "dell_force10",
     "cumulus_linux",
     "hp_comware",
     "ipinfusion_ocnos",

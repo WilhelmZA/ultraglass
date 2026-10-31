@@ -1,0 +1,9 @@
+Type Ctrl-C to abort.
+
+-----------------------------------------------
+Tracing the route to 3ffe:501:ffff:100:201:e8ff:fe00:4c8b,
+64 hops max, 60 byte packets
+-----------------------------------------------
+Hops Hostname  Probe1   Probe2    Probe3
+ 1  3ffe:501:ffff:100:201:e8ff:fe00:4c8b
+             000.000 ms 000.000 ms 000.000 ms

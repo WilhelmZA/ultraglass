@@ -126,6 +126,18 @@ The REST API requires a login session cookie and, from 10.09, a CSRF token. Nati
 
 Tests use attributed command-reference excerpts and explicitly synthetic IPv6/multipath cases. Live VM validation remains pending. See `lab/configs/aoscx/README.md` for the optional GoBGP lab.
 
+### Dell OS9 and SmartFabric OS10
+
+Use `dell_force10` for OS9/FTOS and `dell_os10` for SmartFabric OS10. Both provide dual-stack exact-prefix BGP routes, standard-community queries, ping and traceroute. Address-only BGP queries become `/32` or `/128` host prefixes. Named-VRF BGP and ping forms exist on both platforms. OS10 also supports named-VRF traceroute. OS9 traceroute VRFs are documented only for E-Series hardware, so its built-in traceroute is omitted on VRF devices.
+
+OS9 offers dual-stack AS-path regular-expression searches. OS10 does not support arbitrary `regexp` queries; use custom directives with configured AS-path filter lists. OS10 standard-community queries require 10.5.2.1 or later.
+
+OS10 uses the documented CLI and `Received from` detail format, not FRR shell commands or JSON. Both platforms parse numbered-next-hop BGP details when `structured_output: true`. Unnumbered next hops, AS sets, confederations and incomplete replies remain text. Community and AS-path summary results remain text. Route age and router RPKI state remain unknown.
+
+Set `attrs.source4` and `attrs.source6` for OS10 diagnostics. OS9 diagnostics select their source from the routing table. OS9's fixed traceroute timing may need a longer query timeout. Its parser joins wrapped IPv6 RTT lines and keeps the original raw output.
+
+Parser fixtures are attributed vendor-reference examples. See `lab/configs/os9/README.md` for the isolated GoBGP lab and pending live acceptance.
+
 ### Structured output
 
 Structured output is opt-in on every platform. Set `structured_output: true` on a device for structured BGP results. A device without it returns text.
@@ -138,6 +150,7 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Route results read route age only when the router prints the update time in UTC. Router RPKI state is read when the router validates origins. IPv6 route queries need a prefix, because IOS has no longest-match BGP lookup for an IPv6 address. |
 | Cisco IOS-XR | `show bgp` text | AS-path and community summary results omit communities. Route age remains unknown. Router RPKI state is read when the router validates origins. |
 | Cisco NX-OS | `show bgp` text | AS-path and community summary results omit communities. Route age and router RPKI state remain unknown. IPv6 route queries need a prefix, because NX-OS has no longest-match BGP lookup for an IPv6 address. |
+| Dell OS9 / SmartFabric OS10 | `show ip bgp ... <prefix>` detail text | Summary results stay text. Unnumbered next hops, AS sets and confederations stay text. Age and router RPKI state remain unknown. |
 | Extreme EXOS | `show bgp routes detail` text | Route age, originator and router RPKI state remain unknown. EXOS does not print large communities. |
 | Extreme VOSS | Not supported | VOSS marks no best path, so BGP results stay as text. |
 | FRRouting | `show bgp ... json` through `vtysh` | AS-path results omit communities and route age, because `regexp` has no JSON detail form. Router RPKI state remains unknown. |

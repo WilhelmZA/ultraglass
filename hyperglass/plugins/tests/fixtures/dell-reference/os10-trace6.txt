@@ -1,0 +1,2 @@
+traceroute to 20::1 (20::1), 30 hops max, 80 byte packets
+ 1  20::1 (20::1)  2.622 ms  2.649 ms  2.964 ms

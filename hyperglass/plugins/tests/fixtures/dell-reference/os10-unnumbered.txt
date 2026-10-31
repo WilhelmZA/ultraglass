@@ -1,0 +1,11 @@
+BGP routing table entry for 31.1.1.0/24
+Paths: (1 available, table Default-IP-Routing-Table.)
+
+Received from :
+fe80::3617:ebff:fef1:dc5e via ethernet1/1/1 (192.0.2.1) Best
+
+AS_PATH :
+Next-Hop :ethernet 1/1/1 , Cost : 0
+
+Origin INCOMPLETE, Metric 0, LocalPref 100, Weight 32768,
+Route-reflector origin : 0.0.0.0

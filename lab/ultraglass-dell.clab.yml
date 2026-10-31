@@ -1,0 +1,35 @@
+# Isolated OS9 acceptance topology using the existing local FTOS image.
+name: ultraglass-dell
+mgmt:
+  network: ultraglass-dell-mgmt
+  ipv4-subnet: 192.168.249.0/24
+topology:
+  nodes:
+    core:
+      kind: linux
+      image: ultraglass-lab/core:latest
+      mgmt-ipv4: 192.168.249.10
+      entrypoint: gobgpd
+      cmd: -f /etc/gobgp/gobgpd.toml -t toml
+      binds:
+        - configs/os9/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro
+      exec:
+        - ip addr add 10.251.9.2/30 dev eth1
+        - ip addr add fd00:251:9::2/64 dev eth1
+        - ip addr add 1.1.1.1/32 dev lo
+        - ip addr add 2606:4700::1111/128 dev lo
+    os9:
+      kind: generic_vm
+      image: ultraglass-lab/dell_os9:9.13.0.0
+      mgmt-ipv4: 192.168.249.12
+      memory: 2GiB
+      cpu: 1
+      binds:
+        - configs/os9/startup.cfg:/config/startup.cfg:ro
+      credentials:
+        username: admin
+        password: Lab-Router9
+      env:
+        QEMU_MEMORY: "1024"
+  links:
+    - endpoints: ["core:eth1", "os9:eth1"]

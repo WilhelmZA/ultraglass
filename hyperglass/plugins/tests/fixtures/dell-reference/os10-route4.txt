@@ -1,0 +1,11 @@
+BGP routing table entry for 192.0.2.0/24
+Paths: (1 available, table Default-IP-Routing-Table.)
+
+Received from :
+192.0.2.3(192.0.2.33) Best
+
+AS_PATH : 100
+Next-Hop : 192.0.2.3, Cost : 0
+
+Origin INCOMPLETE, Metric 0, LocalPref 100, Weight  0, confed-external
+Route-reflector origin : 0.0.0.0

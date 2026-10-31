@@ -27,6 +27,7 @@ PLATFORMS = (
     "hp_comware",
     "ipinfusion_ocnos",
     "aruba_aoscx",
+    "dell_os10",
 )
 
 
