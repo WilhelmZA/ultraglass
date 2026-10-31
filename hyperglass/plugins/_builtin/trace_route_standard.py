@@ -28,6 +28,8 @@ PLATFORMS = (
     "ipinfusion_ocnos",
     "aruba_aoscx",
     "dell_os10",
+    "fortinet",
+    "paloalto_panos",
 )
 
 

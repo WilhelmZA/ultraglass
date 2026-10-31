@@ -24,7 +24,8 @@ COMMAND_ERROR = re.compile(
     # Huawei VRP: `Error: Too many parameters ...`, `Error[4]: ...` on the NE40E (#155).
     r"|Error(?:\[\d+\])?:\s*(?:Wrong parameter|Unrecognized command|Incomplete command"
     r"|Too many parameters)"
-    r"|unknown argument:|failure:\s|bad command name\b)",
+    r"|unknown argument:|failure:\s|bad command name\b"
+    r"|Command fail\. Return code|command parse error before|Invalid syntax\.)",
     re.IGNORECASE | re.MULTILINE,
 )
 

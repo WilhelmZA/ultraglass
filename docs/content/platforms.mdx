@@ -138,6 +138,16 @@ Set `attrs.source4` and `attrs.source6` for OS10 diagnostics. OS9 diagnostics se
 
 Parser fixtures are attributed vendor-reference examples. See `lab/configs/os9/README.md` for the isolated GoBGP lab and pending live acceptance.
 
+### FortiGate and PAN-OS
+
+Use `fortinet` for FortiGate and `paloalto_panos` for PAN-OS. Built-ins provide IPv4/IPv6 BGP prefix queries, ping and traceroute. Structured BGP parsers require complete detail replies. AS sets, confederations and unfamiliar output remain text. Age and router RPKI state remain unknown. Traceroute uses the standard numbered-hop parser.
+
+FortiGate queries run in the account's current VDOM. Use a VDOM-scoped account. Explicit `vrf` is not supported by these built-ins. Diagnostic sequences reset options, set five ping probes and source addresses, then reset options after completion. A rejected setup command stops the sequence before probes run. Every query opens and closes its own SSH session. IPv6 traceroute uses `execute tracert6` and automatic source selection; IPv4 traceroute and both ping families require `attrs.source4` or `attrs.source6`.
+
+PAN-OS support targets the classic routing engine. Set `vrf` to its virtual-router name for BGP; the default is `default`. Address-only queries become `/32` or `/128` prefixes. Diagnostics use explicit `attrs.source4` and `attrs.source6` addresses and are omitted on VRF devices. The advanced routing engine uses different commands and requires custom directives.
+
+AS-path and community searches remain pending for both platforms. Tests use attributed published BGP examples and synthetic IPv6/traceroute cases. Live licensed-VM validation remains pending. See `lab/configs/firewalls/README.md`.
+
 ### Structured output
 
 Structured output is opt-in on every platform. Set `structured_output: true` on a device for structured BGP results. A device without it returns text.
@@ -146,6 +156,8 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | :------- | :-------------------- | :---------- |
 | Arista EOS | `show ip bgp` / `show ipv6 bgp` JSON; `show bgp ... community ... detail` JSON for communities | AS-path results omit communities. Router RPKI state is read when the router validates origins. |
 | Aruba AOS-CX | `show bgp [vrf ...] ipv4/ipv6 unicast <prefix>` detail text | Community summaries stay text. AS-path searches are not offered. Age and router RPKI state remain unknown. Live captures pending. |
+| Fortinet FortiGate | `get router info[6] bgp network <target>` detail text | One routing context per reply. AS sets and confederations stay text. Live captures pending. |
+| Palo Alto PAN-OS | `show routing protocol bgp loc-rib-detail prefix ...` | Classic virtual routers only. Peer IP/router ID, age and router RPKI state are unknown. Live captures pending. |
 | BIRD | `show route all` text | Route age and router RPKI state remain unknown. |
 | Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Route results read route age only when the router prints the update time in UTC. Router RPKI state is read when the router validates origins. IPv6 route queries need a prefix, because IOS has no longest-match BGP lookup for an IPv6 address. |
 | Cisco IOS-XR | `show bgp` text | AS-path and community summary results omit communities. Route age remains unknown. Router RPKI state is read when the router validates origins. |

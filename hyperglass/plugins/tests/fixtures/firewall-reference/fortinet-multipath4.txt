@@ -1,0 +1,13 @@
+BGP routing table entry for 0.0.0.0/0
+Paths: (2 available, best #2, table Default-IP-Routing-Table)
+  Advertised to non peer-group peers:
+   13.13.13.6
+  222
+    13.13.13.6 from 13.13.13.6 (6.6.6.6)
+      Origin incomplete metric 0, localpref 100, valid, external
+      Last update: Wed May 20 12:06:00 2020
+
+  111
+    12.12.12.12 from 12.12.12.12 (1.1.1.1)
+      Origin incomplete metric 0, localpref 100, weight 10, valid, external, best
+      Last update: Wed May 20 12:05:58 2020

@@ -1,0 +1,37 @@
+# Supply locally built, licensed vendor images. No images or licences are included.
+name: ultraglass-firewalls
+mgmt:
+  network: ultraglass-firewalls-mgmt
+  ipv4-subnet: 192.168.248.0/24
+topology:
+  nodes:
+    core:
+      kind: linux
+      image: ultraglass-lab/core:latest
+      mgmt-ipv4: 192.168.248.10
+      entrypoint: gobgpd
+      cmd: -f /etc/gobgp/gobgpd.toml -t toml
+      binds:
+        - configs/firewalls/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro
+      exec:
+        - ip addr add 10.248.1.0/31 dev eth1
+        - ip addr add 2001:db8:248:1::/127 dev eth1
+        - ip addr add 10.248.2.0/31 dev eth2
+        - ip addr add 2001:db8:248:2::/127 dev eth2
+        - ip addr add 198.51.100.1/32 dev lo
+        - ip addr add 2001:db8:100::1/128 dev lo
+    fortigate:
+      kind: fortinet_fortigate
+      image: ${FORTIGATE_IMAGE}
+      mgmt-ipv4: 192.168.248.11
+      memory: 3GiB
+      cpu: 2
+    panos:
+      kind: paloalto_panos
+      image: ${PANOS_IMAGE}
+      mgmt-ipv4: 192.168.248.12
+      memory: 7GiB
+      cpu: 2
+  links:
+    - endpoints: ["core:eth1", "fortigate:eth1"]
+    - endpoints: ["core:eth2", "panos:eth1"]

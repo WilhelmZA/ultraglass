@@ -1,0 +1,9 @@
+VRF 0 BGP routing table entry for 4.5.6.0/24
+Paths: (1 available, best 1, table Default-IP-Routing-Table)
+  Advertised to non peer-group peers:
+   10.9.0.210
+  Original VRF 0
+  Local
+    10.9.15.254 from 0.0.0.0 (10.9.0.187)
+      Origin incomplete, tag 1122, localpref 100, weight 32768, valid, sourced, best
+      Last update: Thu Jan 11 09:29:14 2024

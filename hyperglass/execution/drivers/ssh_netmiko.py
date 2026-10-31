@@ -197,6 +197,9 @@ def collect_commands(
                 response = send(fallback, read_timeout=timeout, **args)
                 attempt["output"] = response
             responses.append(response)
+            # FortiOS diagnostic setup must succeed before sending probes.
+            if platform == "fortinet" and command_error((response,)):
+                break
         return tuple(responses)
     finally:
         connection.disconnect()

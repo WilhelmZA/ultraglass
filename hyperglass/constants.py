@@ -50,6 +50,8 @@ SUPPORTED_STRUCTURED_OUTPUT = (
     "aruba_aoscx",
     "dell_os10",
     "dell_force10",
+    "fortinet",
+    "paloalto_panos",
     "cumulus_linux",
     "hp_comware",
     "ipinfusion_ocnos",

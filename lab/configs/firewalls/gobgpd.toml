@@ -1,0 +1,31 @@
+[global.config]
+  as = 65000
+  router-id = "10.248.0.1"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.248.1.1"
+    peer-as = 65016
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "2001:db8:248:1::1"
+    peer-as = 65016
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "10.248.2.1"
+    peer-as = 65017
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv4-unicast"
+[[neighbors]]
+  [neighbors.config]
+    neighbor-address = "2001:db8:248:2::1"
+    peer-as = 65017
+  [[neighbors.afi-safis]]
+    [neighbors.afi-safis.config]
+      afi-safi-name = "ipv6-unicast"

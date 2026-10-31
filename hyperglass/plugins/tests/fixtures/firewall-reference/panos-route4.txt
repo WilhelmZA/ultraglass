@@ -1,0 +1,31 @@
+VIRTUAL ROUTER: default (id 1)
+  ==========
+  Prefix:                        10.10.10.0/24 *
+  Nexthop:                       192.168.122.168
+  Received from:                 Peer BGP_AS100 (id 5)
+  Originator ID:                 0.0.0.0
+  AS Path:                       100
+  Origin:                        IGP
+  MED:                           0
+  Local Preference:              100
+  Atomic aggregate:              no
+  Aggregator AS:                 0
+  Aggregator ID:                 0.0.0.0
+  Weight:                        0
+  Flap:                          value 0.00, count 0
+  Community:                     65535:0
+  ----------
+  Prefix:                        10.10.10.0/24
+  Nexthop:                       192.168.122.103
+  Originator ID:                 0.0.0.0
+  AS Path:                       200,100
+  Origin:                        IGP
+  MED:                           0
+  Local Preference:              100
+  Atomic aggregate:              no
+  Aggregator AS:                 0
+  Aggregator ID:                 0.0.0.0
+  Weight:                        0
+  Flap:                          value 0.00, count 0
+
+total routes shown: 2
