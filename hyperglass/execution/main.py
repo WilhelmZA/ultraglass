@@ -79,14 +79,15 @@ async def execute(query: "Query") -> Union["OutputDataModel", str]:
         output = await driver.response(response)
 
         if is_series(output):
-            if len(output) == 0:
+            # Text responses can be whitespace only, such as an FRR filter with no match.
+            if not any(str(item).strip() for item in output):
                 raise ResponseEmpty(query=query)
             output = "\n\n".join(output)
 
         elif isinstance(output, str):
-            # If the output is a string (not structured) and is empty,
+            # If the output is a string (not structured) and is blank,
             # produce an error.
-            if output == "" or output == "\n":
+            if not output.strip():
                 raise ResponseEmpty(query=query)
 
         elif isinstance(output, Dict):

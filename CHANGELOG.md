@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Huawei structured BGP results for a VRF location now report the device's VRF instead of `default` (#194).
 - Arista EOS and Huawei VRP structured AS path, community and route queries with no matching routes now return the "no matching results" warning, as the other platforms do, instead of `success` with an empty table (#196).
+- Text queries whose device response is blank, such as an FRR AS path or community filter with no match, now return the "no matching results" warning instead of `success` with an empty panel (#195).
 
 ## 3.5.0-rc.4 - 2026-10-31
 
