@@ -109,7 +109,7 @@ def _process_vrf(outputs, platform: str = "frr", vrf: str = "LAB"):
     return plugin.process(output=tuple(outputs), query=query)
 
 
-@pytest.mark.parametrize("platform", ("frr", "vyos", "sonic"))
+@pytest.mark.parametrize("platform", ("frr", "vyos", "sonic", "cumulus_linux"))
 def test_frr_vrf_route_uses_device_vrf(platform):
     # `show bgp vrf LAB ipv4 unicast <prefix> json` carries no VRF name (#134).
     result = _process_vrf([(FIXTURES / "frr_vrf_route.json").read_text()], platform=platform)
@@ -118,7 +118,7 @@ def test_frr_vrf_route_uses_device_vrf(platform):
     assert result.vrf == "LAB"
 
 
-@pytest.mark.parametrize("platform", ("frr", "vyos", "sonic"))
+@pytest.mark.parametrize("platform", ("frr", "vyos", "sonic", "cumulus_linux"))
 def test_frr_vrf_aspath_uses_vrf_name_from_output(platform):
     # Regexp and community output carries `vrfName`, which wins over the device setting.
     outputs = [(FIXTURES / f"frr_vrf_aspath{family}.json").read_text() for family in (4, 6)]

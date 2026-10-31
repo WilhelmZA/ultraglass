@@ -76,6 +76,29 @@ Use `extreme_exos` for ExtremeXOS and `extreme_vsp` for VOSS (VSP and Fabric Eng
 
 Use `sonic` for community SONiC. It connects as a Linux shell and runs the FRRouting commands through `vtysh`, so the login user must be able to run `vtysh`. The default `admin` user can. Dell Enterprise SONiC uses a different CLI; configure it as `dell_sonic` with custom directives.
 
+### NVIDIA Cumulus Linux
+
+Use `cumulus_linux` for the Cumulus Linux shell. It connects with Netmiko's `cumulus_linux` driver. Built-ins cover IPv4 and IPv6 BGP route, AS path, community, ping, and traceroute queries, including named VRFs.
+
+BGP commands use `sudo -n vtysh -c 'show bgp ...'`. Ping and traceroute use `sudo -n ip vrf exec default` or the configured VRF. This selects the data-plane routing context even when SSH enters the management VRF. Set `attrs.source4` and `attrs.source6` to addresses assigned in that context.
+
+The login account needs passwordless sudo for these commands. `-n` makes missing sudo permission fail instead of waiting for a password. Structured output uses the shared FRR JSON and Linux traceroute parsers. AS-path JSON omits communities and route age. The current tests use existing FRR captures; Cumulus VX live captures remain pending. The optional lab topology is documented in `lab/configs/cumulus/README.md`.
+
+```yaml
+devices:
+  - name: cumulus-leaf
+    address: 192.0.2.10
+    platform: cumulus_linux
+    credential:
+      username: lookingglass
+      key: /etc/hyperglass/keys/cumulus
+    structured_output: true
+    # vrf: BLUE
+    attrs:
+      source4: 192.0.2.1
+      source6: 2001:db8::1
+```
+
 ### Structured output
 
 Structured output is opt-in on every platform. Set `structured_output: true` on a device for structured BGP results. A device without it returns text.
@@ -94,17 +117,18 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | Juniper Junos | `show route ... detail \| display xml` | Route queries return the best path only. Router RPKI state is read when the router validates origins. |
 | MikroTik RouterOS | `print detail` text (RouterOS 6 and 7) | Route age remains unknown. Router RPKI state is read when the route detail carries an `rpki` value. |
 | Nokia SR OS | Not supported | Structured output covers traceroute only; BGP results stay as text. |
+| NVIDIA Cumulus Linux | FRR JSON through `sudo -n vtysh` | Shared FRR parser; Cumulus VX live captures pending. AS-path results omit communities and route age. Router RPKI state remains unknown. |
 | OpenBGPD | `bgpctl -j show rib detail` JSON | Router RPKI state comes from daemon origin validation. |
 | SONiC | FRR JSON through `vtysh` | AS-path results omit communities and route age. Router RPKI state remains unknown. |
 | TNSR | Not supported | Structured output covers traceroute only; BGP results stay as text. |
 | VyOS 1.4+ | FRR JSON through `vtysh` | AS-path results omit communities and route age. Router RPKI state remains unknown. |
 | VyOS 1.3 | Not supported | Use text BGP results, even with structured traceroute enabled. |
 
-Structured traceroute covers every built-in platform. FRRouting and SONiC, Huawei VRP and MikroTik have their own traceroute parsers. Arista EOS, Juniper Junos, Cisco IOS, IOS-XR and NX-OS, Nokia SR OS, BIRD, OpenBGPD, VyOS 1.4+ and 1.3, TNSR, and Extreme EXOS and VOSS use the standard numbered-hop parser. It needs `structured_output: true` on the device, like structured BGP. Set `structured.enable_for_traceroute: false` to return text on every device. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation.
+Structured traceroute covers every built-in platform. FRRouting, SONiC and Cumulus Linux share the FRR traceroute parser. Huawei VRP and MikroTik have their own traceroute parsers. Arista EOS, Juniper Junos, Cisco IOS, IOS-XR and NX-OS, Nokia SR OS, BIRD, OpenBGPD, VyOS 1.4+ and 1.3, TNSR, and Extreme EXOS and VOSS use the standard numbered-hop parser. It needs `structured_output: true` on the device, like structured BGP. Set `structured.enable_for_traceroute: false` to return text on every device. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation.
 
 ### VRF queries
 
-Built-in VRF forms support EOS, Extreme EXOS (`vr`) and VOSS, FRRouting, Huawei VRP, MikroTik RouterOS 7, SONiC, and VyOS 1.4+. FRRouting and SONiC expose only BGP queries when `vrf` is set. See [device VRF configuration](/configuration/devices.mdx#vrf-queries).
+Built-in VRF forms support EOS, Extreme EXOS (`vr`) and VOSS, FRRouting, Huawei VRP, MikroTik RouterOS 7, NVIDIA Cumulus Linux, SONiC, and VyOS 1.4+. FRRouting and SONiC expose only BGP queries when `vrf` is set. Cumulus Linux also supports ping and traceroute in a VRF. See [device VRF configuration](/configuration/devices.mdx#vrf-queries).
 
 ## Other Platforms
 

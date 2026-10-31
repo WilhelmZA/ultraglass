@@ -1,0 +1,32 @@
+# Optional small-table lab. Requires a locally supplied Cumulus VX image.
+name: ultraglass-cumulus
+
+mgmt:
+  network: ultraglass-cumulus-mgmt
+  ipv4-subnet: 192.168.251.0/24
+
+topology:
+  nodes:
+    core:
+      kind: linux
+      image: ultraglass-lab/core:latest
+      mgmt-ipv4: 192.168.251.10
+      binds:
+        - configs/cumulus/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro
+      exec:
+        - ip addr add 10.252.1.0/31 dev eth1
+        - ip addr add 2001:db8:252:1::/127 dev eth1
+        - ip addr add 10.252.2.0/31 dev eth2
+        - ip addr add 2001:db8:252:2::/127 dev eth2
+        - ip addr add 198.51.100.1/32 dev lo
+        - ip addr add 2001:db8:100::1/128 dev lo
+    cumulus:
+      kind: generic_vm
+      image: ${CUMULUS_IMAGE:=vrnetlab/nvidia_cumulus-vx:5.16.1}
+      mgmt-ipv4: 192.168.251.12
+      memory: 5GiB
+      cpu: 2
+
+  links:
+    - endpoints: ["core:eth1", "cumulus:eth1"]
+    - endpoints: ["core:eth2", "cumulus:eth2"]

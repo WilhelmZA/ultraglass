@@ -130,7 +130,7 @@ class Construct:
         # Values come only from the directive's configured choices. Quote them where a shell
         # parses the command.
         selected = getattr(self.query, "query_variables", None) or {}
-        shell = self.device.platform in (*LINUX_PLATFORMS, "vyos", "vyos_1_3")
+        shell = self.device.platform in (*LINUX_PLATFORMS, "vyos", "vyos_1_3", "cumulus_linux")
         values = {
             name: variable.render(selected.get(name), quote=shell)
             for name, variable in variables.items()
@@ -142,6 +142,7 @@ class Construct:
             "frr",
             "openbgpd",
             "sonic",
+            "cumulus_linux",
             "vyos",
             "vyos_1_3",
         ):

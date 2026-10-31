@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - `hyperglass onboard` builds validated device entries, tests offered built-in commands with fallback and field-coverage reports, checks feature settings, and scaffolds custom directives. Commands support plain-text and JSON reports (#128).
+- NVIDIA Cumulus Linux built-in BGP, ping, and traceroute commands, including VRFs, FRR structured parsing, and an optional small-table lab topology (#77). Cumulus VX live captures remain pending.
 
 ## 3.5.0 - 2026-10-31
 

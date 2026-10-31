@@ -18,6 +18,7 @@ COMMAND_ERROR = re.compile(
     r"|Error|Permission denied)"
     r"|(?:birdc?:\s*)?syntax error\b"
     r"|vtysh_connect\([^\n]*Permission denied"
+    r"|sudo:\s[^\n]*(?:password is required|not allowed|not in the sudoers|command not found)"
     r"|(?:[\w/.-]+:\s*)?(?:Permission denied|Operation not permitted)\s*$"
     r"|(?:traceroute|ping|bgpctl|birdc):[^\n]*(?:not permitted|Permission denied|invalid|unknown)"
     # Huawei VRP: `Error: Too many parameters ...`, `Error[4]: ...` on the NE40E (#155).

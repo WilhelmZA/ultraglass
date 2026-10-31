@@ -1,0 +1,20 @@
+devices:
+  - name: lab-cumulus
+    address: 192.168.251.12
+    platform: cumulus_linux
+    credential: &credential
+      username: cumulus
+      password: Clab123!
+    structured_output: true
+    attrs:
+      source4: 10.252.1.1
+      source6: 2001:db8:252:1::1
+  - name: lab-cumulus-vrf
+    address: 192.168.251.12
+    platform: cumulus_linux
+    credential: *credential
+    vrf: LAB
+    structured_output: true
+    attrs:
+      source4: 10.252.2.1
+      source6: 2001:db8:252:2::1

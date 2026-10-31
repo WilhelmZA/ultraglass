@@ -295,10 +295,11 @@ class TraceroutePluginFrr(OutputPlugin):
     """Parse FRR traceroute output."""
 
     _hyperglass_builtin: bool = PrivateAttr(True)
-    platforms: t.Sequence[str] = ("frr", "sonic")
+    platforms: t.Sequence[str] = ("frr", "sonic", "cumulus_linux")
     directives: t.Sequence[str] = (
         "__hyperglass_frr_traceroute__",
         "__hyperglass_sonic_traceroute__",
+        "__hyperglass_cumulus_linux_traceroute__",
     )
     common: bool = False
 
