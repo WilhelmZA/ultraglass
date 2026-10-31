@@ -207,9 +207,10 @@ The structured application is at `http://127.0.0.1:8001`; the text application i
 python3 scripts/smoke-test.py lab-iosv
 python3 scripts/smoke-test.py --text lab-iosv
 python3 -m pytest tests/ -k frr -v
+ULTRAGLASS_LAB_TEXT=1 ULTRAGLASS_LAB_API=http://127.0.0.1:8002/api python3 -m pytest tests/ -k frr -v
 ```
 
-Select devices that are running. The integration suite skips unavailable devices. Set `ULTRAGLASS_LAB_API` to choose a different API endpoint.
+Select devices that are running. The integration suite skips unavailable devices. Set `ULTRAGLASS_LAB_API` to choose a different API endpoint. Set `ULTRAGLASS_LAB_TEXT=1` to run the suite against the text application: each `_table` query id becomes its text id, and each structured case expects text.
 
 Use `scripts/verify-issues.py` for mixed-device API checks and `scripts/verify-browser.py` for browser checks. Pass a local `data/` directory through `--output`. Browser checks require Playwright and Chromium.
 

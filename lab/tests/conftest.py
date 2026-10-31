@@ -17,6 +17,16 @@ import urllib.request
 import pytest
 
 API = os.environ.get("ULTRAGLASS_LAB_API", "http://127.0.0.1:8001/api")
+# Run against the text instance: ULTRAGLASS_LAB_TEXT=1 ULTRAGLASS_LAB_API=http://127.0.0.1:8002/api
+TEXT = os.environ.get("ULTRAGLASS_LAB_TEXT", "").lower() in ("1", "true", "yes")
+
+# Locations whose container name is not the location id without `lab-` and `-vrf`.
+NODES = {"lab-huawei-vrpv8": "huawei", "lab-huawei-vrpv8-vrf": "huawei"}
+
+
+def node(device):
+    """Return the containerlab node that serves a location."""
+    return NODES.get(device) or device.removeprefix("lab-").removesuffix("-vrf")
 
 
 def _get(path, timeout=10):
@@ -42,8 +52,8 @@ def running_devices():
         ["docker", "ps", "--format", "{{.Names}}"], capture_output=True, text=True
     ).stdout
     up = {n.replace("clab-ultraglass-", "") for n in out.split() if n.startswith("clab-ultraglass-")}
-    # device id lab-frr maps to container clab-ultraglass-frr
-    return {d for d in known if d.replace("lab-", "") in up}
+    # Location lab-frr and lab-frr-vrf map to container clab-ultraglass-frr.
+    return {d for d in known if node(d) in up}
 
 
 def query(device, query_type, target, timeout=320):
