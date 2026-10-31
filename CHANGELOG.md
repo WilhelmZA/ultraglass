@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - HPE Comware 7 exact-prefix BGP, ping, and traceroute built-ins with VRF support, detail parsing, and standard traceroute parsing (#79). VSR1000 live validation remains pending.
+- IP Infusion OcNOS BGP and diagnostic built-ins with structured route and traceroute parsing (#78). Live captures remain pending.
 
 - `hyperglass onboard` builds validated device entries, tests offered built-in commands with fallback and field-coverage reports, checks feature settings, and scaffolds custom directives. Commands support plain-text and JSON reports (#128).
 - NVIDIA Cumulus Linux built-in BGP, ping, and traceroute commands, including VRFs, FRR structured parsing, and an optional small-table lab topology (#77). Cumulus VX live captures remain pending.

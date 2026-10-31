@@ -1,0 +1,10 @@
+BGP routing table entry for 6666::/64
+Paths: (1 available, best #1, table Default-IP-Routing-Table)
+  Advertised to peer-groups:
+  Book-v6
+  Local
+    :: from :: (102.67.98.95)
+      Origin incomplete,metric 0, localpref 100, weight 32768
+      valid, sourced, best, source safi: 0
+      Community: 37721:2000
+      Last update: Thu Feb  4 09:00:50 2021

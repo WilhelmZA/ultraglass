@@ -108,6 +108,13 @@ devices:
       source4: 192.0.2.1
       source6: 2001:db8::1
 ```
+### IP Infusion OcNOS
+
+Use `ipinfusion_ocnos` for OcNOS 6.5+ through its Netmiko driver. Native commands offer IPv4/IPv6 routes, AS-path searches, IPv4 standard-community searches, ping, and traceroute. Ping uses `count 5`; older releases without this option need custom directives. The driver enters privileged mode; configure `driver_config.secret` if the device requires an enable password.
+
+OcNOS detailed route output supports structured parsing. AS-path and community summaries remain text. Traceroute uses the standard numbered-hop parser. Ping and traceroute support named VRFs; built-in BGP queries are omitted on VRF devices until dual-stack VRF forms have live validation. Diagnostics select their source from the routing table. Current tests use attributed vendor-reference examples, not live OcNOS captures.
+
+The optional GoBGP/OcNOS lab is described in `lab/configs/ocnos/README.md`.
 
 ### Structured output
 
@@ -125,6 +132,7 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | FRRouting | `show bgp ... json` through `vtysh` | AS-path results omit communities and route age, because `regexp` has no JSON detail form. Router RPKI state remains unknown. |
 | Huawei VRP | `display bgp routing-table` detail text for routes, brief tables for AS path and community | AS-path brief results omit communities. Community brief results omit the AS path, so RPKI state and AS organisations do not apply to them. Brief results omit route age. Router RPKI state remains unknown. |
 | HPE Comware 7 | `display bgp routing-table ipv4/ipv6 unicast <address> <length>` detail text | Exact prefixes only. AS-path and community searches require custom directives for configured lists. Age and router RPKI state remain unknown. Live captures pending. |
+| IP Infusion OcNOS | `show bgp ipv4/ipv6 unicast <prefix>` detail text | AS-path and community summaries stay text. Age and router RPKI state remain unknown. Live captures pending. |
 | Juniper Junos | `show route ... detail \| display xml` | Route queries return the best path only. Router RPKI state is read when the router validates origins. |
 | MikroTik RouterOS | `print detail` text (RouterOS 6 and 7) | Route age remains unknown. Router RPKI state is read when the route detail carries an `rpki` value. |
 | Nokia SR OS | Not supported | Structured output covers traceroute only; BGP results stay as text. |

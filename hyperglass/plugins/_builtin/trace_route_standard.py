@@ -25,6 +25,7 @@ PLATFORMS = (
     "extreme_exos",
     "extreme_vsp",
     "hp_comware",
+    "ipinfusion_ocnos",
 )
 
 

@@ -168,8 +168,8 @@ def collect_commands(
     An optional trace list records attempted commands and their replies for CLI diagnostics.
     """
     try:
-        # VOSS runs traceroute only in privileged mode.
-        if platform in ("arista_eos", "extreme_vsp"):
+        # These platforms require privileged mode for built-in diagnostics.
+        if platform in ("arista_eos", "extreme_vsp", "ipinfusion_ocnos"):
             connection.enable()
         responses = []
         for index, query in enumerate(queries):

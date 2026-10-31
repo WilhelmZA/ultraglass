@@ -1,0 +1,12 @@
+BGP routing table entry for 22.22.22.22/32
+Paths: (2 available, best #1, table Default-IP-Routing)
+  Not advertised to any peer
+  Local
+    11.11.11.2 from 11.11.11.2 (2.2.2.2)
+      Origin IGP, metric 0, localpref 100, valid, internal, best
+      Last update: Fri Feb 16 09:46:54 2001
+
+  Local
+    11.11.12.2 from 11.11.12.2 (2.2.2.2)
+      Origin IGP, metric 0, localpref 100, valid, internal
+      Last update: Fri Feb 16 09:46:52 2001

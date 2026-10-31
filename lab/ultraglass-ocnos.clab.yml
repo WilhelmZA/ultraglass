@@ -1,0 +1,26 @@
+# Supply a locally built, licensed OcNOS 6.5+ image through OCNOS_IMAGE.
+name: ultraglass-ocnos
+mgmt:
+  network: ultraglass-ocnos-mgmt
+  ipv4-subnet: 192.168.253.0/24
+topology:
+  nodes:
+    core:
+      kind: linux
+      image: ultraglass-lab/core:latest
+      mgmt-ipv4: 192.168.253.10
+      binds:
+        - configs/ocnos/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro
+      exec:
+        - ip addr add 10.254.1.0/31 dev eth1
+        - ip addr add 2001:db8:254:1::/127 dev eth1
+        - ip addr add 198.51.100.1/32 dev lo
+        - ip addr add 2001:db8:100::1/128 dev lo
+    ocnos:
+      kind: ipinfusion_ocnos
+      image: ${OCNOS_IMAGE}
+      mgmt-ipv4: 192.168.253.12
+      memory: 5GiB
+      cpu: 2
+  links:
+    - endpoints: ["core:eth1", "ocnos:eth1"]

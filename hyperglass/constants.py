@@ -49,6 +49,7 @@ SUPPORTED_STRUCTURED_OUTPUT = (
     "sonic",
     "cumulus_linux",
     "hp_comware",
+    "ipinfusion_ocnos",
 )
 
 CONFIG_EXTENSIONS = ("py", "yaml", "yml", "json", "toml")
