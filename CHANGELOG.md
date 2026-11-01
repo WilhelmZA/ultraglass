@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 
 - Remove the unused upstream BGP community input plugin and its registration-test exemption. Built-in syntax checks and directive rules continue to validate community targets (#213).
+- Parse IOSv wrapped IPv6 BGP summary rows with their one-column continuation offset. Structured AS-path queries now retain both address families when a long prefix wraps (#215).
 - Device onboarding defaults structured output to no unless the existing entry enables it. The onboarding documentation distinguishes device opt-in from global `structured.enable_for_*` toggles (#128).
 
 ## 3.5.0 - 2026-10-31

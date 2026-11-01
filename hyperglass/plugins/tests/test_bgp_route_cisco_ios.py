@@ -75,6 +75,52 @@ def test_summary_table_bulk():
     assert table.routes[0].prefix == "104.22.109.0/24"
 
 
+def test_iosv_policy_aspath():
+    """Replay the complete dual-stack query that failed onboarding acceptance (#215)."""
+    fixtures = FIXTURES.parent / "cisco-iosv-live"
+    table = parse_cisco_ios(
+        [(fixtures / f"aspath_policy{family}.txt").read_text() for family in (4, 6)]
+    )
+    assert table.count == 4
+    assert [route.prefix for route in table.routes] == [
+        "1.0.0.0/24",
+        "1.1.1.0/24",
+        "2606:4700:4700::/48",
+        "2606:4700::/44",
+    ]
+    assert [route.as_path for route in table.routes] == [
+        [65000, 64999, 13335],
+        [65000, 13335],
+        [65000, 64999, 13335],
+        [65000, 13335],
+    ]
+    assert [route.next_hop for route in table.routes] == [
+        "10.251.5.0",
+        "10.251.5.0",
+        "FD00:251:5::",
+        "FD00:251:5::",
+    ]
+    assert all(route.active and route.source_as == 13335 for route in table.routes)
+    assert all(
+        (route.med, route.local_preference, route.weight) == (0, 100, 0) for route in table.routes
+    )
+
+
+@pytest.mark.parametrize("shift", (0, 1), ids=("iol", "iosv"))
+def test_wrapped_summary_columns(shift):
+    """Synthetic nonzero metrics expose off-by-one errors in both continuation layouts."""
+    output = HEADER + " *>   2606:4700:4700::/48\n"
+    output += (
+        " " * (22 + shift)
+        + f"{'2001:db8::1':<20}{123456:>6}{1234567:>7}{1234567:>7} 65000 13335 i\n"
+    )
+    route = parse_cisco_ios([output]).routes[0]
+    assert route.prefix == "2606:4700:4700::/48"
+    assert route.next_hop == "2001:db8::1"
+    assert (route.med, route.local_preference, route.weight) == (123456, 1234567, 1234567)
+    assert route.as_path == [65000, 13335]
+
+
 def test_summary_table_columns():
     """Multiple paths, metrics, internal paths, classful networks and RPKI codes."""
     output = HEADER + "".join(

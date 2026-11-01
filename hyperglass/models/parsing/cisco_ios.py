@@ -203,9 +203,9 @@ def parse_table(output: str, platform: str = "cisco_ios") -> t.List[t.Dict[str, 
     """Convert the `show bgp <afi> unicast` summary table to standard route fields.
 
     The summary table carries no communities. IOS moves a long network onto its own
-    line and continues the path on the next line, which aligns with the header. NX-OS
-    keeps the line and shifts the later columns right. A line that starts with a status
-    code sits one character right of the header on IOS.
+    line. Its continuation aligns with the header on IOL or one character right on IOSv.
+    NX-OS keeps the line and shifts the later columns right. A line that starts with a
+    status code sits one character right of the header on IOS.
     """
     layout = TABLE_LAYOUT[platform]
     routes = []
@@ -228,7 +228,10 @@ def parse_table(output: str, platform: str = "cisco_ios") -> t.List[t.Dict[str, 
         status = line[: columns["network"] + layout["shift"]]
         if status.strip() and status.strip()[0] not in STATUS_CODES:
             continue
-        shift = layout["shift"] if status.strip() else 0
+        # IOSv retains the status-row offset on wrapped paths; IOL aligns to the header.
+        indentation = len(line) - len(line.lstrip())
+        shifted_continuation = indentation == columns["next_hop"] + layout["shift"]
+        shift = layout["shift"] if status.strip() or shifted_continuation else 0
         col = {name: index + shift for name, index in columns.items()}
         if status.strip():
             route, prefix, col = _start_path(line, status, col, layout, prefix)
