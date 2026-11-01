@@ -1,0 +1,10 @@
+PING 2001:db8:252:1::1(2001:db8:252:1::1) from 2001:db8:252:1::1 : 56 data bytes
+64 bytes from 2001:db8:252:1::1: icmp_seq=1 ttl=64 time=2.49 ms
+64 bytes from 2001:db8:252:1::1: icmp_seq=2 ttl=64 time=0.355 ms
+64 bytes from 2001:db8:252:1::1: icmp_seq=3 ttl=64 time=0.322 ms
+64 bytes from 2001:db8:252:1::1: icmp_seq=4 ttl=64 time=0.341 ms
+64 bytes from 2001:db8:252:1::1: icmp_seq=5 ttl=64 time=0.497 ms
+
+--- 2001:db8:252:1::1 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 10ms
+rtt min/avg/max/mdev = 0.322/0.800/2.489/0.847 ms

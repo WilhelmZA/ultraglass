@@ -1,0 +1,29 @@
+{
+ "vrfId": 0,
+ "vrfName": "default",
+ "tableVersion": 1,
+ "routerId": "10.252.1.1",
+ "defaultLocPrf": 100,
+ "localAS": 65012,
+ "routes": { "1.0.0.0/24": [
+  {
+    "valid":true,
+    "bestpath":true,
+    "pathFrom":"external",
+    "prefix":"1.0.0.0",
+    "prefixLen":24,
+    "network":"1.0.0.0\/24",
+    "weight":0,
+    "peerId":"10.252.1.2",
+    "path":"64999 13335",
+    "origin":"IGP",
+    "nexthops":[
+      {
+        "ip":"10.252.1.2",
+        "hostname":"gobgp-fixture",
+        "afi":"ipv4",
+        "used":true
+      }
+    ]
+  }
+] }  }
