@@ -24,6 +24,21 @@ if t.TYPE_CHECKING:
     from .._output import OutputType
 
 
+def _prefix_paths(prefix: str, paths: t.Union[t.Dict, t.List]) -> t.List:
+    """Separate a matching Cumulus FRR 7.5 prefix header from its detail paths."""
+    if isinstance(paths, dict):
+        return paths["paths"]
+    if (
+        paths
+        and isinstance(paths[0], dict)
+        and set(paths[0]) == {"prefix", "advertisedTo"}
+        and paths[0]["prefix"] == prefix
+        and isinstance(paths[0]["advertisedTo"], dict)
+    ):
+        return paths[1:]
+    return paths
+
+
 def parse_frr(output: t.Sequence[str], vrf: t.Optional[str] = None) -> "OutputDataModel":
     """Parse a FRR BGP JSON response.
 
@@ -49,10 +64,7 @@ def parse_frr(output: t.Sequence[str], vrf: t.Optional[str] = None) -> "OutputDa
             # summary paths, or with `json detail`, an object holding detail paths.
             if "routes" in parsed:
                 tables = [
-                    FRRBGPTable(
-                        prefix=prefix,
-                        paths=paths["paths"] if isinstance(paths, dict) else paths,
-                    )
+                    FRRBGPTable(prefix=prefix, paths=_prefix_paths(prefix, paths))
                     for prefix, paths in parsed["routes"].items()
                 ]
             else:

@@ -1,0 +1,146 @@
+[
+  {
+    "file": "version.txt",
+    "command": "cat /etc/os-release"
+  },
+  {
+    "file": "frr-version.txt",
+    "command": "sudo -n vtysh -c 'show version'"
+  },
+  {
+    "file": "ssh-vrf.txt",
+    "command": "ip vrf identify $$"
+  },
+  {
+    "file": "bgp-summary.json",
+    "command": "sudo -n vtysh -c 'show bgp vrf all summary json'"
+  },
+  {
+    "file": "default-route4.json",
+    "command": "sudo -n vtysh -c 'show bgp ipv4 unicast 1.0.0.0/24 json'"
+  },
+  {
+    "file": "default-route4.txt",
+    "command": "sudo -n vtysh -c 'show bgp ipv4 unicast 1.0.0.0/24'"
+  },
+  {
+    "file": "default-aspath4.json",
+    "command": "sudo -n vtysh -c 'show bgp ipv4 unicast regexp _64999_ json'"
+  },
+  {
+    "file": "default-aspath4.txt",
+    "command": "sudo -n vtysh -c 'show bgp ipv4 unicast regexp _64999_'"
+  },
+  {
+    "file": "default-community4.json",
+    "command": "sudo -n vtysh -c 'show bgp ipv4 unicast community 65000:777 json detail'"
+  },
+  {
+    "file": "default-community4.txt",
+    "command": "sudo -n vtysh -c 'show bgp ipv4 unicast community 65000:777'"
+  },
+  {
+    "file": "default-ping4.txt",
+    "command": "sudo -n ip vrf exec default ping -4 -c 5 -I 10.252.1.1 10.252.1.1"
+  },
+  {
+    "file": "default-trace4.txt",
+    "command": "sudo -n ip vrf exec default traceroute -4 -n -q 1 -w 1 -s 10.252.1.1 10.252.1.1"
+  },
+  {
+    "file": "default-route6.json",
+    "command": "sudo -n vtysh -c 'show bgp ipv6 unicast 2606:4700:4700::/48 json'"
+  },
+  {
+    "file": "default-route6.txt",
+    "command": "sudo -n vtysh -c 'show bgp ipv6 unicast 2606:4700:4700::/48'"
+  },
+  {
+    "file": "default-aspath6.json",
+    "command": "sudo -n vtysh -c 'show bgp ipv6 unicast regexp _64999_ json'"
+  },
+  {
+    "file": "default-aspath6.txt",
+    "command": "sudo -n vtysh -c 'show bgp ipv6 unicast regexp _64999_'"
+  },
+  {
+    "file": "default-community6.json",
+    "command": "sudo -n vtysh -c 'show bgp ipv6 unicast community 65000:777 json detail'"
+  },
+  {
+    "file": "default-community6.txt",
+    "command": "sudo -n vtysh -c 'show bgp ipv6 unicast community 65000:777'"
+  },
+  {
+    "file": "default-ping6.txt",
+    "command": "sudo -n ip vrf exec default ping -6 -c 5 -I 2001:db8:252:1::1 2001:db8:252:1::1"
+  },
+  {
+    "file": "default-trace6.txt",
+    "command": "sudo -n ip vrf exec default traceroute -6 -n -q 1 -w 1 -s 2001:db8:252:1::1 2001:db8:252:1::1"
+  },
+  {
+    "file": "lab-route4.json",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv4 unicast 198.51.100.0/24 json'"
+  },
+  {
+    "file": "lab-route4.txt",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv4 unicast 198.51.100.0/24'"
+  },
+  {
+    "file": "lab-aspath4.json",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv4 unicast regexp _64999_ json'"
+  },
+  {
+    "file": "lab-aspath4.txt",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv4 unicast regexp _64999_'"
+  },
+  {
+    "file": "lab-community4.json",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv4 unicast community 65000:777 json detail'"
+  },
+  {
+    "file": "lab-community4.txt",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv4 unicast community 65000:777'"
+  },
+  {
+    "file": "lab-ping4.txt",
+    "command": "sudo -n ip vrf exec LAB ping -4 -c 5 -I 10.252.2.1 10.252.2.1"
+  },
+  {
+    "file": "lab-trace4.txt",
+    "command": "sudo -n ip vrf exec LAB traceroute -4 -n -q 1 -w 1 -s 10.252.2.1 10.252.2.1"
+  },
+  {
+    "file": "lab-route6.json",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv6 unicast 2001:db8:100::/48 json'"
+  },
+  {
+    "file": "lab-route6.txt",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv6 unicast 2001:db8:100::/48'"
+  },
+  {
+    "file": "lab-aspath6.json",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv6 unicast regexp _64999_ json'"
+  },
+  {
+    "file": "lab-aspath6.txt",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv6 unicast regexp _64999_'"
+  },
+  {
+    "file": "lab-community6.json",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv6 unicast community 65000:777 json detail'"
+  },
+  {
+    "file": "lab-community6.txt",
+    "command": "sudo -n vtysh -c 'show bgp vrf LAB ipv6 unicast community 65000:777'"
+  },
+  {
+    "file": "lab-ping6.txt",
+    "command": "sudo -n ip vrf exec LAB ping -6 -c 5 -I 2001:db8:252:2::1 2001:db8:252:2::1"
+  },
+  {
+    "file": "lab-trace6.txt",
+    "command": "sudo -n ip vrf exec LAB traceroute -6 -n -q 1 -w 1 -s 2001:db8:252:2::1 2001:db8:252:2::1"
+  }
+]

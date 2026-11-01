@@ -1,0 +1,70 @@
+{
+ "vrfId": 6,
+ "vrfName": "LAB",
+ "tableVersion": 1,
+ "routerId": "10.252.2.1",
+ "defaultLocPrf": 100,
+ "localAS": 65012,
+ "routes": { "198.51.100.0/24": [
+  {
+    "prefix":"198.51.100.0\/24",
+    "advertisedTo":{
+      "10.252.2.2":{
+        "hostname":"gobgp-fixture"
+      }
+    }
+  },
+  {
+    "aspath":{
+      "string":"64999 64497",
+      "segments":[
+        {
+          "type":"as-sequence",
+          "list":[
+            64999,
+            64497
+          ]
+        }
+      ],
+      "length":2
+    },
+    "origin":"IGP",
+    "valid":true,
+    "bestpath":{
+      "overall":true,
+      "selectionReason":"First path received"
+    },
+    "community":{
+      "string":"65000:777",
+      "list":[
+        "65000:777"
+      ]
+    },
+    "largeCommunity":{
+      "string":"65000:777:1",
+      "list":[
+        "65000:777:1"
+      ]
+    },
+    "lastUpdate":{
+      "epoch":1793528330,
+      "string":"Sun Nov  1 10:18:50 2026\n"
+    },
+    "nexthops":[
+      {
+        "ip":"10.252.2.2",
+        "hostname":"gobgp-fixture",
+        "afi":"ipv4",
+        "metric":0,
+        "accessible":true,
+        "used":true
+      }
+    ],
+    "peer":{
+      "peerId":"10.252.2.2",
+      "routerId":"10.252.2.2",
+      "hostname":"gobgp-fixture",
+      "type":"external"
+    }
+  }
+] }  }

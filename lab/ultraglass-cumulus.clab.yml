@@ -6,6 +6,8 @@ mgmt:
   ipv4-subnet: 192.168.251.0/24
 
 topology:
+  defaults:
+    privileged: false
   nodes:
     core:
       kind: linux

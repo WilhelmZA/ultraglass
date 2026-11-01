@@ -1,0 +1,30 @@
+{
+ "vrfId": 6,
+ "vrfName": "LAB",
+ "tableVersion": 1,
+ "routerId": "10.252.2.1",
+ "defaultLocPrf": 100,
+ "localAS": 65012,
+ "routes": { "2001:db8:100::/48": [
+  {
+    "valid":true,
+    "bestpath":true,
+    "pathFrom":"external",
+    "prefix":"2001:db8:100::",
+    "prefixLen":48,
+    "network":"2001:db8:100::\/48",
+    "weight":0,
+    "peerId":"10.252.2.2",
+    "path":"64999 64497",
+    "origin":"IGP",
+    "nexthops":[
+      {
+        "ip":"2001:db8:252:2::2",
+        "hostname":"gobgp-fixture",
+        "afi":"ipv6",
+        "scope":"global",
+        "used":true
+      }
+    ]
+  }
+] }  }

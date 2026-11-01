@@ -1,0 +1,2 @@
+traceroute to 2001:db8:252:2::1 (2001:db8:252:2::1), 30 hops max, 80 byte packets
+ 1  2001:db8:252:2::1  3.812 ms

@@ -1,0 +1,10 @@
+BGP routing table entry for 1.0.0.0/24
+Paths: (1 available, best #1, table default)
+  Advertised to non peer-group peers:
+  10.252.1.2
+  64999 13335
+    10.252.1.2 from 10.252.1.2 (10.252.1.2)
+      Origin IGP, valid, external, best (First path received)
+      Community: 65000:777
+      Large Community: 65000:777:1
+      Last update: Sun Nov  1 10:18:52 2026

@@ -18,10 +18,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Dell OS9 and SmartFabric OS10 BGP and diagnostic built-ins, named-VRF forms, shared detailed BGP parsing, and OS9 wrapped-IPv6 traceroute parsing (#74).
 - FortiGate and PAN-OS BGP prefix queries and diagnostics, structured route/traceroute parsing, PAN-OS virtual-router BGP forms, and fail-fast FortiGate diagnostic setup (#81). Live acceptance remains pending.
 - `hyperglass onboard` builds validated device entries, tests offered built-in commands with fallback and field-coverage reports, checks feature settings, and scaffolds custom directives. Commands support plain-text and JSON reports (#128).
-- NVIDIA Cumulus Linux built-in BGP, ping, and traceroute commands, including VRFs, FRR structured parsing, and an optional small-table lab topology (#77). Cumulus VX live captures remain pending.
+- NVIDIA Cumulus Linux built-in BGP, ping, and traceroute commands, including VRFs, FRR structured parsing, and an optional small-table lab topology (#77). Cumulus VX 5.4 live captures cover both address families, default and LAB VRFs, and text/structured output.
 
 ### Fixed
 
+- Parse Cumulus VX 5.4 community detail JSON without treating its prefix metadata header as a BGP path. Preserve both community types and reject malformed paths (#217).
 - Remove the unused upstream BGP community input plugin and its registration-test exemption. Built-in syntax checks and directive rules continue to validate community targets (#213).
 - Parse IOSv wrapped IPv6 BGP summary rows with their one-column continuation offset. Structured AS-path queries now retain both address families when a long prefix wraps (#215).
 - Device onboarding defaults structured output to no unless the existing entry enables it. The onboarding documentation distinguishes device opt-in from global `structured.enable_for_*` toggles (#128).
