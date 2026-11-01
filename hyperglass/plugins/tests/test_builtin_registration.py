@@ -11,10 +11,6 @@ from hyperglass.plugins import _builtin
 from hyperglass.plugins._input import InputPlugin
 from hyperglass.plugins._output import OutputPlugin
 
-# Inherited from upstream and never registered; tracked separately from the platform plugins.
-KNOWN_UNREGISTERED = {"bgp_community.ValidateBGPCommunity"}
-
-
 def test_every_builtin_plugin_is_exported():
     """`init_builtin_plugins` reads the classes imported into `_builtin/__init__.py`.
 
@@ -30,6 +26,6 @@ def test_every_builtin_plugin_is_exported():
             if not issubclass(obj, (OutputPlugin, InputPlugin)):
                 continue
             exported = getattr(_builtin, class_name, None) is obj and class_name in _builtin.__all__
-            if not exported and f"{module_name}.{class_name}" not in KNOWN_UNREGISTERED:
+            if not exported:
                 missing.append(f"{module_name}.{class_name}")
     assert not missing, f"Not exported from hyperglass.plugins._builtin: {missing}"

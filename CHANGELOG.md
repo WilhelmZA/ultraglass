@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- Remove the unused upstream BGP community input plugin and its registration-test exemption. Built-in syntax checks and directive rules continue to validate community targets (#213).
 - Device onboarding defaults structured output to no unless the existing entry enables it. The onboarding documentation distinguishes device opt-in from global `structured.enable_for_*` toggles (#128).
 
 ## 3.5.0 - 2026-10-31
