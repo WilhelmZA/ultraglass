@@ -51,7 +51,11 @@ def parse_frr(output: t.Sequence[str], vrf: t.Optional[str] = None) -> "OutputDa
                 tables = [
                     FRRBGPTable(
                         prefix=prefix,
-                        paths=paths["paths"] if isinstance(paths, dict) else paths,
+                        paths=(
+                            paths["paths"]
+                            if isinstance(paths, dict)
+                            else _detail_paths(prefix, paths)
+                        ),
                     )
                     for prefix, paths in parsed["routes"].items()
                 ]
@@ -84,6 +88,21 @@ def parse_frr(output: t.Sequence[str], vrf: t.Optional[str] = None) -> "OutputDa
             raise ParsingError("Error parsing response data") from err
 
     return result
+
+
+def _detail_paths(prefix: str, paths: t.List[t.Dict]) -> t.List[t.Dict]:
+    """Remove only the leading prefix metadata in older FRR detail lists."""
+    if paths and isinstance(paths[0], dict):
+        header = paths[0]
+        # Cumulus VX 5.4 emits this header before the actual paths. Do not
+        # discard malformed paths or headers belonging to another prefix.
+        if (
+            set(header) == {"prefix", "advertisedTo"}
+            and header["prefix"] == prefix
+            and isinstance(header["advertisedTo"], dict)
+        ):
+            return paths[1:]
+    return paths
 
 
 class BGPRoutePluginFrr(OutputPlugin):

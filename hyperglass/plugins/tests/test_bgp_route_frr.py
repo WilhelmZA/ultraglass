@@ -2,6 +2,8 @@
 
 # flake8: noqa
 # Standard Library
+import json
+from copy import deepcopy
 from pathlib import Path
 
 # Third Party
@@ -10,6 +12,7 @@ import pytest
 # Project
 from hyperglass.models.config.devices import Device
 from hyperglass.models.data.bgp_route import BGPRouteTable
+from hyperglass.exceptions.private import ParsingError
 
 # Local
 from ._fixtures import MockDevice
@@ -132,3 +135,76 @@ def test_frr_route_without_vrf_is_default():
     result = _process((FIXTURES / "frr_route_local.json").read_text())
 
     assert result.vrf == "default"
+
+
+@pytest.mark.parametrize("vrf", ("default", "lab"))
+@pytest.mark.parametrize("family", (4, 6))
+def test_cumulus_community_prefix_metadata(vrf, family):
+    sample = (FIXTURES / "cumulus-vx54-live" / f"{vrf}-community{family}.json").read_text()
+    result = _process_vrf([sample], platform="cumulus_linux", vrf="CONFIGURED")
+
+    assert result.count == 1
+    assert result.vrf == ("LAB" if vrf == "lab" else "default")
+    route = result.routes[0]
+    assert route.as_path == ([64999, 64497] if vrf == "lab" else [64999, 13335])
+    assert route.communities == ["65000:777", "65000:777:1"]
+    assert route.active is True
+    subnet = 2 if vrf == "lab" else 1
+    assert route.next_hop == (
+        f"10.252.{subnet}.2" if family == 4 else f"2001:db8:252:{subnet}::2"
+    )
+    expected = {
+        "default": {4: "1.0.0.0/24", 6: "2606:4700:4700::/48"},
+        "lab": {4: "198.51.100.0/24", 6: "2001:db8:100::/48"},
+    }
+    assert str(route.prefix) == expected[vrf][family]
+
+
+def test_cumulus_community_combines_captured_families():
+    outputs = [
+        (FIXTURES / "cumulus-vx54-live" / f"lab-community{family}.json").read_text()
+        for family in (4, 6)
+    ]
+    result = _process_vrf(outputs, platform="cumulus_linux", vrf="CONFIGURED")
+    assert result.count == 2
+    assert result.vrf == "LAB"
+    assert {str(route.prefix) for route in result.routes} == {
+        "198.51.100.0/24",
+        "2001:db8:100::/48",
+    }
+
+
+def test_cumulus_metadata_preserves_all_paths():
+    # Synthetic multipath variant; no extra live path is claimed.
+    data = json.loads((FIXTURES / "cumulus-vx54-live/default-community4.json").read_text())
+    paths = data["routes"]["1.0.0.0/24"]
+    other = deepcopy(paths[1])
+    other["bestpath"]["overall"] = False
+    other["med"] = 42
+    paths.append(other)
+    result = _process_vrf([json.dumps(data)], platform="cumulus_linux")
+    assert result.count == 2
+    assert [route.med for route in result.routes] == [0, 42]
+    assert [route.active for route in result.routes] == [True, False]
+
+
+@pytest.mark.parametrize(
+    "case", ("mismatch", "path_field", "bad_advertised", "later_header", "bad_path")
+)
+def test_cumulus_metadata_does_not_hide_malformed_paths(case):
+    # Synthetic mutations of a captured reply are not live acceptance evidence.
+    data = json.loads((FIXTURES / "cumulus-vx54-live/default-community4.json").read_text())
+    paths = data["routes"]["1.0.0.0/24"]
+    if case == "mismatch":
+        paths[0]["prefix"] = "192.0.2.0/24"
+    elif case == "path_field":
+        paths[0]["valid"] = True
+    elif case == "bad_advertised":
+        paths[0]["advertisedTo"] = []
+    elif case == "later_header":
+        paths.reverse()
+    else:
+        del paths[1]["valid"]
+
+    with pytest.raises(ParsingError):
+        _process_vrf([json.dumps(data)], platform="cumulus_linux")

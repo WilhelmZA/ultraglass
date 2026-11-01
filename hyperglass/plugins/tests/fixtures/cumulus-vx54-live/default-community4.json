@@ -1,0 +1,70 @@
+{
+ "vrfId": 0,
+ "vrfName": "default",
+ "tableVersion": 1,
+ "routerId": "10.252.1.1",
+ "defaultLocPrf": 100,
+ "localAS": 65012,
+ "routes": { "1.0.0.0/24": [
+  {
+    "prefix":"1.0.0.0\/24",
+    "advertisedTo":{
+      "10.252.1.2":{
+        "hostname":"wilhelm-framework"
+      }
+    }
+  },
+  {
+    "aspath":{
+      "string":"64999 13335",
+      "segments":[
+        {
+          "type":"as-sequence",
+          "list":[
+            64999,
+            13335
+          ]
+        }
+      ],
+      "length":2
+    },
+    "origin":"IGP",
+    "valid":true,
+    "bestpath":{
+      "overall":true,
+      "selectionReason":"First path received"
+    },
+    "community":{
+      "string":"65000:777",
+      "list":[
+        "65000:777"
+      ]
+    },
+    "largeCommunity":{
+      "string":"65000:777:1",
+      "list":[
+        "65000:777:1"
+      ]
+    },
+    "lastUpdate":{
+      "epoch":1793528333,
+      "string":"Sun Nov  1 10:18:53 2026\n"
+    },
+    "nexthops":[
+      {
+        "ip":"10.252.1.2",
+        "hostname":"wilhelm-framework",
+        "afi":"ipv4",
+        "metric":0,
+        "accessible":true,
+        "used":true
+      }
+    ],
+    "peer":{
+      "peerId":"10.252.1.2",
+      "routerId":"10.252.1.2",
+      "hostname":"wilhelm-framework",
+      "type":"external"
+    }
+  }
+] }  } 
