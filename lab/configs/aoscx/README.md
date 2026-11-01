@@ -1,6 +1,6 @@
 # AOS-CX acceptance lab
 
-Build an AOS-CX 10.14 image with [vrnetlab's Aruba wrapper](https://github.com/srl-labs/vrnetlab/tree/master/aruba/aoscx) from the vendor OVA. Supply its local tag through `AOSCX_IMAGE`. The isolated topology uses the existing `ultraglass-lab/core:latest` image. Boot and capture remain pending because no AOS-CX image is available.
+Supply a compatible AOS-CX 10.14 container image through `AOSCX_IMAGE`. The topology uses `ultraglass-lab/core:latest` for its BGP peer. Live validation remains pending.
 
 ```sh
 sudo env AOSCX_IMAGE=your-local-aoscx-image containerlab deploy -t lab/ultraglass-aoscx.clab.yml
