@@ -1,6 +1,6 @@
 # Firewall acceptance lab
 
-Build local images with vrnetlab's [FortiGate](https://github.com/srl-labs/vrnetlab/tree/master/fortinet/fortigate) and [PAN-OS](https://github.com/srl-labs/vrnetlab/tree/master/paloalto/pan) wrappers. Obtain the vendor licences required for BGP. No licensed images are available in this checkout, so boot and live acceptance remain pending.
+Supply compatible FortiGate and PAN-OS container images through `FORTIGATE_IMAGE` and `PANOS_IMAGE`. Activate the vendor licences required for BGP. Live validation remains pending.
 
 ```sh
 sudo env FORTIGATE_IMAGE=your-fortigate-tag PANOS_IMAGE=your-panos-tag containerlab deploy -t lab/ultraglass-firewalls.clab.yml

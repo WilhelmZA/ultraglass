@@ -2,15 +2,15 @@
 
 This optional topology connects Cumulus VX to a dedicated GoBGP core in the default VRF and `LAB`. It uses a small deterministic table. Cumulus VX 5.4.0 live validation passes for both address families and routing contexts, in text and structured modes. Captures and regression tests are under `hyperglass/plugins/tests/fixtures/cumulus-live/` and `test_cumulus_live.py`.
 
-## Verified standalone VM run
+## Validated behavior
 
-The 2026-11-01 run uses the vendor's [Cumulus VX 5.4.0 QEMU image](https://d2cd9e7ca6hntp.cloudfront.net/public/CumulusLinux-5.4.0/cumulus-linux-5.4.0-vx-amd64-qemu.qcow2), listed in the [GNS3 registry](https://github.com/GNS3/gns3-registry/blob/master/appliances/cumulus-vx.gns3a). Its SHA-256 is `8d255f082f6c5e5f3f8acb9c7022a06d7ce213583eace49609ae66792433d0fd`; its size is 6,254,493,696 bytes. FRR reports `7.5+cl5.3.0u0`.
+Validation covers Cumulus VX 5.4.0 with FRR `7.5+cl5.3.0u0`. The capture manifest records the commands and software versions.
 
-The appliance runs alone in QEMU TCG with one emulated CPU, 2 GiB guest RAM, a 3 GiB process ceiling and a 100% CPU quota. Three restricted user-mode NICs provide management, default-VRF and LAB links. No host devices or filesystems are shared. SSH enters the management VRF. Two GoBGP peers each carry both address families; each routing context receives one IPv4 and one IPv6 prefix. This standalone run uses native interface and FRR configuration rather than the NVUE 5.16 example below.
+SSH enters the management VRF. Separate BGP peers supply distinct IPv4 and IPv6 prefixes to the default and LAB VRFs. Validation uses native interface and FRR configuration rather than the NVUE 5.16 example below.
 
-All 32 onboarding cases and 32 independent uncached HTTP API comparisons pass. Checks include prefixes, AS paths, standard/large communities, next hops, best-path state, reported VRFs and traceroute addresses. Ping receives all five replies. Route fixtures differ between VRFs to detect routing-context leakage. Diagnostics target each VRF's own data-interface addresses; restricted user networking does not provide a remote UDP traceroute responder.
+All 32 onboarding cases and 32 independent uncached HTTP API comparisons pass. Checks include prefixes, AS paths, standard/large communities, next hops, best-path state, reported VRFs and traceroute addresses. Ping receives all five replies. Route fixtures differ between VRFs to detect routing-context leakage. Diagnostics target each VRF's own data-interface addresses. These checks do not establish remote forwarding behavior.
 
-The CPU-limited emulation needs explicit SSH pacing. Without it, some reads return a prompt before command output. The accepted run uses this device setting in both modes:
+The validated SSH configuration uses explicit pacing. Without it, some reads return a prompt before command output. Both output modes use:
 
 ```yaml
 driver_config:
@@ -18,13 +18,13 @@ driver_config:
   global_delay_factor: 1
 ```
 
-Live community queries exposed the FRR 7.5 prefix metadata header fixed in #217. The saved failures precede the successful patched run. The VM, feed processes, temporary API and Redis stop after validation. Results apply to VX 5.4.0; the NVUE 5.16 configuration example has not been live-tested.
+Live community queries exposed the FRR 7.5 prefix metadata header fixed in #217. Regression tests cover that response format. Results apply to VX 5.4.0; the NVUE 5.16 configuration example has not been live-tested.
 
 ## Start
 
-Run hardware-dependent appliances inside an isolated lab VM. Do not run the Cumulus systemd container on the workstation; it caused a hardware-watchdog reset on 2026-11-01. The standalone TCG setup above is the verified workstation method.
+Run hardware-dependent appliances inside an isolated lab VM without host device passthrough or host filesystem sharing.
 
-Supply a Cumulus VX disk through the [vrnetlab Cumulus wrapper](https://github.com/srl-labs/vrnetlab/tree/master/nvidia/cumulus-vx). The topology defaults to its documented `vrnetlab/nvidia_cumulus-vx:5.16.1` tag. Set `CUMULUS_IMAGE` for another locally built tag. The core image comes from `lab/images/core`.
+Supply a compatible Cumulus VX container image through `CUMULUS_IMAGE`. The topology defaults to `vrnetlab/nvidia_cumulus-vx:5.16.1`. The BGP peer image comes from `lab/images/core`.
 
 From the repository root:
 

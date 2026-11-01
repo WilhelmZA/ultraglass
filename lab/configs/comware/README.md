@@ -1,6 +1,6 @@
 # Comware 7 acceptance lab
 
-Build a licensed VSR1000 image using [vrnetlab's HPE wrapper](https://github.com/srl-labs/vrnetlab/tree/master/hp/vsr1000). Supply its local image tag through `COMWARE_IMAGE`. The isolated topology uses the existing `ultraglass-lab/core:latest` image and two BGP sessions. VSR1000 boot and live captures remain pending because the development lab has no image.
+Supply a compatible licensed VSR1000 container image through `COMWARE_IMAGE`. The topology uses `ultraglass-lab/core:latest` and two BGP sessions. Live validation remains pending.
 
 From the repository root:
 

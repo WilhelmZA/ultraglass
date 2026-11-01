@@ -1,6 +1,6 @@
 # OcNOS acceptance lab
 
-Build a licensed OcNOS 6.5+ image using [vrnetlab's OcNOS wrapper](https://github.com/srl-labs/vrnetlab/tree/master/ipinfusion/ocnos). Supply its local tag through `OCNOS_IMAGE`. The topology uses a separate management network and the existing `ultraglass-lab/core:latest` GoBGP image. Boot on the AMD lab host and live capture remain pending because no OcNOS image is available.
+Supply a compatible licensed OcNOS 6.5+ container image through `OCNOS_IMAGE`. The topology uses a separate management network and the `ultraglass-lab/core:latest` BGP peer. Live validation remains pending.
 
 From the repository root:
 

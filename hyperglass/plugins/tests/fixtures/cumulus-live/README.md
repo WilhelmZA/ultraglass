@@ -15,4 +15,4 @@ The community JSON uses a list whose first object contains `prefix` and `adverti
 
 Diagnostics target each VRF's own interface address (`10.252.N.1` and `2001:db8:252:N::1`). They confirm native command execution, source binding and explicit VRF selection from a management-VRF SSH session. Traceroute reaches that local address in one hop. The restricted user-mode network does not supply a remote UDP traceroute responder.
 
-The live test uses one standalone QEMU TCG VM with one CPU and 2 GiB RAM, without host device or filesystem sharing. Final application validation uses `driver_config: {fast_cli: false, global_delay_factor: 1}` for the CPU-limited guest. All 32 CLI cases and 32 uncached HTTP API comparisons pass on the patched source. The appliance and temporary services stop afterward.
+Application validation uses `driver_config: {fast_cli: false, global_delay_factor: 1}`. All 32 CLI cases and 32 uncached HTTP API comparisons pass on the patched source.
