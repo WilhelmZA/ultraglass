@@ -55,7 +55,7 @@ class OS9VM(vrnetlab.VM):
             f"hostname {self.hostname}",
             f"username {self.username} password 0 {self.password} privilege 15",
             "ip ssh server enable", "interface managementethernet 0/0",
-            "ip address 10.0.0.15/24", "no shutdown", "exit",
+            "ip address 10.0.0.15/24", "no keepalive", "no shutdown", "exit",
             "management route 0.0.0.0/0 10.0.0.2",
         ]
         startup = Path("/config/startup.cfg")

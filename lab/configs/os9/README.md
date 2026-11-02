@@ -22,7 +22,15 @@ Test both prefixes, AS path `_13335$`, community `37195:302`, and diagnostics to
 
 The OS10 virtual edition is not supplied. Attach an operator-provided OS10 appliance to a GoBGP data link for separate acceptance. Configure it as `dell_os10`, set diagnostic source addresses, and repeat the route, community and diagnostic tests in default and named VRFs. Arbitrary AS-path regex search is unsupported on OS10; configured filter lists need custom directives.
 
-Reference fixtures in `dell-reference` are published examples. The local OS9 9.13.0.0 image reaches `SYSTEM_READY` on the AMD host, but its wrapper does not become healthy within the 180-second acceptance wait. No SSH queries or live captures pass this attempt. Live default/VRF captures remain required for full acceptance. OS10's documented detailed BGP output differs from FRR JSON, so the implementation uses its native CLI.
+## OS9 link readiness
+
+OS9 9.13(0.0) requires `no keepalive` on `managementethernet 0/0` and each emulated data interface. Without it, interfaces remain administratively up with line protocol down. The bootstrap and `startup.cfg` now apply this setting. Rebuild the OS9 image to update its management bootstrap; apply the setting through the console on an existing appliance.
+
+Live checks confirm that enabling keepalive drops both interfaces and causes data-link pings to fail. Disabling keepalive restores both interfaces. SSH authentication and management IPv4, data IPv4 and data IPv6 pings then pass. `Pluggable media not present` still appears while the interfaces pass traffic; it does not prove a link failure.
+
+The SSH server can initially report disabled after `ip ssh server enable`. Wait for `show ip ssh` to report enabled and verify an authenticated SSH command. Allow IPv6 neighbor discovery to settle after changing link state.
+
+Reference fixtures in `dell-reference` are published examples. Full default/VRF query validation and authentic parser fixtures remain required for #74. OS10 needs separate live acceptance.
 
 ```sh
 sudo containerlab destroy -t lab/ultraglass-dell.clab.yml
