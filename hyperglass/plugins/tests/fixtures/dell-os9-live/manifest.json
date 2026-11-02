@@ -1,0 +1,90 @@
+[
+  {
+    "file": "version.txt",
+    "command": "show version"
+  },
+  {
+    "file": "vrfs.txt",
+    "command": "show ip vrf"
+  },
+  {
+    "file": "default-aspath.txt",
+    "command": "show ip bgp regexp _65000_"
+  },
+  {
+    "file": "default-route4.txt",
+    "command": "show ip bgp ipv4 unicast 1.0.0.0/24"
+  },
+  {
+    "file": "default-community4.txt",
+    "command": "show ip bgp ipv4 unicast community 65000:777"
+  },
+  {
+    "file": "default-summary4.txt",
+    "command": "show ip bgp ipv4 unicast summary"
+  },
+  {
+    "file": "default-ping4.txt",
+    "command": "ping 10.251.9.2 count 5"
+  },
+  {
+    "file": "default-trace4.txt",
+    "command": "traceroute 10.251.9.1"
+  },
+  {
+    "file": "default-route6.txt",
+    "command": "show ip bgp ipv6 unicast 2606:4700:4700::/48"
+  },
+  {
+    "file": "default-community6.txt",
+    "command": "show ip bgp ipv6 unicast community 65000:777"
+  },
+  {
+    "file": "default-summary6.txt",
+    "command": "show ip bgp ipv6 unicast summary"
+  },
+  {
+    "file": "default-ping6.txt",
+    "command": "ping fd00:251:9::2 count 5"
+  },
+  {
+    "file": "default-trace6.txt",
+    "command": "traceroute fd00:251:9::1"
+  },
+  {
+    "file": "lab-aspath.txt",
+    "command": "show ip bgp vrf LAB regexp _65000_"
+  },
+  {
+    "file": "lab-route4.txt",
+    "command": "show ip bgp vrf LAB ipv4 unicast 198.51.100.0/24"
+  },
+  {
+    "file": "lab-community4.txt",
+    "command": "show ip bgp vrf LAB ipv4 unicast community 65000:777"
+  },
+  {
+    "file": "lab-summary4.txt",
+    "command": "show ip bgp vrf LAB ipv4 unicast summary"
+  },
+  {
+    "file": "lab-ping4.txt",
+    "command": "ping vrf LAB 10.254.2.2 count 5"
+  },
+  {
+    "file": "lab-route6.txt",
+    "command": "show ip bgp vrf LAB ipv6 unicast 2001:db8:100::/48"
+  },
+  {
+    "file": "lab-community6.txt",
+    "command": "show ip bgp vrf LAB ipv6 unicast community 65000:777"
+  },
+  {
+    "file": "lab-summary6.txt",
+    "command": "show ip bgp vrf LAB ipv6 unicast summary"
+  },
+  {
+    "file": "lab-ping6.txt",
+    "command": "ping vrf LAB fd00:254:2::2 count 5"
+  }
+]

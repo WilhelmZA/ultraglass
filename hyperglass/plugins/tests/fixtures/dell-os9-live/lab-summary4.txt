@@ -1,0 +1,12 @@
+BGP router identifier 10.251.9.1, local AS number 65029
+BGP local RIB : Routes to be Added 0, Replaced 0, Withdrawn 0
+1 network entrie(s) using 76 bytes of memory
+1 paths using 108 bytes of memory
+BGP-RIB over all using 109 bytes of memory
+3 BGP path attribute entrie(s) using 384 bytes of memory
+2 BGP AS-PATH entrie(s) using 20 bytes of memory
+2 BGP community entrie(s) using 8 bytes of memory
+1 neighbor(s) using 8192 bytes of memory
+
+Neighbor        AS            MsgRcvd  MsgSent     TblVer  InQ  OutQ Up/Down  State/Pfx
+10.254.2.2      65000              13       12          0    0     0 00:04:39 1

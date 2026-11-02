@@ -22,7 +22,9 @@ def _path(prefix: str, block: str, peer: re.Match) -> dict:
     path = re.search(r"^[ \t]*AS_PATH\s*:[ \t]*([^\n]*)", block, re.MULTILINE)
     hop = re.search(r"Next-Hop\s*:\s*([^,]+),", block)
     attrs = re.search(
-        r"Origin\s+\w+,\s*Metric\s+(\d+),\s*LocalPref\s+(\d+),\s*Weight\s+(\d+)", block
+        r"Origin\s+\w+,\s*Metric\s+(\d+)(?:\s+\(Default\))?,"
+        r"\s*LocalPref\s+(\d+),\s*Weight\s+(\d+)",
+        block,
     )
     if not path or not hop or not attrs:
         raise ValueError("Incomplete Dell path")
@@ -32,7 +34,11 @@ def _path(prefix: str, block: str, peer: re.Match) -> dict:
     as_path = [parse_asn(asn) for asn in value.split()]
     if None in as_path:
         raise ValueError("Invalid ASN")
-    community = re.search(r"^[ \t]*Communities\s*:[ \t]*([^\n]*)", block, re.MULTILINE)
+    community = re.search(
+        r"^[ \t]*Communities[ \t]*:[ \t]*([^\n]*(?:\n[ \t]+\d+:\d+[^\n]*)*)",
+        block,
+        re.MULTILINE,
+    )
     return {
         "prefix": prefix,
         "as_path": as_path,

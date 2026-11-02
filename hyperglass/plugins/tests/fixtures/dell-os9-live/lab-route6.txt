@@ -1,0 +1,14 @@
+BGP routing table entry for 2001:db8:100::/48
+Paths: (1 available, table Default-MBGP-Routing-Table.)
+Not advertised to any peer
+
+Received from :
+ 10.254.2.2 (10.254.2.2)   Best
+  AS_PATH : 65000 64497
+
+  Next-Hop : fd00:254:2::2, Cost : 0
+  Origin incomplete, Metric  4294967295 (Default), LocalPref  100, Weight  0, external
+
+
+ Communities :
+  65000:777

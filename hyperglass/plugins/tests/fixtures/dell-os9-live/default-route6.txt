@@ -1,0 +1,14 @@
+BGP routing table entry for 2606:4700:4700::/48
+Paths: (1 available, table Default-MBGP-Routing-Table.)
+Not advertised to any peer
+
+Received from :
+ 10.251.9.2 (10.251.9.2)   Best
+  AS_PATH : 65000 13335
+
+  Next-Hop : fd00:251:9::2, Cost : 0
+  Origin incomplete, Metric  4294967295 (Default), LocalPref  100, Weight  0, external
+
+
+ Communities :
+  65000:777

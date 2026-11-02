@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- Correct OS9 VRF ping syntax and IPv4 AS-path searches. Parse the default-metric annotation and wrapped communities in OS9 9.13 detailed routes, with authentic default/LAB IPv4/IPv6 captures and CLI, API and browser validation (#74).
 - Parse Cumulus VX 5.4 community detail JSON without treating its prefix metadata header as a BGP path. Preserve both community types and reject malformed paths (#217).
 - Remove the unused upstream BGP community input plugin and its registration-test exemption. Built-in syntax checks and directive rules continue to validate community targets (#213).
 - Parse IOSv wrapped IPv6 BGP summary rows with their one-column continuation offset. Structured AS-path queries now retain both address families when a long prefix wraps (#215).

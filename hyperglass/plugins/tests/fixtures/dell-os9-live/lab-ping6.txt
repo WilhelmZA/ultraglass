@@ -1,0 +1,6 @@
+
+Type Ctrl-C to abort.
+
+Sending 5, 100-byte ICMP Echos to fd00:254:2::2, timeout is 2 seconds:
+!!!!!
+Success rate is 100.0 percent (5/5), round-trip min/avg/max = 0/0/0 (ms)

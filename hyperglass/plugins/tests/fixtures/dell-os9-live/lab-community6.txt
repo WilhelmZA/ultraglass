@@ -1,0 +1,9 @@
+BGP local RIB : Routes to be Added 0, Replaced 0, Withdrawn 0
+BGP local router ID is 10.251.9.1
+Status codes: s suppressed, S stale, d dampened, h history, * valid, > best
+Path source: I - internal, a - aggregate, c - confed-external, r - redistributed
+             n - network,  D - denied,  S - stale
+Origin codes: i - IGP, e - EGP, ? - incomplete
+
+    Network            Next Hop            Metric     LocPrf Weight Path
+*>  2001:db8:100::/48  fd00:254:2::2                              0 65000 64497 ?

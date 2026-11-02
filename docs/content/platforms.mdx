@@ -130,13 +130,13 @@ Tests use attributed command-reference excerpts and explicitly synthetic IPv6/mu
 
 Use `dell_force10` for OS9/FTOS and `dell_os10` for SmartFabric OS10. Both provide dual-stack exact-prefix BGP routes, standard-community queries, ping and traceroute. Address-only BGP queries become `/32` or `/128` host prefixes. Named-VRF BGP and ping forms exist on both platforms. OS10 also supports named-VRF traceroute. OS9 traceroute VRFs are documented only for E-Series hardware, so its built-in traceroute is omitted on VRF devices.
 
-OS9 offers dual-stack AS-path regular-expression searches. OS10 does not support arbitrary `regexp` queries; use custom directives with configured AS-path filter lists. OS10 standard-community queries require 10.5.2.1 or later.
+OS9 offers IPv4 AS-path regular-expression searches through `show ip bgp [vrf NAME] regexp PATTERN`. OS9 9.13 rejects `regexp` after explicit IPv4/IPv6 family selectors. IPv6 AS-path searches need custom directives with configured filter lists. OS10 does not support arbitrary `regexp` queries; use custom directives with configured AS-path filter lists. OS10 standard-community queries require 10.5.2.1 or later.
 
 OS10 uses the documented CLI and `Received from` detail format, not FRR shell commands or JSON. Both platforms parse numbered-next-hop BGP details when `structured_output: true`. Unnumbered next hops, AS sets, confederations and incomplete replies remain text. Community and AS-path summary results remain text. Route age and router RPKI state remain unknown.
 
 Set `attrs.source4` and `attrs.source6` for OS10 diagnostics. OS9 diagnostics select their source from the routing table. OS9's fixed traceroute timing may need a longer query timeout. Its parser joins wrapped IPv6 RTT lines and keeps the original raw output.
 
-Parser fixtures are attributed vendor-reference examples. See `lab/configs/os9/README.md` for the isolated GoBGP lab and pending live acceptance.
+OS9 9.13(0.0) has authentic IPv4/IPv6 captures for default and named VRFs. Its live matrix passes 28 CLI queries, 28 uncached API comparisons and 28 browser queries across text and structured modes. The parser handles the `(Default)` metric annotation and communities printed below their heading. OS10 fixtures remain attributed vendor-reference examples; OS10 live acceptance remains pending. See `lab/configs/os9/README.md` for the query matrix and setup.
 
 ### FortiGate and PAN-OS
 

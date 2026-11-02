@@ -72,6 +72,11 @@ def test_search_capabilities(platform, vrf):
         if kind not in kinds:
             continue
         context = f"vrf {vrf} " if vrf else ""
+        if kind == "bgp_aspath":
+            assert Construct(router, query_for(router, kind, target)).queries() == [
+                f"show ip bgp {context}regexp {target}"
+            ]
+            continue
         assert Construct(router, query_for(router, kind, target)).queries() == [
             f"show ip bgp {context}ipv4 unicast {verb} {target}",
             f"show ip bgp {context}ipv6 unicast {verb} {target}",
