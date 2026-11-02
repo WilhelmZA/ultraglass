@@ -1,0 +1,10 @@
+PING 10.250.1.2 (10.250.1.2) from 10.250.1.1 : 56(84) bytes of data.
+64 bytes from 10.250.1.2: icmp_seq=1 ttl=255 time=2.27 ms
+64 bytes from 10.250.1.2: icmp_seq=2 ttl=255 time=1.29 ms
+64 bytes from 10.250.1.2: icmp_seq=3 ttl=255 time=2.40 ms
+64 bytes from 10.250.1.2: icmp_seq=4 ttl=255 time=1.47 ms
+64 bytes from 10.250.1.2: icmp_seq=5 ttl=255 time=1.39 ms
+
+--- 10.250.1.2 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4007ms
+rtt min/avg/max/mdev = 1.291/1.764/2.399/0.471 ms

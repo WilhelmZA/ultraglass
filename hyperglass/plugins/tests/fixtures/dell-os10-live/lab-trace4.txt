@@ -1,0 +1,2 @@
+traceroute to 10.250.2.1 (10.250.2.1), 30 hops max, 60 byte packets
+ 1  10.250.2.1  5.260 ms

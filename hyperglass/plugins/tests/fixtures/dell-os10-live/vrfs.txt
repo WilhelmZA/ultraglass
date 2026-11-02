@@ -1,0 +1,7 @@
+VRF-Name                          Interfaces
+LAB                               Eth1/1/2
+
+default                           Mgmt1/1/1
+                                  Eth1/1/1
+                                  Vlan1
+

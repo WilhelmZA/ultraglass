@@ -1,0 +1,8 @@
+Dell SmartFabric OS10 Enterprise
+Copyright (c) 1999-2026 by Dell Inc. All Rights Reserved.
+OS Version: 10.6.1.3P1
+Build Version: 10.6.1.3P1.6
+Build Time: 2026-10-05T11:24:17+0000
+System Type: S5224F-VM
+Architecture: x86_64
+Up Time: 00:10:37

@@ -1,0 +1,2 @@
+traceroute to fd00:250:1::1 (fd00:250:1::1), 30 hops max, 80 byte packets
+ 1  fd00:250:1::1  0.305 ms
