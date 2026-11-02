@@ -37,8 +37,10 @@ The restricted feed caps the default VRF at 10,000 prefixes per address family. 
 
 For slow CLI session initialization, set `request_timeout: 240` in `config.yaml` and `driver_config.read_timeout_override: 180` on the device. These settings allow session initialization and command execution to finish within the browser request timeout.
 
+The restricted-table matrix passes all 28 CLI queries, 28 uncached API comparisons and 28 browser queries with no page errors. Browser checks use a dedicated query account. Interrupted checks resume from saved results; the completed matrix is not a single uninterrupted run. The original small-table captures remain the regression fixtures.
+
 ## Coverage limits
 
-This completed matrix uses one prefix per family per VRF. Direct pings reach each data gateway; application diagnostics target each context's own interface address. Traceroute validates one-hop execution and parsing, not remote routed forwarding. Community summaries remain text. AS-path searches use custom directives with configured filter lists.
+Completed matrices cover both the small-table and restricted-table profiles above. Direct pings reach each data gateway; application diagnostics target each context's own interface address. Traceroute validates one-hop execution and parsing, not remote routed forwarding. Community summaries remain text. AS-path searches use custom directives with configured filter lists.
 
 A separate full-table run converges at 1,094,724 IPv4 and 261,579 IPv6 prefixes from a RIPE RIS rrc19 snapshot. OS10 reports two IPv4 prefixes rejected for invalid AS-path length. After adding two community-query control prefixes, 25 of 28 CLI cases pass before management access stops responding. Subsequent SSH retries fail, so full-table API and browser acceptance remains incomplete. This result does not establish sustained full-table capacity.
