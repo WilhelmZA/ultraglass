@@ -44,20 +44,15 @@ OS9_BGPRouteTable = OS9_BGPRoute.model_copy(
 )
 OS9_BGPASPath = BuiltinDirective(
     id="__hyperglass_dell_force10_bgp_aspath__",
-    name="BGP AS Path",
+    name="BGP AS Path (IPv4)",
     platforms=PLATFORMS,
-    field=Text(description="AS path regular expression"),
+    field=Text(description="IPv4 AS path regular expression"),
     rules=[
         RuleWithPattern(
             condition="*",
-            commands=[
-                "show ip bgp ipv4 unicast regexp {target}",
-                "show ip bgp ipv6 unicast regexp {target}",
-            ],
-            vrf_command=[
-                "show ip bgp vrf {vrf} ipv4 unicast regexp {target}",
-                "show ip bgp vrf {vrf} ipv6 unicast regexp {target}",
-            ],
+            # OS9 9.13 rejects regexp under explicit IPv4/IPv6 AFI selectors.
+            command="show ip bgp regexp {target}",
+            vrf_command="show ip bgp vrf {vrf} regexp {target}",
         )
     ],
 )
@@ -89,12 +84,12 @@ OS9_Ping = BuiltinDirective(
         RuleWithIPv4(
             condition="0.0.0.0/0",
             command="ping {target} count 5",
-            vrf_command="ping {target} count 5 vrf {vrf}",
+            vrf_command="ping vrf {vrf} {target} count 5",
         ),
         RuleWithIPv6(
             condition="::/0",
             command="ping {target} count 5",
-            vrf_command="ping {target} count 5 vrf {vrf}",
+            vrf_command="ping vrf {vrf} {target} count 5",
         ),
     ],
 )
