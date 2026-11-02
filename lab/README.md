@@ -117,7 +117,7 @@ Starting the same optional appliance after `stop` preserves its disk and restore
 
 The helper waits for SSH and verifies both fixture data links before reporting success. A failed check returns an error instead of reporting the appliance ready.
 
-OS9 remains an experimental console appliance. Connect to `192.168.250.29:5000` with Telnet. Its container health confirms configuration loading only; SSH and data links are not operational.
+OS9 9.13(0.0) requires `no keepalive` on its emulated management and data interfaces. The bootstrap and data-link configuration include this setting. SSH and IPv4/IPv6 data-link pings pass with it. Container health confirms configuration loading only; wait for SSH readiness before querying. See [OS9 validation](configs/os9/README.md).
 
 ### Companion BGP feed
 
