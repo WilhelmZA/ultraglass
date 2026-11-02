@@ -1,0 +1,15 @@
+BGP routing table entry for 2606:4700:4700::/48
+Paths: (1 available, table Default-IP-Routing-Table.)
+
+Received from :
+10.250.1.2(10.250.1.2) Best
+
+AS_PATH : 65000 13335
+Next-Hop : fd00:250:1::2, Cost : 0
+
+Origin IGP, Metric 42, LocalPref 100, Weight  0,
+Route-reflector origin : 0.0.0.0
+Communities:
+  65000:777
+
+
