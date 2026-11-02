@@ -2,13 +2,25 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.5.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.6.0-rc.1**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 3.6.0-rc.1 - 2026-11-02
+
+This is the first release candidate for 3.6.0. It adds device onboarding and eight platform implementations: NVIDIA Cumulus Linux, HPE Comware 7, IP Infusion OcNOS, Aruba AOS-CX, Dell OS9, Dell SmartFabric OS10, FortiGate and PAN-OS.
+
+Images: `wilhelmza/ultraglass:3.6.0-rc.1` and `ghcr.io/wilhelmza/ultraglass:3.6.0-rc.1`. The `latest` tag remains on 3.5.0.
+
+### Validation
+
+- Cumulus VX 5.4, OS9 9.13(0.0) and OS10 10.6.1.3P1 have authentic command captures and completed live acceptance.
+- OS10 passes 28 CLI queries, 28 uncached API comparisons and 28 browser queries with 10,000 IPv4 and 9,729 IPv6 routes, plus LAB control routes. Interrupted checks resume from saved results. Sustained full-table capacity is not established.
+- Comware, OcNOS, AOS-CX, FortiGate and PAN-OS live acceptance remains pending. Their implementations have regression coverage; they are not live-validated platforms.
 
 ### Added
 
