@@ -55,6 +55,7 @@ SUPPORTED_STRUCTURED_OUTPUT = (
     "cumulus_linux",
     "hp_comware",
     "ipinfusion_ocnos",
+    "arrcus_arcos",
 )
 
 CONFIG_EXTENSIONS = ("py", "yaml", "yml", "json", "toml")
@@ -111,6 +112,7 @@ SCRAPE_HELPERS = {
     "junos": "juniper",
     "mikrotik": "mikrotik_routeros",
     "tsnr": "tnsr",
+    "arcos": "arrcus_arcos",
 }
 
 DRIVER_MAP = {
@@ -119,6 +121,7 @@ DRIVER_MAP = {
     "openbgpd": "netmiko",
     "sonic": "netmiko",
     "vyos_1_3": "netmiko",
+    "arrcus_arcos": "netmiko",
     "http": "hyperglass_http_client",
 }
 
@@ -132,4 +135,5 @@ LINUX_PLATFORMS = (
     "bird",
     "openbgpd",
     "sonic",
+    "arrcus_arcos",
 )
