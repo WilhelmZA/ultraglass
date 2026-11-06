@@ -29,6 +29,7 @@ Some vendors have more than one `platform` key. Pick the key from this section; 
 - **VyOS:** see [VyOS versions](#vyos-versions).
 - **Extreme:** see [Extreme EXOS and VOSS](#extreme-exos-and-voss).
 - **TNSR:** use `tnsr`. Ultraglass rewrites `tsnr` to `tnsr`. See [Netgate TNSR](#netgate-tnsr).
+- **Arrcus ArcOS:** use `arrcus_arcos`. Ultraglass rewrites `arcos` to `arrcus_arcos`. The device connects with Netmiko's Linux SSH driver and runs `confd_cli`.
 
 ### Huawei VRP 5 and VRP 8
 
@@ -143,6 +144,16 @@ OcNOS detailed route output supports structured parsing. AS-path and community s
 
 The optional GoBGP/OcNOS lab is described in `lab/configs/ocnos/README.md`.
 
+### Arrcus ArcOS
+
+Use `arrcus_arcos` for Arrcus ArcOS. Built-ins provide IPv4 and IPv6 exact-prefix BGP lookups. An address queries its `/32` or `/128` host route. Named VRFs use `show network-instance <vrf> protocol BGP BGP`. The default instance name is `BGP`; devices that use another protocol instance name need a custom directive.
+
+The login is a Linux shell that can run `confd_cli`. Queries send `echo 'show network-instance ... | display json' | confd_cli -C -u admin`, the ConfD show path used to read OpenConfig BGP state. Structured parsing walks loc-rib `prefix` entries and their next-hop, AS path, communities, local preference and MED. Neighbor session objects are ignored. Unrecognized JSON, AS sets and incomplete paths remain text. The documented show path returns the BGP protocol instance; matching prefixes are selected in the parser. That is suitable for lab-scale tables. Full-table looking-glass use needs a confirmed narrower show path.
+
+Ping, traceroute, AS-path and community searches are omitted until those commands are confirmed on a device. Age and router RPKI state remain unknown. Tests use reconstructed OpenConfig JSON from the documented show tree, not live captures. See `lab/configs/arcos/README.md` for the optional containerlab topology.
+
+The official `arrcus.arcos` Ansible `network_cli` transport hangs on a `config terminal` mode switch against the tested container image. Native support does not use that transport.
+
 ### Aruba AOS-CX
 
 Use `aruba_aoscx` for AOS-CX 10.14 command forms. Built-ins provide IPv4/IPv6 exact-prefix BGP lookups, standard-community searches, ping and traceroute. An address queries its `/32` or `/128` host route. Configure `attrs.source4` and `attrs.source6` for diagnostics. Route, ping and traceroute commands support named VRFs.
@@ -186,6 +197,7 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | Platform | Structured BGP source | Limitations |
 | :------- | :-------------------- | :---------- |
 | Arista EOS | `show ip bgp` / `show ipv6 bgp` JSON; `show bgp ... community ... detail` JSON for communities | AS-path results omit communities. Router RPKI state is read when the router validates origins. |
+| Arrcus ArcOS | `show network-instance ... protocol BGP BGP \| display json` OpenConfig loc-rib | Instance-wide show path; matching prefixes selected in the parser. AS-path and community searches are not offered. Age and router RPKI state remain unknown. Live captures pending. |
 | Aruba AOS-CX | `show bgp [vrf ...] ipv4/ipv6 unicast <prefix>` detail text | Community summaries stay text. AS-path searches are not offered. Age and router RPKI state remain unknown. Live captures pending. |
 | Fortinet FortiGate | `get router info[6] bgp network <target>` detail text | One routing context per reply. AS sets and confederations stay text. A prefix not in the table returns no matching results. Age and router RPKI state remain unknown. |
 | Palo Alto PAN-OS | `show routing protocol bgp loc-rib-detail prefix ...` | Classic virtual routers only. Peer IP/router ID, age and router RPKI state are unknown. Live captures pending. |
