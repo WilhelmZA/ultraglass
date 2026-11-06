@@ -119,12 +119,15 @@ DRIVER_MAP = {
     "openbgpd": "netmiko",
     "sonic": "netmiko",
     "vyos_1_3": "netmiko",
+    "tnsr": "netmiko",
     "http": "hyperglass_http_client",
 }
 
 # Platforms with their own built-in directives that use another Netmiko device type.
 NETMIKO_DEVICE_TYPES = {
     "vyos_1_3": "vyos",
+    # TNSR CLI prompt is `tnsr#`. Netmiko has no TNSR driver; generic SSH matches that prompt.
+    "tnsr": "generic",
 }
 
 LINUX_PLATFORMS = (

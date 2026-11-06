@@ -110,6 +110,12 @@ class Device(HyperglassModelWithId, extra="allow"):
         kw = check_legacy_fields(model="Device", data=kw)
         if "id" not in kw:
             kw = self._with_id(kw)
+        platform = kw.get("platform")
+        if platform in SCRAPE_HELPERS:
+            platform = SCRAPE_HELPERS[platform]
+        # Generic SSH sends Cisco `terminal length 0`. TNSR CLI has no such command.
+        if platform == "tnsr" and "disable_paging" not in kw:
+            kw["disable_paging"] = False
         super().__init__(**kw)
         self._warn_unknown_keys()
         self._validate_directive_attrs()
