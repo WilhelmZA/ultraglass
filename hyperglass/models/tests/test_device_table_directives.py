@@ -7,8 +7,7 @@ import pytest
 from hyperglass.constants import SUPPORTED_STRUCTURED_OUTPUT
 from hyperglass.models.config.devices import Device
 
-# TNSR has no netmiko driver yet (#102).
-PLATFORMS = tuple(p for p in SUPPORTED_STRUCTURED_OUTPUT if p != "tnsr")
+PLATFORMS = SUPPORTED_STRUCTURED_OUTPUT
 ATTRS = {"source4": "192.0.2.1", "source6": "2001:db8::1"}
 
 
