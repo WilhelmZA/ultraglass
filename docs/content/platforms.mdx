@@ -28,6 +28,7 @@ Some vendors have more than one `platform` key. Pick the key from this section; 
 - **Arista EOS:** use `arista_eos`. Ultraglass rewrites `arista` to `arista_eos`.
 - **VyOS:** see [VyOS versions](#vyos-versions).
 - **Extreme:** see [Extreme EXOS and VOSS](#extreme-exos-and-voss).
+- **TNSR:** use `tnsr`. Ultraglass rewrites `tsnr` to `tnsr`. See [Netgate TNSR](#netgate-tnsr).
 
 ### Huawei VRP 5 and VRP 8
 
@@ -40,6 +41,29 @@ VRP 8 has no source option on `tracert ipv6` on some models. Ultraglass sends th
 ### VyOS versions
 
 Use `vyos` for VyOS 1.4 and later. Use `vyos_1_3` for VyOS 1.3, which uses the older `show ip bgp` / `show ipv6 bgp` commands and has no traceroute source option. Both connect with the Netmiko `vyos` driver. Structured output on `vyos_1_3` covers traceroute only; BGP results stay as text.
+
+### Netgate TNSR
+
+Use `tnsr` for TNSR. Ultraglass rewrites `tsnr` to `tnsr`. Netmiko has no TNSR device type, so Ultraglass connects with Netmiko's generic SSH driver to the TNSR CLI (`tnsr#`).
+
+Built-ins provide IPv4/IPv6 BGP route lookups, AS-path searches, community searches, ping and traceroute. BGP queries run FRR `vtysh` through `dataplane shell sudo vtysh`, which is the documented way to read dataplane BGP state from the TNSR CLI. Ping and traceroute use the TNSR CLI `ping` and `traceroute` commands. Configure `attrs.source4` and `attrs.source6`.
+
+The generic SSH driver sends Cisco `terminal length 0` to disable paging. TNSR CLI does not document that command, so `disable_paging` defaults to `false` on this platform. Set it to `true` only if the device accepts that command.
+
+Structured output covers traceroute only. BGP results stay as text. Live ISO validation remains pending.
+
+```yaml
+devices:
+  - name: tnsr-edge
+    address: 192.0.2.10
+    platform: tnsr
+    credential:
+      username: tnsr
+      password: tnsr
+    attrs:
+      source4: 192.0.2.1
+      source6: 2001:db8::1
+```
 
 ### Cisco IOS BGP communities
 

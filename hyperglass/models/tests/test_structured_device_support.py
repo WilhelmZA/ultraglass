@@ -6,8 +6,7 @@ from hyperglass.constants import SUPPORTED_STRUCTURED_OUTPUT
 from hyperglass.models.config.devices import Device
 
 
-# `tnsr` has a parser but is not a valid device platform.
-@pytest.mark.parametrize("platform", [p for p in SUPPORTED_STRUCTURED_OUTPUT if p != "tnsr"])
+@pytest.mark.parametrize("platform", SUPPORTED_STRUCTURED_OUTPUT)
 def test_structured_output_opt_in(platform):
     config = {
         "name": "test",

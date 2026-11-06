@@ -67,6 +67,10 @@ Images: `wilhelmza/ultraglass:3.6.0-rc.2` and `ghcr.io/wilhelmza/ultraglass:3.6.
 
 - FortiGate-VM64-KVM 7.6.8 has authentic captures for IPv4 and IPv6 BGP route detail, prefixes not in the table, ping and traceroute. BGP route, ping and traceroute pass through the API in structured and text modes. AS-path and community searches, VRF selection and PAN-OS remain unvalidated (#81).
 
+### Fixed
+
+- Load `tnsr` devices with Netmiko's generic SSH driver so the built-in TNSR directives can run. `disable_paging` defaults to false because TNSR CLI has no `terminal length` command (#102). Live ISO validation remains pending.
+
 ## 3.6.0-rc.1 - 2026-11-02
 
 This is the first release candidate for 3.6.0. It adds device onboarding and eight platform implementations: NVIDIA Cumulus Linux, HPE Comware 7, IP Infusion OcNOS, Aruba AOS-CX, Dell OS9, Dell SmartFabric OS10, FortiGate and PAN-OS.
