@@ -1,0 +1,76 @@
+{
+  "network-instance": [
+    {
+      "name": "default",
+      "protocol": [
+        {
+          "identifier": "BGP",
+          "name": "BGP",
+          "bgp": {
+            "rib": {
+              "afi-safi": [
+                {
+                  "afi-safi-name": "IPV4_UNICAST",
+                  "ipv4-unicast": {
+                    "loc-rib": {
+                      "route": [
+                        {
+                          "prefix": "10.0.0.0/16",
+                          "origin": "192.0.2.1",
+                          "path-id": 0,
+                          "state": {
+                            "prefix": "10.0.0.0/16",
+                            "origin": "192.0.2.1",
+                            "path-id": 0,
+                            "valid-route": true,
+                            "next-hop": "192.0.2.1",
+                            "med": 0,
+                            "local-pref": 100,
+                            "as-path": {
+                              "as-segment": [
+                                {
+                                  "state": {
+                                    "type": "AS_SEQ",
+                                    "member": [1, 65000]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "prefix": "10.0.0.0/16",
+                          "origin": "192.0.2.2",
+                          "path-id": 1,
+                          "state": {
+                            "prefix": "10.0.0.0/16",
+                            "origin": "192.0.2.2",
+                            "path-id": 1,
+                            "valid-route": false,
+                            "next-hop": "192.0.2.2",
+                            "med": 0,
+                            "local-pref": 100,
+                            "as-path": {
+                              "as-segment": [
+                                {
+                                  "state": {
+                                    "type": "AS_SEQ",
+                                    "member": ["1.10", 65000]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

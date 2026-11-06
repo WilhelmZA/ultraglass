@@ -1,0 +1,69 @@
+{
+  "network-instance": [
+    {
+      "name": "default",
+      "protocol": [
+        {
+          "identifier": "BGP",
+          "name": "BGP",
+          "bgp": {
+            "rib": {
+              "attr-sets": {
+                "attr-set": [
+                  {
+                    "index": 7,
+                    "state": {
+                      "index": 7,
+                      "origin": "IGP",
+                      "med": 50,
+                      "local-pref": 200,
+                      "next-hop": "192.0.2.8"
+                    },
+                    "as-path": {
+                      "as-segment": [
+                        {
+                          "state": {
+                            "type": "AS_SEQ",
+                            "member": [65100, 13335]
+                          }
+                        }
+                      ]
+                    },
+                    "community": {
+                      "state": {
+                        "community": ["65100:1", "65100:2"]
+                      }
+                    }
+                  }
+                ]
+              },
+              "afi-safi": [
+                {
+                  "afi-safi-name": "IPV4_UNICAST",
+                  "ipv4-unicast": {
+                    "loc-rib": {
+                      "route": [
+                        {
+                          "prefix": "10.0.0.0/16",
+                          "origin": "192.0.2.8",
+                          "path-id": 0,
+                          "state": {
+                            "prefix": "10.0.0.0/16",
+                            "origin": "192.0.2.8",
+                            "path-id": 0,
+                            "valid-route": true,
+                            "attr-index": 7
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

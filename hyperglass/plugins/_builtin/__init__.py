@@ -25,6 +25,7 @@ from .bgp_route_dell import BGPRoutePluginDell
 from .bgp_route_fortinet import BGPRoutePluginFortinet
 from .bgp_route_ocnos import BGPRoutePluginOcNOS
 from .bgp_route_panos import BGPRoutePluginPANOS
+from .bgp_route_arcos import BGPRoutePluginArcOS
 from .trace_route_os9 import TraceroutePluginOS9
 
 __all__ = (
@@ -51,6 +52,7 @@ __all__ = (
     "BGPRoutePluginFortinet",
     "BGPRoutePluginOcNOS",
     "BGPRoutePluginPANOS",
+    "BGPRoutePluginArcOS",
     "TraceroutePluginOS9",
     "RemoveCommand",
 )

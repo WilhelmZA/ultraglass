@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+
+- Arrcus ArcOS exact-prefix BGP lookups over ConfD OpenConfig JSON (`show network-instance ... protocol BGP BGP | display json`), named network-instance VRF forms, and structured loc-rib parsing (#80). Live validation remains pending.
+
 ## 3.6.0-rc.1 - 2026-11-02
 
 This is the first release candidate for 3.6.0. It adds device onboarding and eight platform implementations: NVIDIA Cumulus Linux, HPE Comware 7, IP Infusion OcNOS, Aruba AOS-CX, Dell OS9, Dell SmartFabric OS10, FortiGate and PAN-OS.

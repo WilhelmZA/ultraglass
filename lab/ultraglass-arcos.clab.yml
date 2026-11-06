@@ -1,0 +1,29 @@
+# Optional ArcOS lab. Supply a locally tagged native arrcus_arcos image through ARCOS_IMAGE.
+name: ultraglass-arcos
+
+mgmt:
+  network: ultraglass-arcos-mgmt
+  ipv4-subnet: 192.168.247.0/24
+
+topology:
+  defaults:
+    privileged: false
+  nodes:
+    core:
+      kind: linux
+      image: ultraglass-lab/core:latest
+      mgmt-ipv4: 192.168.247.10
+      binds:
+        - configs/arcos/gobgpd.toml:/etc/gobgp/gobgpd.toml:ro
+      exec:
+        - ip addr add 10.247.1.0/31 dev eth1
+        - ip addr add 2001:db8:247:1::/127 dev eth1
+        - ip addr add 198.51.100.1/32 dev lo
+        - ip addr add 2001:db8:100::1/128 dev lo
+    arcos:
+      kind: arrcus_arcos
+      image: ${ARCOS_IMAGE}
+      mgmt-ipv4: 192.168.247.12
+
+  links:
+    - endpoints: ["core:eth1", "arcos:swp1"]
