@@ -2,13 +2,24 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.6.0-rc.1**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.6.0-rc.2**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 3.6.0-rc.2 - 2026-11-08
+
+This is the second release candidate for 3.6.0. It completes FortiGate live validation for BGP route, ping and traceroute, and fixes two defects found during that run.
+
+Images: `wilhelmza/ultraglass:3.6.0-rc.2` and `ghcr.io/wilhelmza/ultraglass:3.6.0-rc.2`. The `latest` tag remains on 3.5.0.
+
+### Changed
+
+- Version bumped to 3.6.0-rc.2.
+- The UI package author now names the Ultraglass maintainers, matching the Python package and the documentation. 3.6.0-rc.1 still carried the upstream author (#225).
 
 ### Fixed
 
