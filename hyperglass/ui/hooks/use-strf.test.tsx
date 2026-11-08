@@ -1,6 +1,6 @@
 import { expect, describe, it } from 'vitest';
 import { render } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { useStrf } from './use-strf';
 
 const TEMPLATE = 'Testing {name} hook';

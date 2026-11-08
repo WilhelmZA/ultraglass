@@ -1,6 +1,6 @@
 import { expect, describe, it } from 'vitest';
 import { render } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { userEvent } from '@testing-library/user-event';
 import { ChakraProvider, useColorMode, useColorModeValue, extendTheme } from '@chakra-ui/react';
 import { useOpposingColor } from './use-opposing-color';

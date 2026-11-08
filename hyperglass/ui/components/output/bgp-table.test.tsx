@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { ChakraProvider } from '@chakra-ui/react';
 import { HyperglassContext } from '~/context';
 import { BGPTable } from './bgp-table';

@@ -1,0 +1,36 @@
+name: Published Image Scan
+
+# New CVEs are published after an image ships. This rescans the published images
+# every week, so a finding shows up here before Docker Hub reports it.
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Image tag to scan
+        required: false
+        default: latest
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  TRIVY_VERSION: 0.74.0
+
+jobs:
+  scan:
+    name: Scan ${{ inputs.tag || 'latest' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan published image
+        run: |
+          docker run --rm aquasec/trivy:${TRIVY_VERSION} image \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            --timeout 20m \
+            "docker.io/wilhelmza/ultraglass:${{ inputs.tag || 'latest' }}"

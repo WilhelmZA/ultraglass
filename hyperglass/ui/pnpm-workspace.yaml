@@ -17,14 +17,35 @@ allowBuilds:
 #                             export build does not use next/image; bumping the pinned
 #                             version keeps the installed package metadata current even
 #                             though the native binding is never built here.
+#   postcss       8.5.32     (advisories up to 8.5.22)
+#   Range-scoped floors below come from `pnpm audit --fix` and stay within each
+#   package's current major line. They clear the image scan findings for form-data,
+#   ws, node-fetch, minimatch, braces, cross-spawn, flatted, picomatch and others
+#   that sit in the dev toolchain installed into the image's pnpm store.
 overrides:
   ua-parser-js: '^0.7.36'
   '@babel/runtime': '7.26.10'
   '@babel/helpers': '7.26.10'
   browserslist: '>=4.28.7'
   nanoid: '3.3.18'
-  postcss: '8.5.18'
+  postcss: '8.5.32'
   sharp: '>=0.35.5'
   source-map-js: '>=1.2.2'
+  ajv@<6.14.0: ^6.14.0
+  brace-expansion@<1.1.21: ^1.1.21
+  brace-expansion@>=2.0.0 <2.1.7: ^2.1.7
+  braces@<3.0.3: ^3.0.3
+  cross-spawn@>=7.0.0 <7.0.5: ^7.0.5
+  flatted@<=3.4.1: ^3.4.2
+  form-data@>=4.0.0 <4.0.6: ^4.0.6
+  js-yaml@>=4.0.0 <4.3.2: ^4.3.2
+  micromatch@<4.0.8: ^4.0.8
+  minimatch@<3.1.4: ^3.1.4
+  minimatch@>=9.0.0 <9.0.9: ^9.0.9
+  node-fetch@<2.6.7: ^2.6.7
+  picomatch@<2.3.2: ^2.3.2
+  uuid@<11.1.1: ^11.1.1
+  ws@>=8.0.0 <8.21.0: ^8.21.0
+  yaml@>=1.0.0 <1.10.3: ^1.10.3
 packages:
   - .

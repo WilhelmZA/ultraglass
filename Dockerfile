@@ -1,4 +1,7 @@
 FROM python:3.13-alpine AS base
+# Pull patched Alpine packages (zlib, expat, musl, sqlite, libxml2, ...) on top of
+# the base image so the image does not wait for an upstream base rebuild.
+RUN apk upgrade --no-cache
 WORKDIR /opt/hyperglass
 ENV HYPERGLASS_APP_PATH=/etc/hyperglass
 ENV HYPERGLASS_HOST=0.0.0.0
@@ -24,11 +27,11 @@ ENV PNPM_CONFIG_STORE_DIR=/opt/hyperglass/.pnpm-store
 # reconcile its own package manifest. pnpm is pinned to a release with a fixed
 # bundled tar dependency.
 RUN apk add --no-cache build-base pkgconfig cairo-dev nodejs npm \
-  && npm install -g npm@12.0.2 pnpm@11.23.0 \
+  && npm install -g npm@12.0.2 pnpm@11.28.11 \
   && rm -rf /tmp/tar-patch \
   && mkdir -p /tmp/tar-patch \
   && npm --prefix /tmp/tar-patch install --omit=dev --ignore-scripts \
-    tar@7.5.21 brace-expansion@5.0.9 ip-address@10.3.1 \
+    tar@7.5.21 brace-expansion@5.0.12 ip-address@10.3.1 undici@6.29.1 \
   && cp -a /tmp/tar-patch/node_modules/. /usr/local/lib/node_modules/npm/node_modules/ \
   && rm -rf /tmp/tar-patch \
   && pnpm install --frozen-lockfile \

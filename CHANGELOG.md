@@ -10,6 +10,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Security
+
+- Raise Python dependency pins to fixed releases: Pillow 13.0.0, PyJWT 2.15.1, anyio 4.16.0, Brotli 1.2.1, certifi 2026.10.23 and urllib3 2.8.0. typing-extensions moves to 4.16.0, which anyio 4.16.0 requires.
+- Upgrade the UI test toolchain to Vitest 5.1, Vite 8.3 and jest-dom 7.0. This removes esbuild 0.19 (built with Go 1.20.12), Rollup 4.12 and tinypool 0.8 from the image.
+- Add pnpm overrides for vulnerable transitive UI packages, including form-data, ws, node-fetch, minimatch, braces, cross-spawn, flatted and picomatch. Raise postcss to 8.5.32.
+- Upgrade Alpine packages during the image build, and patch undici 6.29.1 and brace-expansion 5.0.12 inside npm. pnpm moves to 11.28.11.
+
+### Added
+
+- The Docker job builds and scans the image with Trivy before publishing. A HIGH or CRITICAL finding with a fixed version fails the job and blocks the publish.
+- A weekly workflow scans the published `latest` image, and can scan any tag on demand.
+
 ## 3.6.0 - 2026-11-09
 
 This release adds device onboarding and eight platforms: NVIDIA Cumulus Linux, HPE Comware 7, IP Infusion OcNOS, Aruba AOS-CX, Dell OS9, Dell SmartFabric OS10, FortiGate and PAN-OS. The `hyperglass onboard` command builds a device entry, tests the built-in commands against the device and reports which fields it returns.
