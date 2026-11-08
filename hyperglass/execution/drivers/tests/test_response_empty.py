@@ -54,3 +54,10 @@ async def test_text_with_content_is_returned(respond, output):
     respond(output)
     result = await main.execute(_query())
     assert "route" in result
+
+
+@pytest.mark.asyncio
+async def test_blank_setup_replies_are_dropped(respond):
+    """FortiOS diagnostic option commands reply with nothing before the probe output."""
+    respond(("", "", "", "", "PING 192.0.2.1", ""))
+    assert await main.execute(_query()) == "PING 192.0.2.1"

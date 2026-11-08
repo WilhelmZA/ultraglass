@@ -1,0 +1,2 @@
+traceroute to 10.250.1.2 (10.250.1.2), 32 hops max, 1 probe packets per hop, 84 byte packets
+ 1  10.250.1.2  0.381 ms

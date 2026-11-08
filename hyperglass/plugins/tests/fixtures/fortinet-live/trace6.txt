@@ -1,0 +1,2 @@
+tracert6 to fd00:250:1::2 (fd00:250:1::2), 30 hops max, 40/8 byte payload/paddata
+  1  fd00:250:1::2 (fd00:250:1::2)  0.232 ms  0.485 ms  0.336 ms

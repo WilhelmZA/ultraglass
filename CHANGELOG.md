@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Fixed
+
+- FortiGate structured BGP route queries for a prefix that is not in the table now report that no matching results were found, instead of returning the device message as a successful result (#81).
+- Text responses no longer start with blank lines when a query runs setup commands that print nothing, such as the FortiGate ping and traceroute options (#81).
+
+### Validation
+
+- FortiGate-VM64-KVM 7.6.8 has authentic captures for IPv4 and IPv6 BGP route detail, prefixes not in the table, ping and traceroute. BGP route, ping and traceroute pass through the API in structured and text modes. AS-path and community searches, VRF selection and PAN-OS remain unvalidated (#81).
+
 ## 3.6.0-rc.1 - 2026-11-02
 
 This is the first release candidate for 3.6.0. It adds device onboarding and eight platform implementations: NVIDIA Cumulus Linux, HPE Comware 7, IP Infusion OcNOS, Aruba AOS-CX, Dell OS9, Dell SmartFabric OS10, FortiGate and PAN-OS.

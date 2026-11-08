@@ -1,0 +1,10 @@
+PING fd00:250:1::2(fd00:250:1::2) from fd00:250:1::15 : 56 data bytes
+64 bytes from fd00:250:1::2: icmp_seq=1 ttl=255 time=0.199 ms
+64 bytes from fd00:250:1::2: icmp_seq=2 ttl=255 time=0.355 ms
+64 bytes from fd00:250:1::2: icmp_seq=3 ttl=255 time=0.396 ms
+64 bytes from fd00:250:1::2: icmp_seq=4 ttl=255 time=0.311 ms
+64 bytes from fd00:250:1::2: icmp_seq=5 ttl=255 time=0.253 ms
+
+--- fd00:250:1::2 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss, time 4002ms
+rtt min/avg/max/mdev = 0.199/0.302/0.396/0.073 ms

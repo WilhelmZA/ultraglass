@@ -17,6 +17,8 @@ from .._output import OutputPlugin
 
 HEADER = re.compile(r"^(?:VRF (\d+) )?BGP routing table entry for (\S+)", re.MULTILINE)
 PATH = re.compile(r"^  (Local|[\d({\[].*)$", re.MULTILINE)
+# FortiOS prints this when no BGP route covers the target.
+NOT_FOUND = "% Network not in table"
 HOP = re.compile(r"^    (\S+)(?: \(inaccessible\))? from (\S+) \(([^)]+)\)", re.MULTILINE)
 
 
@@ -89,6 +91,9 @@ class BGPRoutePluginFortinet(OutputPlugin):
         if not query.device.structured_output:
             return output
         text = output if isinstance(output, str) else "\n".join(output)
+        # No result lets the query report an empty response instead of the device text.
+        if text.strip() == NOT_FOUND:
+            return None
         try:
             return parse_fortinet(text)
         except ValueError:

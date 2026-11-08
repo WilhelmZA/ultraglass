@@ -1,0 +1,9 @@
+VRF 0 BGP routing table entry for 2606:4700::/44
+Paths: (1 available, best #1, table Default-IP-Routing-Table)
+  Not advertised to any peer
+  Original VRF 0
+  65000 13335
+    fd00:250:1::2 from 10.250.1.2 (10.250.1.2)
+      Origin incomplete distance 20 metric 0, localpref 100, valid, external, best
+      Community: 37195:302
+      Last update: Sat Nov  7 15:51:31 2026

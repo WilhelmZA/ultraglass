@@ -82,7 +82,8 @@ async def execute(query: "Query") -> Union["OutputDataModel", str]:
             # Text responses can be whitespace only, such as an FRR filter with no match.
             if not any(str(item).strip() for item in output):
                 raise ResponseEmpty(query=query)
-            output = "\n\n".join(output)
+            # Diagnostic setup commands, such as FortiOS ping options, reply with nothing.
+            output = "\n\n".join(item for item in output if str(item).strip())
 
         elif isinstance(output, str):
             # If the output is a string (not structured) and is blank,

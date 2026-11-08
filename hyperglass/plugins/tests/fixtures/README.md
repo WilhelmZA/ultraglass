@@ -57,3 +57,8 @@ The lab probe advertises `1.1.1.0/24` and `2606:4700::/44` with AS path `65000 1
 ## 1 November 2026 onboarding captures
 
 - `cisco-iosv-live/aspath_policy4.txt` and `aspath_policy6.txt`: IOSv 15.9(3)M6, complete `show bgp <ipv4|ipv6> unicast quote-regexp "_13335$"` responses from the failed structured onboarding query in #128. Extracted from `ultraglass-lab-evidence/2026-11-01-onboard-128/ultraglass/lab-iosv/onboard.json`; only trailing whitespace is removed. Each response holds two routes, including the active policy fixture. The long IPv6 prefix wraps, and its continuation starts one column right of the header (#215).
+
+## FortiGate (issue #81)
+
+- `fortinet-live/`: FortiGate-VM64-KVM v7.6.8 build3744, captured on 8 November 2026 over SSH with the commands the built-in directives send. The device peers with a GoBGP fixture that advertises `1.1.1.0/24` and `2606:4700::/44` with AS path `65000 13335` and community `37195:302`. `route4.txt` and `route6.txt` use `get router info bgp network 1.1.1.1` and `get router info6 bgp network 2606:4700::1111`. `notfound4.txt` and `notfound6.txt` are the replies for `9.9.9.0/24` and `2001:db8::/32`. `ping4.txt`, `ping6.txt` and `trace4.txt` are the probe replies after the directive's option commands, which print nothing. `trace6.txt` uses `execute tracert6`. Only trailing whitespace is removed.
+- `test_live_captures_fortinet.py` runs the route and traceroute captures through their parsers, checks that a missing prefix produces no result, and checks that the ping captures are complete.
