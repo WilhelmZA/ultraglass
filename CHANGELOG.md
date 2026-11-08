@@ -2,13 +2,17 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.6.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.6.1**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.6.1 - 2026-11-09
+
+This release patches the HIGH and CRITICAL vulnerabilities Docker Hub reported in the 3.6.0 image, and adds a Trivy image scan to CI that blocks a publish on a fixable HIGH or CRITICAL finding (#233). There is no functional change. A 3.6.0 configuration loads unchanged.
+
+Images: `wilhelmza/ultraglass:3.6.1` and `ghcr.io/wilhelmza/ultraglass:3.6.1`. The `latest` tag on both registries now points to 3.6.1.
 
 ### Security
 
@@ -21,6 +25,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The Docker job builds and scans the image with Trivy before publishing. A HIGH or CRITICAL finding with a fixed version fails the job and blocks the publish.
 - A weekly workflow scans the published `latest` image, and can scan any tag on demand.
+
+### Changed
+
+- Updated the Python package, runtime metadata, UI package, upgrade guide, installation docs and issue templates to 3.6.1.
 
 ## 3.6.0 - 2026-11-09
 
