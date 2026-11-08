@@ -1,5 +1,5 @@
 {
-  "version": "3.6.0-rc.2",
+  "version": "3.6.0",
   "name": "ui",
   "description": "UI for Ultraglass, a maintained fork of the modern network looking glass hyperglass",
   "author": "Ultraglass maintainers",

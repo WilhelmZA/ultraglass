@@ -1,13 +1,13 @@
 ## Using Docker
 
-The application keeps the `hyperglass` service and configuration names for compatibility. Pull the Ultraglass repository, then update the checked-out release before rebuilding the containers. Replace `v3.5.0` with the release you want from the [releases page](https://github.com/WilhelmZA/ultraglass/releases).
+The application keeps the `hyperglass` service and configuration names for compatibility. Pull the Ultraglass repository, then update the checked-out release before rebuilding the containers. Replace `v3.6.0` with the release you want from the [releases page](https://github.com/WilhelmZA/ultraglass/releases).
 
 ```shell copy
 cd /opt/hyperglass
 docker compose down
 docker compose rm -f
 git fetch --tags
-git checkout v3.5.0
+git checkout v3.6.0
 docker compose build
 docker compose up
 ```
@@ -19,15 +19,13 @@ Update the checked-out release, reinstall the package in the virtual environment
 ```shell copy
 cd /opt/hyperglass
 git fetch --tags
-git checkout v3.5.0
+git checkout v3.6.0
 . .venv/bin/activate
 python -m pip install -e '.[ui]'
 systemctl restart hyperglass
 ```
 
 ## Upgrading from 3.5 to 3.6
-
-3.6.0 is in release candidate testing. The current candidate is `v3.6.0-rc.2`. To test it, use `v3.6.0-rc.2` in place of `v3.5.0` in the commands above. Release images are tagged `3.6.0-rc.2`. The `latest` tag remains on 3.5.0.
 
 A 3.5.0 configuration loads unchanged. No configuration key is removed. 3.6 adds these changes:
 

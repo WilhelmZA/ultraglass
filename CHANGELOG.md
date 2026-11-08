@@ -2,13 +2,30 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.6.0-rc.2**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.6.0**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 3.6.0 - 2026-11-09
+
+This release adds device onboarding and eight platforms: NVIDIA Cumulus Linux, HPE Comware 7, IP Infusion OcNOS, Aruba AOS-CX, Dell OS9, Dell SmartFabric OS10, FortiGate and PAN-OS. The `hyperglass onboard` command builds a device entry, tests the built-in commands against the device and reports which fields it returns.
+
+3.6.0 supersedes release candidates 3.6.0-rc.1 and rc.2, whose sections below record what each candidate added. Cumulus VX 5.4, Dell OS9 9.13, Dell OS10 10.6.1.3P1 and FortiGate 7.6.8 completed live acceptance with captured device output kept as parser regression fixtures. The rc.2 lab run passed Cisco IOS structured and text queries and device onboarding. Comware, OcNOS, AOS-CX and PAN-OS have regression coverage, and their live acceptance remains pending.
+
+Images: `wilhelmza/ultraglass:3.6.0` and `ghcr.io/wilhelmza/ultraglass:3.6.0`. The `latest` tag on both registries now points to 3.6.0.
+
+### Upgrading from 3.5.0
+
+A 3.5.0 configuration loads unchanged. No configuration key is removed. Structured output stays opt-in, so set `structured_output: true` on each new-platform device that should return tables. See the [upgrade guide](https://github.com/WilhelmZA/ultraglass/blob/main/docs/content/installation/upgrading.mdx).
+
+### Changed
+
+- Updated the Python package, runtime metadata, UI package, upgrade guide, installation docs and issue templates to 3.6.0.
+- Updated the platform, device, structured output, onboarding and installation documentation for 3.6 (#230).
 
 ## 3.6.0-rc.2 - 2026-11-08
 
