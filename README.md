@@ -10,20 +10,21 @@ Ultraglass is a maintained fork of [hyperglass](https://github.com/thatmattlove/
 
 - Runs network diagnostics from selected routers or locations.
 - Supports BGP route, BGP community, BGP AS path, ping, and traceroute queries.
-- Provides structured BGP and traceroute output where the device platform supports it.
+- Provides opt-in structured BGP and traceroute output where the device platform supports it.
 - Enriches routes and traceroute hops with ASN, organisation, country, IXP, and reverse DNS data when enabled.
 - Supports IPv4 and IPv6, VRFs, SSH proxy servers, HTTP devices, and concurrent queries.
 - Applies prefix-list and access-list style controls to query targets.
 - Provides a responsive web UI and configurable OpenAPI documentation.
 - Lets administrators customise the theme, logo, menus, labels, messages, directives, and error handling.
+- Includes a `hyperglass onboard` command that creates and tests device entries, checks feature settings, and scaffolds custom directives.
 
 ## Supported platforms
 
-Ultraglass includes built-in support for Arista EOS, BIRD, Cisco IOS, Cisco NX-OS, Cisco IOS-XR, FRRouting, Huawei VRP, Juniper Junos, MikroTik, Nokia SR OS, OpenBGPD, TNSR, and VyOS. Netmiko provides the underlying device connectivity, so other supported platforms can be configured when their commands and output match the required query types.
+Ultraglass includes built-in support for Arista EOS, Aruba AOS-CX, BIRD, Cisco IOS, Cisco NX-OS, Cisco IOS-XR, NVIDIA Cumulus Linux, Dell OS9 (Force10), Dell SmartFabric OS10, Extreme EXOS, Extreme VOSS, Fortinet FortiGate, FRRouting, HPE Comware 7, Huawei VRP, IP Infusion OcNOS, Juniper Junos, MikroTik RouterOS and SwitchOS, Nokia SR OS, OpenBGPD, Palo Alto PAN-OS, SONiC, TNSR, and VyOS. Netmiko provides the underlying device connectivity, so other supported platforms can be configured when their commands and output match the required query types.
 
-Structured BGP route output is available for Arista EOS, BIRD, Cisco IOS, FRRouting, Huawei VRP, Juniper Junos, MikroTik RouterOS, OpenBGPD, and VyOS 1.4+. BIRD, Cisco IOS, OpenBGPD, VyOS, and Huawei VRPv8 require explicit `structured_output: true`. Structured traceroute supports FRRouting, Huawei, MikroTik, and standard numbered CLI formats from EOS, Junos, Cisco, Nokia, BIRD, OpenBGPD, VyOS, and TNSR. BIRD, OpenBGPD, VyOS, TNSR, Cisco, and Nokia require explicit `structured_output: true`. Unrecognized traceroute formats retain their text output. Use `vyos_1_3` for VyOS 1.3; its BGP results remain text-only.
+Structured output is opt-in on every platform: set `structured_output: true` on each device. Structured BGP output is available for Arista EOS, Aruba AOS-CX, BIRD, Cisco IOS, IOS-XR and NX-OS, NVIDIA Cumulus Linux, Dell OS9 and OS10, Extreme EXOS, FortiGate, FRRouting, HPE Comware 7, Huawei VRP, IP Infusion OcNOS, Juniper Junos, MikroTik RouterOS and SwitchOS, OpenBGPD, PAN-OS, SONiC, and VyOS 1.4+. Structured traceroute covers these platforms and also Nokia SR OS, TNSR, Extreme VOSS, and VyOS 1.3. Use `vyos_1_3` for VyOS 1.3; its BGP results remain text-only.
 
-Built-in VRF queries support Arista EOS, FRRouting, Huawei VRP, MikroTik RouterOS, and VyOS 1.4+. Configure `vrf` on each device entry. Custom directives can offer fixed-choice variables through additional select fields.
+Built-in VRF queries support Arista EOS, Aruba AOS-CX, NVIDIA Cumulus Linux, Dell OS9 and OS10, Extreme EXOS and VOSS, FRRouting, HPE Comware 7, Huawei VRP, IP Infusion OcNOS, MikroTik RouterOS, PAN-OS, SONiC, and VyOS 1.4+. Configure `vrf` on each device entry. Custom directives can offer fixed-choice variables through additional select fields.
 
 Hostname targets can use public DNS-over-HTTPS or the server resolver through `web.dns_provider.name: server`. My IP uses the address the server sees by default, with no third-party lookup. Set `web.my_ip: external` to ask myip.wtf for both address families after visitor confirmation, or `off` to hide the control.
 

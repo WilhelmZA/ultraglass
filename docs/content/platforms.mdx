@@ -92,7 +92,9 @@ Use `cumulus_linux` for the Cumulus Linux shell. It connects with Netmiko's `cum
 
 BGP commands use `sudo -n vtysh -c 'show bgp ...'`. Ping and traceroute use `sudo -n ip vrf exec default` or the configured VRF. This selects the data-plane routing context even when SSH enters the management VRF. Set `attrs.source4` and `attrs.source6` to addresses assigned in that context.
 
-The login account needs passwordless sudo for these commands. `-n` makes missing sudo permission fail instead of waiting for a password. Structured output uses the shared FRR JSON and Linux traceroute parsers. AS-path JSON omits communities and route age. The current tests use existing FRR captures; Cumulus VX live captures remain pending. The optional lab topology is documented in `lab/configs/cumulus/README.md`.
+The login account needs passwordless sudo for these commands. `-n` makes missing sudo permission fail instead of waiting for a password. Structured output uses the shared FRR JSON and Linux traceroute parsers. AS-path JSON omits communities and route age. The parser skips the prefix metadata at the start of Cumulus community detail JSON.
+
+Cumulus VX 5.4 has authentic IPv4 and IPv6 captures for BGP, ping and traceroute in the default VRF and a named VRF. It passes live acceptance in text and structured modes. The optional lab topology is documented in `lab/configs/cumulus/README.md`.
 
 ```yaml
 devices:
@@ -108,6 +110,7 @@ devices:
       source4: 192.0.2.1
       source6: 2001:db8::1
 ```
+
 ### IP Infusion OcNOS
 
 Use `ipinfusion_ocnos` for OcNOS 6.5+ through its Netmiko driver. Native commands offer IPv4/IPv6 routes, AS-path searches, IPv4 standard-community searches, ping, and traceroute. Ping uses `count 5`; older releases without this option need custom directives. The driver enters privileged mode; configure `driver_config.secret` if the device requires an enable password.
@@ -146,7 +149,11 @@ FortiGate queries run in the account's current VDOM. Use a VDOM-scoped account. 
 
 PAN-OS support targets the classic routing engine. Set `vrf` to its virtual-router name for BGP; the default is `default`. Address-only queries become `/32` or `/128` prefixes. Diagnostics use explicit `attrs.source4` and `attrs.source6` addresses and are omitted on VRF devices. The advanced routing engine uses different commands and requires custom directives.
 
-AS-path and community searches remain pending for both platforms. Tests use attributed published BGP examples and synthetic IPv6/traceroute cases. Live licensed-VM validation remains pending. See `lab/configs/firewalls/README.md`.
+Neither platform has built-in AS-path or community directives. Configure custom directives for these searches.
+
+In structured mode, a FortiGate BGP route query for a prefix that is not in the table reports that no matching results were found.
+
+FortiGate-VM64-KVM 7.6.8 has authentic captures for IPv4 and IPv6 BGP route detail, prefixes not in the table, ping and traceroute. BGP route, ping and traceroute pass through the API in text and structured modes. PAN-OS tests use attributed published BGP examples and synthetic IPv6 and traceroute cases. PAN-OS live validation remains pending. See `lab/configs/firewalls/README.md`.
 
 ### Structured output
 
@@ -156,7 +163,7 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | :------- | :-------------------- | :---------- |
 | Arista EOS | `show ip bgp` / `show ipv6 bgp` JSON; `show bgp ... community ... detail` JSON for communities | AS-path results omit communities. Router RPKI state is read when the router validates origins. |
 | Aruba AOS-CX | `show bgp [vrf ...] ipv4/ipv6 unicast <prefix>` detail text | Community summaries stay text. AS-path searches are not offered. Age and router RPKI state remain unknown. Live captures pending. |
-| Fortinet FortiGate | `get router info[6] bgp network <target>` detail text | One routing context per reply. AS sets and confederations stay text. Live captures pending. |
+| Fortinet FortiGate | `get router info[6] bgp network <target>` detail text | One routing context per reply. AS sets and confederations stay text. A prefix not in the table returns no matching results. Age and router RPKI state remain unknown. |
 | Palo Alto PAN-OS | `show routing protocol bgp loc-rib-detail prefix ...` | Classic virtual routers only. Peer IP/router ID, age and router RPKI state are unknown. Live captures pending. |
 | BIRD | `show route all` text | Route age and router RPKI state remain unknown. |
 | Cisco IOS | `show bgp` text | AS-path and community summary results omit communities and route age. Route results read route age only when the router prints the update time in UTC. Router RPKI state is read when the router validates origins. IPv6 route queries need a prefix, because IOS has no longest-match BGP lookup for an IPv6 address. |
@@ -172,18 +179,18 @@ Structured output is opt-in on every platform. Set `structured_output: true` on 
 | Juniper Junos | `show route ... detail \| display xml` | Route queries return the best path only. Router RPKI state is read when the router validates origins. |
 | MikroTik RouterOS | `print detail` text (RouterOS 6 and 7) | Route age remains unknown. Router RPKI state is read when the route detail carries an `rpki` value. |
 | Nokia SR OS | Not supported | Structured output covers traceroute only; BGP results stay as text. |
-| NVIDIA Cumulus Linux | FRR JSON through `sudo -n vtysh` | Shared FRR parser; Cumulus VX live captures pending. AS-path results omit communities and route age. Router RPKI state remains unknown. |
+| NVIDIA Cumulus Linux | FRR JSON through `sudo -n vtysh` | Shared FRR parser. AS-path results omit communities and route age. Router RPKI state remains unknown. |
 | OpenBGPD | `bgpctl -j show rib detail` JSON | Router RPKI state comes from daemon origin validation. |
 | SONiC | FRR JSON through `vtysh` | AS-path results omit communities and route age. Router RPKI state remains unknown. |
 | TNSR | Not supported | Structured output covers traceroute only; BGP results stay as text. |
 | VyOS 1.4+ | FRR JSON through `vtysh` | AS-path results omit communities and route age. Router RPKI state remains unknown. |
 | VyOS 1.3 | Not supported | Use text BGP results, even with structured traceroute enabled. |
 
-Structured traceroute covers every built-in platform. FRRouting, SONiC and Cumulus Linux share the FRR traceroute parser. Huawei VRP and MikroTik have their own traceroute parsers. Arista EOS, Juniper Junos, Cisco IOS, IOS-XR and NX-OS, Nokia SR OS, BIRD, OpenBGPD, VyOS 1.4+ and 1.3, TNSR, and Extreme EXOS and VOSS use the standard numbered-hop parser. It needs `structured_output: true` on the device, like structured BGP. Set `structured.enable_for_traceroute: false` to return text on every device. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation.
+Structured traceroute covers every built-in platform. FRRouting, SONiC and Cumulus Linux share the FRR traceroute parser. Huawei VRP and MikroTik have their own traceroute parsers. Arista EOS, Juniper Junos, Cisco IOS, IOS-XR and NX-OS, Nokia SR OS, BIRD, OpenBGPD, VyOS 1.4+ and 1.3, TNSR, Extreme EXOS and VOSS, HPE Comware 7, IP Infusion OcNOS, Aruba AOS-CX, Dell SmartFabric OS10, FortiGate and PAN-OS use the standard numbered-hop parser. Dell OS9 uses the standard parser after it joins wrapped IPv6 RTT lines. It needs `structured_output: true` on the device, like structured BGP. Set `structured.enable_for_traceroute: false` to return text on every device. Unrecognized formats remain text. Parser support does not mean every hardware version has live validation.
 
 ### VRF queries
 
-Built-in VRF forms support EOS, Extreme EXOS (`vr`) and VOSS, FRRouting, Huawei VRP, MikroTik RouterOS 7, NVIDIA Cumulus Linux, SONiC, and VyOS 1.4+. FRRouting and SONiC expose only BGP queries when `vrf` is set. Cumulus Linux also supports ping and traceroute in a VRF. See [device VRF configuration](/configuration/devices.mdx#vrf-queries).
+Built-in VRF forms support EOS, Extreme EXOS (`vr`) and VOSS, FRRouting, Huawei VRP, MikroTik RouterOS 7, NVIDIA Cumulus Linux, SONiC, VyOS 1.4+, HPE Comware 7 (`vpn-instance`), IP Infusion OcNOS, Aruba AOS-CX, Dell OS9 and SmartFabric OS10, and PAN-OS (virtual router). FRRouting and SONiC expose only BGP queries when `vrf` is set. Cumulus Linux also supports ping and traceroute in a VRF. The platform sections above list the query types each newer platform offers in a VRF. FortiGate has no VRF selection; queries run in the account's current VDOM. See [device VRF configuration](/configuration/devices.mdx#vrf-queries).
 
 ## Other Platforms
 

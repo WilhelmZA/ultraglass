@@ -13,7 +13,7 @@ hyperglass onboard check
 hyperglass onboard directive my-router
 ```
 
-Each command accepts `--json`. Prompts go to standard error. Standard output contains one JSON report when this flag is set. Test failures and invalid configuration return exit code `1`. Disabled optional features from `check` do not count as test failures.
+Each command accepts `--json`. Prompts go to standard error. Standard output contains one JSON report when this flag is set. Without the flag, each command prints a plain-text report and a status summary. Test failures and invalid configuration return exit code `1`. Disabled optional features from `check` do not count as test failures.
 
 ## Create or update a device
 
@@ -21,7 +21,7 @@ Each command accepts `--json`. Prompts go to standard error. Standard output con
 hyperglass onboard device
 ```
 
-Enter a new device name, or an existing device name or ID to update it. The prompts collect the address, SSH port, platform, credential, OS version, VRF, structured-output preference, and required command attributes such as source addresses. Enter `?` at the platform prompt to list platform keys. Unknown platform keys produce spelling suggestions. The interactive editor supports SSH platforms; configure HTTP devices directly in the devices file.
+Enter a new device name, or an existing device name or ID to update it. The prompts collect the address, SSH port, platform, credential, OS version, VRF, structured-output preference, and required command attributes such as source addresses. The structured-output prompt appears only for platforms with structured support. The attribute prompts follow the built-in directives the device offers, so a VRF device or a platform without source attributes gets fewer prompts. Enter `?` at the platform prompt to list platform keys. Unknown platform keys produce spelling suggestions. The interactive editor supports SSH platforms; configure HTTP devices directly in the devices file.
 
 Use a password or an existing private-key file. Passwords and key passphrases stay hidden. Updating a device keeps its existing credential unless you choose to replace it. Press Enter to keep the displayed OS version or VRF. Enter `-` to unset either field.
 
@@ -72,4 +72,4 @@ Suggestions use dotted setting paths, such as `structured.rpki.mode: external`. 
 hyperglass onboard directive my-router
 ```
 
-Enter a new directive ID, a command template for the selected device's platform, an IP-prefix or regular-expression target rule, and a test target. The command validates the directive, runs it once, and shows its output. A successful test offers to save it in `directives.yaml`. Add the reported directive ID to the device's `directives` list and restart Ultraglass to expose it in the application.
+Enter a new directive ID, a command template for the selected device's platform, an IP-prefix or regular-expression target rule, and a test target. The ID must start with a letter and contain only letters, digits, hyphens or underscores. It must not match part of an existing directive ID. Use `{target}` in the command template. On a VRF device, a template that contains `{vrf}` is also saved as the rule's `vrf_command`. The command rejects a template that references an attribute the device does not define. It validates the directive, runs it once, and shows its output. A successful test offers to save it in `directives.yaml`. Add the reported directive ID to the device's `directives` list and restart Ultraglass to expose it in the application.

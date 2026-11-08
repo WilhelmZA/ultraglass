@@ -24,3 +24,14 @@ git checkout v3.5.0
 python -m pip install -e '.[ui]'
 systemctl restart hyperglass
 ```
+
+## Upgrading from 3.5 to 3.6
+
+3.6.0 is in release candidate testing. The current candidate is `v3.6.0-rc.2`. To test it, use `v3.6.0-rc.2` in place of `v3.5.0` in the commands above. Release images are tagged `3.6.0-rc.2`. The `latest` tag remains on 3.5.0.
+
+A 3.5.0 configuration loads unchanged. No configuration key is removed. 3.6 adds these changes:
+
+- New built-in platforms: `aruba_aoscx`, `cumulus_linux`, `dell_force10`, `dell_os10`, `fortinet`, `hp_comware`, `ipinfusion_ocnos` and `paloalto_panos`. See [devices](/configuration/devices.mdx) for the `attrs` and VRF forms each platform uses.
+- The `hyperglass onboard` command creates and tests device entries, checks feature settings, and scaffolds custom directives. See [device onboarding](/configuration/onboarding.mdx).
+- Structured output stays opt-in. Set `structured_output: true` on each device that should return tables, including devices on the new platforms.
+- The unused upstream BGP community input plugin is removed. Built-in syntax checks and directive rules still validate community targets.

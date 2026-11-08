@@ -4,7 +4,7 @@ import { Callout } from "nextra/components";
 
 Devices that return structured or easily parsed data can display their response in a table, or as JSON through the REST API. Structured output is opt-in: set `structured_output: true` on each device. Ultraglass rejects `structured_output: true` on a platform that has no structured support.
 
-Structured BGP results are available for Arista EOS, BIRD, Cisco IOS, IOS-XR and NX-OS, Extreme EXOS, FRRouting, Huawei VRP, Juniper Junos, MikroTik RouterOS and SwitchOS, OpenBGPD, SONiC and VyOS 1.4 and later. Structured traceroute covers these platforms and also Nokia SR OS, TNSR, Extreme VOSS and VyOS 1.3. See [structured output in Platforms](/platforms.mdx#structured-output) for the source command and limitations of each platform.
+Structured BGP results are available for Arista EOS, BIRD, Cisco IOS, IOS-XR and NX-OS, NVIDIA Cumulus Linux, Extreme EXOS, FRRouting, Huawei VRP, Juniper Junos, MikroTik RouterOS and SwitchOS, OpenBGPD, SONiC and VyOS 1.4 and later. Aruba AOS-CX, Dell OS9 and SmartFabric OS10, FortiGate, HPE Comware 7, IP Infusion OcNOS and PAN-OS have structured results for BGP route queries only. Their AS path and community queries, where the platform offers them, return text. Structured traceroute covers all these platforms and also Nokia SR OS, TNSR, Extreme VOSS and VyOS 1.3. See [structured output in Platforms](/platforms.mdx#structured-output) for the source command and limitations of each platform.
 
 When structured output is available, Ultraglass can check the RPKI state of each returned BGP prefix using one of two methods:
 

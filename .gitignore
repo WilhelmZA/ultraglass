@@ -88,3 +88,6 @@ docs/_build/
 # PyBuilder
 target/
 assets/
+
+# uv generates this when syncing; dependencies are locked in requirements*.lock
+uv.lock
