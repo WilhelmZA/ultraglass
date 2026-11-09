@@ -145,6 +145,8 @@ class Construct:
             "cumulus_linux",
             "vyos",
             "vyos_1_3",
+            # `dataplane shell` runs the command through a shell.
+            "tnsr",
         ):
             # Split the trusted template first. Quote complete arguments after substitution.
             return shlex.join(

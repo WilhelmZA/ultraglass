@@ -113,7 +113,7 @@ class Device(HyperglassModelWithId, extra="allow"):
         platform = kw.get("platform")
         if platform in SCRAPE_HELPERS:
             platform = SCRAPE_HELPERS[platform]
-        # Generic SSH sends Cisco `terminal length 0`. TNSR CLI has no such command.
+        # Netmiko's generic driver sends no paging command. TNSR CLI has no `terminal length`.
         if platform == "tnsr" and "disable_paging" not in kw:
             kw["disable_paging"] = False
         super().__init__(**kw)

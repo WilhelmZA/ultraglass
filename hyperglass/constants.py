@@ -126,7 +126,8 @@ DRIVER_MAP = {
 # Platforms with their own built-in directives that use another Netmiko device type.
 NETMIKO_DEVICE_TYPES = {
     "vyos_1_3": "vyos",
-    # TNSR CLI prompt is `tnsr#`. Netmiko has no TNSR driver; generic SSH matches that prompt.
+    # Netmiko has no TNSR driver. Its generic driver finds the `tnsr#` prompt per command and
+    # sends no paging command.
     "tnsr": "generic",
 }
 

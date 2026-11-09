@@ -54,27 +54,27 @@ def test_tnsr_alias_and_explicit_paging():
         (
             "bgp_route",
             "1.1.1.1",
-            ['dataplane shell sudo vtysh -c "show bgp ipv4 unicast 1.1.1.1"'],
+            ["dataplane shell sudo vtysh -c 'show bgp ipv4 unicast 1.1.1.1'"],
         ),
         (
             "bgp_route",
             "2606:4700::1111",
-            ['dataplane shell sudo vtysh -c "show bgp ipv6 unicast 2606:4700::1111"'],
+            ["dataplane shell sudo vtysh -c 'show bgp ipv6 unicast 2606:4700::1111'"],
         ),
         (
             "bgp_aspath",
             "_13335$",
             [
-                'dataplane shell sudo vtysh -c "show bgp ipv4 unicast regexp _13335$"',
-                'dataplane shell sudo vtysh -c "show bgp ipv6 unicast regexp _13335$"',
+                "dataplane shell sudo vtysh -c 'show bgp ipv4 unicast regexp _13335$'",
+                "dataplane shell sudo vtysh -c 'show bgp ipv6 unicast regexp _13335$'",
             ],
         ),
         (
             "bgp_community",
             "65000:777",
             [
-                'dataplane shell sudo vtysh -c "show bgp ipv4 unicast community 65000:777"',
-                'dataplane shell sudo vtysh -c "show bgp ipv6 unicast community 65000:777"',
+                "dataplane shell sudo vtysh -c 'show bgp ipv4 unicast community 65000:777'",
+                "dataplane shell sudo vtysh -c 'show bgp ipv6 unicast community 65000:777'",
             ],
         ),
         (
@@ -91,3 +91,12 @@ def test_tnsr_alias_and_explicit_paging():
 )
 def test_tnsr_commands(kind, target, expected):
     assert _commands(_device(), kind, target) == expected
+
+
+def test_tnsr_shell_quotes_aspath_target():
+    device = _device()
+    commands = _commands(device, "bgp_aspath", "$(1)")
+    assert commands == [
+        "dataplane shell sudo vtysh -c 'show bgp ipv4 unicast regexp $(1)'",
+        "dataplane shell sudo vtysh -c 'show bgp ipv6 unicast regexp $(1)'",
+    ]

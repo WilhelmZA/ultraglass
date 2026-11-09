@@ -48,7 +48,7 @@ Use `tnsr` for TNSR. Ultraglass rewrites `tsnr` to `tnsr`. Netmiko has no TNSR d
 
 Built-ins provide IPv4/IPv6 BGP route lookups, AS-path searches, community searches, ping and traceroute. BGP queries run FRR `vtysh` through `dataplane shell sudo vtysh`, which is the documented way to read dataplane BGP state from the TNSR CLI. Ping and traceroute use the TNSR CLI `ping` and `traceroute` commands. Configure `attrs.source4` and `attrs.source6`.
 
-The generic SSH driver sends Cisco `terminal length 0` to disable paging. TNSR CLI does not document that command, so `disable_paging` defaults to `false` on this platform. Set it to `true` only if the device accepts that command.
+Netmiko's generic driver sends no paging command at login, and TNSR CLI has no `terminal length` command, so `disable_paging` defaults to `false` on this platform. `dataplane shell` runs the BGP commands through a shell, so Ultraglass shell-quotes the query target.
 
 Structured output covers traceroute only. BGP results stay as text. Live ISO validation remains pending.
 
