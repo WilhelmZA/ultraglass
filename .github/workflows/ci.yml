@@ -161,7 +161,7 @@ jobs:
       - frontend
     if: ${{ always() && needs.backend.result == 'success' && needs.frontend.result == 'success' }}
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'workflow_dispatch' && 'release' || '' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'release' || (startsWith(github.ref, 'refs/tags/v') && 'release-tag' || '') }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -341,7 +341,7 @@ jobs:
       - release
     if: ${{ always() && ((startsWith(github.ref, 'refs/tags/v') && needs.release.result == 'success') || (github.event_name == 'workflow_dispatch' && inputs.dockerhub_description)) }}
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'workflow_dispatch' && 'release' || '' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'release' || (startsWith(github.ref, 'refs/tags/v') && 'release-tag' || '') }}
     permissions:
       contents: read
     steps:
