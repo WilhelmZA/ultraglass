@@ -15,9 +15,7 @@ from hyperglass.execution.drivers._construct import Construct
 from hyperglass.plugins._builtin.bgp_route_arcos import BGPRoutePluginArcOS, parse_arcos
 
 FIXTURES = Path(__file__).parents[2] / "plugins/tests/fixtures/arcos-reference"
-SHOW = (
-    "echo 'show network-instance default protocol BGP BGP | display json' | confd_cli -C -u admin"
-)
+SHOW = "echo 'show network-instance default protocol BGP BGP | display json' | confd_cli -C"
 
 
 def device(**kwargs):
@@ -53,7 +51,7 @@ def test_route_command(structured, vrf, target, expected):
     instance = vrf or "default"
     constructed = Construct(router, query_for(router, "bgp_route", target))
     assert constructed.queries() == [
-        f"echo 'show network-instance {instance} protocol BGP BGP | display json' | confd_cli -C -u admin"
+        f"echo 'show network-instance {instance} protocol BGP BGP | display json' | confd_cli -C"
     ]
     assert constructed.target == expected
     assert router.get_device_type() == "linux_ssh"

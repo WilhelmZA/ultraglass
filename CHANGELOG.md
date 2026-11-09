@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- Arrcus ArcOS exact-prefix BGP lookups over ConfD OpenConfig JSON (`show network-instance ... protocol BGP BGP | display json`), named network-instance VRF forms, and structured loc-rib parsing (#80). Live validation remains pending.
+- Arrcus ArcOS exact-prefix BGP lookups over ConfD OpenConfig JSON (`show network-instance ... protocol BGP BGP | display json`), named network-instance VRF forms, and structured loc-rib parsing (#80). `confd_cli` runs as the SSH login user. Live validation remains pending.
 
 ### Fixed
 

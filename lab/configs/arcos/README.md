@@ -19,7 +19,7 @@ docker exec clab-ultraglass-arcos-core gobgp global rib add -a ipv6 2001:db8:100
 Configure an `arrcus_arcos` device at `192.168.247.12` in the test installation. Test both prefixes with structured output on and off:
 
 ```text
-echo 'show network-instance default protocol BGP BGP | display json' | confd_cli -C -u admin
+echo 'show network-instance default protocol BGP BGP | display json' | confd_cli -C
 ```
 
 Capture `show version` and the exact ConfD JSON under `hyperglass/plugins/tests/fixtures/arcos-live/`. Repeat after configuring a named network-instance and its BGP instance.

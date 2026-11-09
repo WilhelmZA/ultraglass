@@ -14,12 +14,8 @@ PLATFORMS = ["arrcus_arcos"]
 
 # The documented ConfD show path returns the BGP protocol instance as OpenConfig JSON.
 # Prefix filtering happens in the structured parser. The vendor default instance name is BGP.
-_SHOW = (
-    "echo 'show network-instance default protocol BGP BGP | display json' | confd_cli -C -u admin"
-)
-_SHOW_VRF = (
-    "echo 'show network-instance {vrf} protocol BGP BGP | display json' | confd_cli -C -u admin"
-)
+_SHOW = "echo 'show network-instance default protocol BGP BGP | display json' | confd_cli -C"
+_SHOW_VRF = "echo 'show network-instance {vrf} protocol BGP BGP | display json' | confd_cli -C"
 
 ARCOS_BGPRoute = BuiltinDirective(
     id="__hyperglass_arrcus_arcos_bgp_route__",
