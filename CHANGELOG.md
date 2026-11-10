@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - Arrcus ArcOS exact-prefix BGP lookups over ConfD OpenConfig JSON (`show network-instance ... protocol BGP BGP | display json`), named network-instance VRF forms, and structured loc-rib parsing (#80). `confd_cli` runs as the SSH login user. Live validation remains pending.
+- `.samples/sample_config.yaml`, a complete `config.yaml` that sets every option with a comment explaining each feature and its default. The complete configuration reference embeds the same file, and a test fails when a config key is missing from it or the docs copy differs.
 
 ### Fixed
 

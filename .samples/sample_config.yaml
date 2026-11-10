@@ -1,0 +1,425 @@
+# Ultraglass complete configuration example
+#
+# This file sets every key that config.yaml accepts, so each feature is visible in
+# one place. Copy it to the application directory (default /etc/hyperglass) as
+# config.yaml, then remove or change what you do not need. Every key is optional:
+# a key you leave out keeps the default shown in its comment.
+#
+# Devices and directives live in devices.yaml and directives.yaml, not here. See
+# .samples/sample_devices.yaml and the documentation for those files.
+#
+# Unknown keys fail validation, except under logging.http, which passes extra keys
+# to the webhook. A test checks that this file covers every config key, so a new
+# key must be added here before it can be released.
+
+# ---------------------------------------------------------------------------
+# Site identity
+# ---------------------------------------------------------------------------
+
+# Name of the site. Used in the page <title> and the API documentation.
+# Default: Ultraglass
+site_title: "ACME Looking Glass"
+
+# Organisation name. Used in the UI, the API documentation, SEO <meta> tags and
+# the default Terms menu. Default: Beloved Ultraglass User
+org_name: "ACME Networks"
+
+# Short site description for the <meta name="description"> tag. {org_name} is
+# replaced with org_name. Default: "{org_name} Network Looking Glass"
+site_description: "{org_name} Network Looking Glass"
+
+# Your primary ASN. Sets the default subtitle and the PeeringDB footer link.
+# Default: 65001
+primary_asn: 64496
+
+# ---------------------------------------------------------------------------
+# Runtime behaviour
+# ---------------------------------------------------------------------------
+
+# Timeout in seconds for every query. The UI uses this value exactly; the backend
+# uses it minus one second. Default: 90
+request_timeout: 90
+
+# Return static fake output instead of querying devices. For development and
+# testing only. Default: false
+fake_output: false
+
+# Origins allowed to call the API from a browser (CORS). Default: none allowed.
+cors_origins:
+  - "https://noc.example.com"
+
+# Common plugins loaded from the plugins folder of the application directory.
+# The file extension is optional. Names with no matching file are ignored.
+# Default: none. Directive-specific plugins are set in directives.yaml instead.
+plugins:
+  - "custom_validation"  # loads <app dir>/plugins/custom_validation.py
+
+# ---------------------------------------------------------------------------
+# Response cache
+# ---------------------------------------------------------------------------
+
+cache:
+  # Seconds a device response stays cached. A cache hit restarts the timer, and
+  # the UI countdown uses the same value. Default: 120
+  timeout: 120
+  # Show the cache icon and countdown on cached results in the UI. Default: true
+  show_text: true
+
+# ---------------------------------------------------------------------------
+# API documentation (OpenAPI / ReDoc at docs.path)
+# ---------------------------------------------------------------------------
+
+docs:
+  # Serve the API documentation. Default: true
+  enable: true
+  # Base URL used in request samples, and published as the OpenAPI server URL.
+  # Default: https://lg.example.net (not published unless you set it)
+  base_url: "https://lg.example.com"
+  # URL path of the documentation page. Default: /api/docs
+  path: "/api/docs"
+  # Page title. {site_title} is replaced. Default: "{site_title} API Documentation"
+  title: "{site_title} API Documentation"
+  # Text shown below the title. Default: empty
+  description: "Query ACME routers over HTTP."
+  # Per-endpoint text. title is the section header, summary sits beside the URI,
+  # description sits inside the section. Each endpoint accepts the same three keys.
+  query:
+    title: "Submit Query"
+    summary: "Query the Looking Glass"
+    description: "Request a query response per location."
+  devices:
+    title: "Devices"
+    summary: "Devices List"
+    description: "List of all devices and locations, with identifiers, display names, networks and VRFs."
+  queries:
+    title: "Supported Queries"
+    summary: "Query Types"
+    description: "List of supported query types."
+  info:
+    title: "System Information"
+    summary: "System Information"
+    description: "General information about this looking glass."
+
+# ---------------------------------------------------------------------------
+# Logging, webhooks and query samples
+# ---------------------------------------------------------------------------
+
+logging:
+  # Existing directory for the log file, session logs and query samples.
+  # Default: /tmp
+  directory: "/var/log/hyperglass"
+  # Log file format: text or json. Default: text
+  format: "text"
+  # Size at which the log file rotates. Default: 50MB
+  max_size: "50MB"
+
+  # Write every SSH session, with each command and its output, to
+  # <directory>/<device id>-<YYYYMMDD>.log. Passwords are redacted. Use it to debug
+  # a device, then turn it off. Default: false
+  session_log: false
+
+  # Send log messages to a syslog server. Omit the block to disable syslog.
+  syslog:
+    # Set false to keep the block but stop sending. Default: true
+    enable: true
+    host: "syslog.example.com"
+    # Port, sent over UDP. Default: 514
+    port: 514
+
+  # Post a notification to a webhook for each query. Omit the block to disable.
+  http:
+    # Set false to keep the block but stop sending. Default: true
+    enable: true
+    # msteams (Teams Workflows Adaptive Card), slack, or generic (JSON POST).
+    # Default: generic
+    provider: "generic"
+    # Webhook URL. A query string in the URL is kept.
+    host: "https://hooks.example.com/ultraglass"
+    # Authentication for the webhook. Omit the block for none.
+    #   mode: basic   - sends username and password as HTTP basic auth.
+    #   mode: api_key - sends password as the value of the header named in header.
+    authentication:
+      mode: "api_key"
+      # Used by basic mode only.
+      username: "ultraglass"
+      password: "replace-with-a-secret"
+      # Header name for api_key mode. Default: x-api-key
+      header: "x-api-key"
+    # Extra HTTP headers and query parameters sent with each request.
+    headers:
+      x-source: "ultraglass"
+    params:
+      env: "production"
+    # Verify the webhook TLS certificate. Default: true
+    verify_ssl: true
+    # Request timeout in seconds. Default: 5
+    timeout: 5
+
+  # Append one JSON object per query to a JSONL file: the request, the raw device
+  # output and the parsed result. Use it to capture parser fixtures or to audit
+  # queries. Default: disabled
+  samples:
+    enable: false
+    # Output file. Default: <directory>/hyperglass_query_log.jsonl
+    path: "/var/log/hyperglass/hyperglass_query_log.jsonl"
+    # Include the raw device output. Default: true
+    include_raw: true
+    # Include the parsed result. Default: true
+    include_parsed: true
+    # Size at which the file rotates to <name>.1. Default: 50MB
+    max_size: "50MB"
+    # Rotated files kept. Minimum 1. Default: 1
+    backup_count: 1
+
+# ---------------------------------------------------------------------------
+# User-facing error messages
+# ---------------------------------------------------------------------------
+#
+# Placeholders in braces are filled in when the message is shown. An unknown
+# placeholder is left blank.
+
+messages:
+  # A required field is empty. {field} is the field's display name.
+  no_input: "{field} must be specified."
+  # A rule in the directive denies the target. {target} is the target.
+  target_not_allowed: "{target} is not allowed."
+  # The target is not valid for the query type. {target} is the target.
+  invalid_input: "{target} is not valid."
+  # A general error. Seeing this may indicate a bug.
+  general: "Something went wrong."
+  # A configured object does not exist. {type} is the object type, {name} its name.
+  not_found: "{type} '{name}' not found."
+  # The query passed request_timeout.
+  request_timeout: "Request timed out."
+  # Ultraglass cannot connect to the device. {device_name} and {error} are filled in.
+  connection_error: "Error connecting to {device_name}: {error}"
+  # Ultraglass cannot authenticate to the device.
+  authentication_error: "Authentication error occurred."
+  # The query ran but returned no matching results.
+  no_output: "The query completed, but no matching results were found."
+  # The device rejected the command or denied permission. {device_name} is filled in.
+  device_command_error: "The query command failed on {device_name}."
+  # Deprecated keys, accepted with a warning but never shown, removed in 4.0:
+  # feature_not_enabled, invalid_query, invalid_field, no_response.
+
+# ---------------------------------------------------------------------------
+# Structured output (tables instead of raw text)
+# ---------------------------------------------------------------------------
+#
+# Structured output is opt-in per device: set structured_output: true on each
+# device in devices.yaml. These settings control what structured results show.
+
+structured:
+  # BGP community handling in structured BGP route results.
+  communities:
+    # deny   - hide the communities listed in items.
+    # permit - show only the communities listed in items.
+    # name   - show every community, with the friendly names from names.
+    # Default: deny (with no items, nothing is hidden)
+    mode: "name"
+    # Communities matched by deny and permit modes.
+    items:
+      - "64496:666"
+    # Friendly names. Required, with at least one entry, when mode is name.
+    names:
+      "64496:100": "Customer routes"
+      "64496:200": "Peer routes"
+      "64496:666": "Blackhole"
+
+  # RPKI origin validation state on BGP routes.
+  rpki:
+    # router   - use the router's own RPKI state.
+    # external - look the state up with backend.
+    # Default: router
+    mode: "external"
+    # cloudflare or routinator. Default: cloudflare
+    backend: "routinator"
+    # Routinator HTTP API base URL. Required when backend is routinator.
+    rpki_server_url: "http://rpki.example.com:8323"
+
+  # Add ASN, organisation, prefix and IXP details from BGP.tools (WHOIS, TCP port
+  # 43, outbound access required). Lookups are cached in memory per worker.
+  ip_enrichment:
+    # inline - enrich before returning the result.
+    # async  - return the result first, then enrich it in the background; the UI
+    #          fetches the enriched result.
+    # Default: inline
+    mode: "async"
+    # Enrich traceroute hops with ASN, organisation, prefix and IXP. Default: false
+    enrich_traceroute: true
+    # Enrich BGP routes with AS path organisation names and next-hop details when
+    # the query runs. When false, the UI loads AS path names when the user opens
+    # the AS path. Default: false
+    enrich_bgproute: true
+
+  # Kill switches. Set false to return raw text for that query type on every
+  # device. They cannot turn structured output on. Default: unset (per device)
+  # enable_for_traceroute: false
+  # enable_for_bgp_route: false
+
+# ---------------------------------------------------------------------------
+# Web UI
+# ---------------------------------------------------------------------------
+
+web:
+  # Show the Ultraglass and upstream credit in the footer. Default: true
+  credit:
+    enable: true
+
+  # How the browser resolves a hostname typed as a target.
+  #   cloudflare / google - DNS-over-HTTPS from the visitor's browser.
+  #   server - resolve on the Ultraglass server through /api/dns, for networks that
+  #            block public DNS-over-HTTPS.
+  #   custom - your own DNS-over-HTTPS endpoint in url (required).
+  # Default: cloudflare
+  dns_provider:
+    name: "custom"
+    url: "https://doh.example.com/dns-query"
+
+  # How the My IP button finds the visitor's address.
+  #   server   - the address the request came from (X-Real-IP / X-Forwarded-For
+  #              behind a proxy). No third party is contacted.
+  #   external - look it up with myip.wtf after the visitor confirms.
+  #   off      - hide the button.
+  # Default: server
+  my_ip: "server"
+
+  # Location picker style: dropdown, gallery, or auto (gallery for fewer than 5
+  # groups that each have fewer than 9 locations, otherwise dropdown).
+  # Default: auto
+  location_display_mode: "auto"
+
+  # Footer links. {primary_asn} is replaced. side is left or right; order sorts
+  # items on the same side; show_icon adds an external-link icon.
+  # Default: a PeeringDB link for primary_asn.
+  links:
+    - title: "PeeringDB"
+      url: "https://www.peeringdb.com/asn/{primary_asn}"
+      show_icon: true
+      side: "left"
+      order: 0
+    - title: "Network Status"
+      url: "https://status.example.com"
+      show_icon: true
+      side: "right"
+      order: 1
+
+  # Footer menus that open a panel. content is Markdown, or a path to a Markdown
+  # file. Default: a Terms menu and a Help menu.
+  menus:
+    - title: "Terms"
+      content: "/etc/hyperglass/terms.md"
+      side: "left"
+      order: 0
+    - title: "Help"
+      content: |
+        ## Help
+        Choose a location, a query type and a target, then submit.
+      side: "left"
+      order: 1
+
+  # Modal shown when the page loads. file is a Markdown file and must exist.
+  # required: true makes the visitor accept before querying. Default: disabled
+  greeting:
+    enable: true
+    file: "/etc/hyperglass/greeting.md"
+    title: "Welcome"
+    button: "Continue"
+    required: false
+
+  # Logo and favicon. Files must exist. width is a percentage from 1 to 100.
+  # Default: the Ultraglass logo, width 50%. logo.height is accepted but ignored;
+  # the height follows the width.
+  logo:
+    light: "/etc/hyperglass/images/logo-light.svg"
+    dark: "/etc/hyperglass/images/logo-dark.svg"
+    favicon: "/etc/hyperglass/images/icon.svg"
+    width: "40%"
+
+  # Image used for link previews (Open Graph): .jpg, .jpeg or .png. File must exist.
+  # Default: the Ultraglass image.
+  opengraph:
+    image: "/etc/hyperglass/images/opengraph.png"
+
+  # Your own JavaScript, loaded in the page head, and HTML, rendered beneath the
+  # app. Files must exist. Default: none
+  custom_javascript: "/etc/hyperglass/custom.js"
+  custom_html: "/etc/hyperglass/custom.html"
+
+  # Highlight matching text in raw output. pattern is a regular expression (use
+  # single quotes in YAML); color is a web.theme.colors key. Default: none
+  highlight:
+    - pattern: '64496'
+      label: "Our ASN"
+      color: "primary"
+    - pattern: '\d+% packet loss'
+      label: "Packet loss"
+      color: "error"
+
+  # Every UI label. Placeholders in braces are filled in by the browser.
+  text:
+    # logo_only, text_only, logo_subtitle or all (logo, title and subtitle).
+    # Default: logo_only
+    title_mode: "all"
+    # Title and subtitle, 32 characters at most.
+    title: "ACME Looking Glass"
+    subtitle: "AS64496"
+    # Field labels.
+    query_location: "Location"
+    query_type: "Query Type"
+    query_target: "Target"
+    # Hostname resolution prompts.
+    fqdn_tooltip: "Use {protocol}"
+    fqdn_message: "Your browser has resolved {fqdn} to"
+    fqdn_error: "Unable to resolve {fqdn}"
+    fqdn_error_button: "Try Again"
+    # Cache and timing.
+    cache_prefix: "Results cached for "
+    cache_icon: "Cached from {time} UTC"
+    complete_time: "Completed in {seconds}"
+    # RPKI states and the empty-communities label.
+    rpki_invalid: "Invalid"
+    rpki_valid: "Valid"
+    rpki_unknown: "No ROAs Exist"
+    rpki_unverified: "Not Verified"
+    no_communities: "No Communities"
+    # My IP button.
+    ip_error: "Unable to determine IP Address"
+    no_ip: "No {protocol} Address"
+    ip_select: "Select an IP Address"
+    ip_button: "My IP"
+    ip_lookup_notice: "This sends your IP address to myip.wtf to look it up."
+    ip_lookup_confirm: "Look up my IP"
+
+  theme:
+    # Force light or dark mode. Default: unset (follows the visitor's system).
+    default_color_mode: "dark"
+    # Font family names. Defaults: Nunito and Fira Code.
+    fonts:
+      body: "Nunito"
+      mono: "Fira Code"
+    # Palette. Any CSS colour. The functional colours default to a palette colour:
+    # primary=cyan, secondary=blue, success=green, warning=yellow, error=orange,
+    # danger=red.
+    colors:
+      black: "#000000"
+      white: "#ffffff"
+      dark: "#010101"
+      light: "#f5f6f7"
+      gray: "#c1c7cc"
+      filtered: "#c1c7cc"
+      red: "#d84b4b"
+      orange: "#ff6b35"
+      yellow: "#edae49"
+      green: "#35b246"
+      blue: "#314cb6"
+      teal: "#35b299"
+      cyan: "#118ab2"
+      pink: "#f2607d"
+      purple: "#8d30b5"
+      primary: "#118ab2"
+      secondary: "#314cb6"
+      success: "#35b246"
+      warning: "#edae49"
+      error: "#ff6b35"
+      danger: "#d84b4b"

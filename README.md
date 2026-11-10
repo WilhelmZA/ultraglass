@@ -46,6 +46,8 @@ docker compose up
 
 Open `http://localhost:8001` after the containers start. The sample device returns fake output and does not connect to a network device.
 
+`.samples/sample_config.yaml` is a complete `config.yaml` that sets every option, with a comment that explains each feature. Use it as a reference when you write your own.
+
 ### Manual installation
 
 Manual installation requires Python 3.11 or later and Redis 7. Install the `ui` extra when enabling the web UI; it adds the Python favicon dependencies, while Node.js 22.13 and pnpm 11 provide the frontend build tools. The optional `performance` extra enables `uvloop`. The full procedure is in the [manual installation guide](docs/content/installation/manual.mdx).
