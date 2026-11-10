@@ -68,11 +68,36 @@ Every command accepts `--json` for scripting. Restart Ultraglass after a save so
 
 ## Supported platforms
 
-Ultraglass ships directives and parsers for 26 platforms: Arista EOS, Arrcus ArcOS, Aruba AOS-CX, BIRD, Cisco IOS and IOS XE, Cisco NX-OS, Cisco IOS-XR, NVIDIA Cumulus Linux, Dell OS9 (Force10), Dell SmartFabric OS10, Extreme EXOS, Extreme VOSS, Fortinet FortiGate, FRRouting, HPE Comware 7, Huawei VRP, IP Infusion OcNOS, Juniper Junos, MikroTik RouterOS and SwitchOS, Nokia SR OS, OpenBGPD, Palo Alto PAN-OS, SONiC, TNSR, VyOS 1.4+ and VyOS 1.3. Netmiko provides the device connectivity, so any other Netmiko platform works with custom directives.
+Ultraglass ships directives and parsers for these 26 platforms. Netmiko provides the device connectivity, so any other Netmiko platform works with custom directives. Structured output is opt-in on every platform: set `structured_output: true` on the device. Text means the query works and returns the device's raw output.
 
-Structured output is opt-in on every platform: set `structured_output: true` on each device. Structured BGP output is available for Arista EOS, Arrcus ArcOS, Aruba AOS-CX, BIRD, Cisco IOS, IOS-XR and NX-OS, NVIDIA Cumulus Linux, Dell OS9 and OS10, Extreme EXOS, FortiGate, FRRouting, HPE Comware 7, Huawei VRP, IP Infusion OcNOS, Juniper Junos, MikroTik RouterOS and SwitchOS, OpenBGPD, PAN-OS, SONiC and VyOS 1.4+. Structured traceroute covers these platforms and also Nokia SR OS, TNSR, Extreme VOSS and VyOS 1.3.
-
-Built-in VRF queries support Arista EOS, Aruba AOS-CX, NVIDIA Cumulus Linux, Dell OS9 and OS10, Extreme EXOS and VOSS, FRRouting, HPE Comware 7, Huawei VRP, IP Infusion OcNOS, MikroTik RouterOS, PAN-OS, SONiC and VyOS 1.4+.
+| Platform | `platform` key | Structured BGP | Structured traceroute | Built-in VRF queries | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Arista EOS | `arista_eos` | Yes | Yes | Yes |  |
+| Arrcus ArcOS | `arrcus_arcos` | Yes | No built-in | Yes | BGP route lookups only. AS path, community, ping and traceroute are not yet built in. |
+| Aruba AOS-CX | `aruba_aoscx` | Yes | Yes | Yes |  |
+| BIRD | `bird` | Yes | Yes | No |  |
+| Cisco IOS and IOS XE | `cisco_ios` | Yes | Yes | No | Router needs `ip bgp-community new-format`. |
+| Cisco IOS-XR | `cisco_xr` | Yes | Yes | No | Connection retries default to 3. |
+| Cisco NX-OS | `cisco_nxos` | Yes | Yes | No |  |
+| NVIDIA Cumulus Linux | `cumulus_linux` | Yes | Yes | Yes |  |
+| Dell OS9 (Force10) | `dell_force10` | Yes | Yes | Yes | AS path search is IPv4 only. |
+| Dell SmartFabric OS10 | `dell_os10` | Yes | Yes | Yes |  |
+| Extreme EXOS | `extreme_exos` | Yes | Yes | Yes |  |
+| Extreme VOSS | `extreme_vsp` | Text | Yes | Yes |  |
+| Fortinet FortiGate | `fortinet` | Yes | Yes | No |  |
+| FRRouting | `frr` | Yes | Yes | Yes |  |
+| HPE Comware 7 | `hp_comware` | Yes | Yes | Yes |  |
+| Huawei VRP | `huawei`, `huawei_vrpv8` | Yes | Yes | Yes |  |
+| IP Infusion OcNOS | `ipinfusion_ocnos` | Yes | Yes | Yes |  |
+| Juniper Junos | `juniper` | Yes | Yes | No |  |
+| MikroTik RouterOS and SwitchOS | `mikrotik_routeros`, `mikrotik_switchos` | Yes | Yes | RouterOS only | RouterOS 6 and 7. Full-table AS path and community scans can exceed 90 seconds. |
+| Nokia SR OS | `nokia_sros` | Text | Yes | No |  |
+| OpenBGPD | `openbgpd` | Yes | Yes | No |  |
+| Palo Alto PAN-OS | `paloalto_panos` | Yes | Yes | Yes | `vrf` names the virtual router. |
+| SONiC | `sonic` | Yes | Yes | Yes |  |
+| TNSR | `tnsr` | Text | Yes | No | BGP runs through `dataplane shell sudo vtysh`. |
+| VyOS 1.4+ | `vyos` | Yes | Yes | Yes |  |
+| VyOS 1.3 | `vyos_1_3` | Text | Yes | No |  |
 
 Platform keys, per-platform notes and known limits are in the [platforms guide](docs/content/platforms.mdx).
 
