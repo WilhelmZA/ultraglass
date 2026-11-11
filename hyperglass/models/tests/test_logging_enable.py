@@ -12,6 +12,7 @@ import pytest
 # Project
 from hyperglass import log as log_module
 from hyperglass.external import _base
+from hyperglass.models.config.web import Web
 from hyperglass.models.config.logging import Http, Syslog, Logging
 
 
@@ -70,7 +71,7 @@ def _send_webhook(monkeypatch, http: Http) -> list:
     monkeypatch.setattr(tasks, "network_info", network_info)
     monkeypatch.setattr(_base.BaseExternal, "_atest", no_test)
 
-    params = SimpleNamespace(logging=Logging(http=http))
+    params = SimpleNamespace(logging=Logging(http=http), web=Web())
     request = SimpleNamespace(
         headers={"user-agent": "pytest"}, client=SimpleNamespace(host="192.0.2.10")
     )

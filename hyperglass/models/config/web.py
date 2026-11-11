@@ -1,11 +1,20 @@
 """Validate branding configuration variables."""
 
 # Standard Library
+import re
 import typing as t
 from pathlib import Path
 
 # Third Party
-from pydantic import Field, HttpUrl, FilePath, ValidationInfo, field_validator, model_validator
+from pydantic import (
+    Field,
+    HttpUrl,
+    FilePath,
+    IPvAnyNetwork,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 from pydantic_extra_types.color import Color
 
 # Project
@@ -19,6 +28,7 @@ from .opengraph import OpenGraph
 DEFAULT_IMAGES = Path(__file__).parent.parent.parent / "images"
 DOH_PROVIDERS_PATTERN = "|".join(DNS_OVER_HTTPS.keys())
 PERCENTAGE_PATTERN = r"^([1-9][0-9]?|100)\%?$"
+HEADER_NAME_PATTERN = re.compile(r"[a-z0-9!#$%&'*+.^_`|~-]+")
 
 Percentage = Field(pattern=r"^([1-9][0-9]?|100)\%$")
 TitleMode = t.Literal["logo_only", "text_only", "logo_subtitle", "all"]
@@ -248,6 +258,29 @@ class HighlightPattern(HyperglassModel):
         return value
 
 
+class ClientIP(HyperglassModel):
+    """How Ultraglass identifies the visitor behind reverse proxies or a CDN."""
+
+    # Request header that carries the visitor's address, read before `X-Real-IP` and
+    # `X-Forwarded-For`. For example `CF-Connecting-IP`, `True-Client-IP` or
+    # `Fastly-Client-IP`.
+    header: t.Optional[str] = None
+    # Networks of the proxies that connect to Ultraglass. When set, client address
+    # headers are read only from these peers; any other peer is itself the client.
+    trusted_proxies: t.List[IPvAnyNetwork] = []
+
+    @field_validator("header")
+    @classmethod
+    def validate_header(cls, value: t.Optional[str]) -> t.Optional[str]:
+        """Normalise the header name, and reject a value that is not a header name."""
+        if value is None or not value.strip():
+            return None
+        value = value.strip().lower()
+        if not HEADER_NAME_PATTERN.fullmatch(value):
+            raise ValueError(f"'{value}' is not a valid HTTP header name")
+        return value
+
+
 class Web(HyperglassModel):
     """Validation model for all web/browser-related configuration."""
 
@@ -269,6 +302,7 @@ class Web(HyperglassModel):
     # `external` looks up the visitor's address with myip.wtf, `server` reads it from the
     # request to Ultraglass, and `off` hides the My IP button.
     my_ip: t.Literal["external", "server", "off"] = "server"
+    client_ip: ClientIP = ClientIP()
     custom_javascript: t.Optional[FilePath] = None
     custom_html: t.Optional[FilePath] = None
     highlight: t.List[HighlightPattern] = []
@@ -286,3 +320,5 @@ class WebPublic(Web):
     """Public web configuration."""
 
     logo: LogoPublic
+    # Proxy settings are used by the server only, so the UI never receives them.
+    client_ip: ClientIP = Field(default_factory=ClientIP, exclude=True)

@@ -170,5 +170,7 @@ class Params(ParamsPublic, HyperglassModel):
                 "site_description": ...,
                 "web": ...,
                 "messages": ...,
-            }
+            },
+            # Proxy settings are used by the server only.
+            exclude={"web": {"client_ip"}},
         )

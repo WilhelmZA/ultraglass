@@ -13,10 +13,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - Arrcus ArcOS exact-prefix BGP lookups over ConfD OpenConfig JSON (`show network-instance ... protocol BGP BGP | display json`), named network-instance VRF forms, and structured loc-rib parsing (#80). `confd_cli` runs as the SSH login user. Live validation remains pending.
+- `web.client_ip.header` names a request header that carries the visitor's address, such as `CF-Connecting-IP`, for sites behind a CDN and a reverse proxy. `web.client_ip.trusted_proxies` limits client address headers to connections from the listed networks. Server My IP, the `/api/dns` rate limit and the webhook `source` field use the same address. Default behaviour is unchanged (#241).
 - `.samples/sample_config.yaml`, a complete `config.yaml` that sets every option with a comment explaining each feature and its default. The complete configuration reference embeds the same file, and a test fails when a config key is missing from it or the docs copy differs.
 
 ### Fixed
 
+- The webhook `source` field used the whole `X-Forwarded-For` list when a request had no `X-Real-IP` header. It now holds one address, the same one that server My IP reports (#241).
 - Load `tnsr` devices with Netmiko's generic SSH driver so the built-in TNSR directives can run. `disable_paging` defaults to false because TNSR CLI has no `terminal length` command, and query targets are shell-quoted because `dataplane shell` runs the command through a shell (#102). Live ISO validation remains pending.
 
 ## 3.6.1 - 2026-11-09

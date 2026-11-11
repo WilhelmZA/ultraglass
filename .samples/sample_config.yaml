@@ -284,6 +284,22 @@ web:
   # Default: server
   my_ip: "server"
 
+  # How Ultraglass identifies the visitor behind reverse proxies or a CDN. Server
+  # My IP, the /api/dns rate limit and the webhook source all use this address.
+  client_ip:
+    # Request header that carries the visitor's address, read before X-Real-IP and
+    # X-Forwarded-For. Set it when a CDN is in front of your reverse proxy, for
+    # example CF-Connecting-IP, True-Client-IP or Fastly-Client-IP.
+    # Default: unset
+    header: "CF-Connecting-IP"
+    # Networks of the proxies that connect to Ultraglass. When set, client address
+    # headers are read only from these peers, and any other peer is the client.
+    # Set it when a client can reach Ultraglass without going through the proxy.
+    # Default: [] (headers are read from every peer)
+    trusted_proxies:
+      - "10.0.0.0/8"
+      - "fd00::/8"
+
   # Location picker style: dropdown, gallery, or auto (gallery for fewer than 5
   # groups that each have fewer than 9 locations, otherwise dropdown).
   # Default: auto

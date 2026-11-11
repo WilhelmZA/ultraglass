@@ -32,6 +32,32 @@ This configuration resolves hostname targets through `/api/dns` and detects visi
 
 Server DNS supports A and AAAA records. Its endpoint allows 120 requests per minute per client. Server My IP returns only the address family used for the request. Configure your reverse proxy to overwrite client-address headers with verified values; both endpoints use forwarded client addresses when present.
 
+### Client Address
+
+Ultraglass needs the visitor's address for server My IP, for the `/api/dns` rate limit and for the webhook `source` field. By default it reads `X-Real-IP`, then the first `X-Forwarded-For` entry, then the address of the connection. A header value that is not an IP address is skipped.
+
+| Parameter | Type | Default Value | Description |
+| :-------- | :--- | :------------ | :---------- |
+| `web.client_ip.header` | String | | Request header that carries the visitor's address. Ultraglass reads it before `X-Real-IP` and `X-Forwarded-For`. The name is not case-sensitive. |
+| `web.client_ip.trusted_proxies` | List of networks | `[]` | IPv4 and IPv6 networks of the proxies that connect to Ultraglass. When set, Ultraglass reads client address headers only when the connection comes from one of these networks. Any other connection is treated as the client. |
+
+Set `web.client_ip.header` when a CDN is in front of your reverse proxy. The reverse proxy then sees the CDN as its client, so `X-Real-IP` holds a CDN address. The CDN sends the visitor's address in its own header, such as `CF-Connecting-IP` (Cloudflare), `True-Client-IP` (Akamai) or `Fastly-Client-IP` (Fastly).
+
+Set `web.client_ip.trusted_proxies` when a client can reach Ultraglass without going through your proxy. Without it, such a client can send any address in these headers. List the networks that connect to Ultraglass directly, which is normally your reverse proxy and not the CDN. With trusted proxies set, Ultraglass also reads `X-Forwarded-For` from the right and uses the last entry that is not a trusted proxy, so an entry that the client added is ignored.
+
+```yaml filename="config.yaml" copy
+web:
+    client_ip:
+        header: CF-Connecting-IP
+        trusted_proxies:
+            - 172.16.0.0/12
+            - fd00::/8
+```
+
+<Callout type="warning">
+Your reverse proxy must pass the CDN header only for requests that come from the CDN. If the proxy also accepts requests from other sources, remove the header from those requests at the proxy.
+</Callout>
+
 ### Logo
 
 | Parameter          | Type             | Default Value | Description                                        |

@@ -298,6 +298,8 @@ Extensive customization options for the web interface appearance and behavior.
 | :-------- | :--- | :------ | :---------- |
 | `web.location_display_mode` | String | `auto` | Location selector style: `auto`, `dropdown`, or `gallery`. |
 | `web.my_ip` | String | `server` | How the My IP button finds the visitor's address. `server` reads it from the request to Ultraglass. `external` looks it up with myip.wtf after the visitor confirms. `off` hides the button. |
+| `web.client_ip.header` | String | | Request header that carries the visitor's address, read before `X-Real-IP` and `X-Forwarded-For`. For example `CF-Connecting-IP` behind a CDN. |
+| `web.client_ip.trusted_proxies` | List of networks | `[]` | Networks of the proxies that connect to Ultraglass. When set, client address headers are read only from these peers. |
 | `web.custom_javascript` | Path | | Path to custom JavaScript file to load. The file must exist. |
 | `web.custom_html` | Path | | Path to custom HTML content to display. The file must exist. |
 | `web.opengraph.image` | Path | Built-in image | OpenGraph image shown when you share a link. Must be `.jpg`, `.jpeg` or `.png`. |
@@ -965,6 +967,22 @@ web:
   #   off      - hide the button.
   # Default: server
   my_ip: "server"
+
+  # How Ultraglass identifies the visitor behind reverse proxies or a CDN. Server
+  # My IP, the /api/dns rate limit and the webhook source all use this address.
+  client_ip:
+    # Request header that carries the visitor's address, read before X-Real-IP and
+    # X-Forwarded-For. Set it when a CDN is in front of your reverse proxy, for
+    # example CF-Connecting-IP, True-Client-IP or Fastly-Client-IP.
+    # Default: unset
+    header: "CF-Connecting-IP"
+    # Networks of the proxies that connect to Ultraglass. When set, client address
+    # headers are read only from these peers, and any other peer is the client.
+    # Set it when a client can reach Ultraglass without going through the proxy.
+    # Default: [] (headers are read from every peer)
+    trusted_proxies:
+      - "10.0.0.0/8"
+      - "fd00::/8"
 
   # Location picker style: dropdown, gallery, or auto (gallery for fewer than 5
   # groups that each have fewer than 9 locations, otherwise dropdown).

@@ -14,6 +14,9 @@ from hyperglass.log import log
 from hyperglass.external import Webhook, network_info
 from hyperglass.models.api import Query
 
+# Local
+from .client_address import resolve_client_address
+
 if t.TYPE_CHECKING:
     # Project
     from hyperglass.models.config.params import Params
@@ -46,12 +49,8 @@ async def send_webhook(
         if params.logging.http is not None and params.logging.http.enable:
             headers = await process_headers(headers=request.headers)
 
-            if headers.get("x-real-ip") is not None:
-                host = headers["x-real-ip"]
-            elif headers.get("x-forwarded-for") is not None:
-                host = headers["x-forwarded-for"]
-            else:
-                host = request.client.host
+            peer = request.client.host if request.client else None
+            host = resolve_client_address(request.headers, peer, params.web.client_ip)
 
             network_result = await network_info(host)
 
