@@ -2,17 +2,29 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.6.1**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.6.2**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.6.2 - 2026-11-12
+
+This critical security release fixes command injection through control characters in query targets (#243, #244). Upgrade deployments running 3.6.1. A crafted IPv6 zone could insert a second command into a device CLI session through the unauthenticated query API.
+
+Images: `wilhelmza/ultraglass:3.6.2` and `ghcr.io/wilhelmza/ultraglass:3.6.2`. Stable release publication updates `latest` on both registries.
+
+### Upgrading from 3.6.1
+
+A 3.6.1 configuration loads unchanged. Bare IPv6 targets now use canonical notation. Zones on bare IPv6 targets accept only ASCII letters, digits and hyphens; dotted or underscored zones are rejected. Existing CIDR normalization can remove the zone when clearing host bits.
 
 ### Security
 
-- Reject an IPv6 zone that contains anything other than letters, digits and hyphens in an IP target. Python's `ipaddress` accepts any character in a zone, so a line break in the zone of a ping or traceroute target reached the device and started a second command in the looking-glass session. A target that contains a control character or a line separator is now rejected for every directive, and an IP target is inserted into the command as the parsed address (#243).
+- Reject an IPv6 zone that contains anything other than ASCII letters, digits and hyphens after IP normalization. Python's `ipaddress` accepts control characters in a zone. Query validation now blocks control characters and line separators for every directive, including custom directives, before command execution. IP targets use the parsed address (#243, #244).
+
+### Changed
+
+- Updated the Python package, runtime metadata, UI package, upgrade guide, installation docs and issue templates to 3.6.2.
 
 ### Added
 
