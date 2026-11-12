@@ -4,6 +4,7 @@
 import typing as t
 import hashlib
 import secrets
+import unicodedata
 from datetime import UTC, datetime
 
 # Third Party
@@ -101,6 +102,21 @@ class Query(BaseModel):
     _kwargs: t.Dict[str, t.Any]
     # The target as validated, before input plugins transform it.
     _validated_target: t.Union[t.List[str], str, None] = None
+
+    @field_validator("query_target")
+    @classmethod
+    def validate_query_target_characters(
+        cls, value: t.Union[t.List[str], str]
+    ) -> t.Union[t.List[str], str]:
+        """Reject control characters and line separators in any target (#243).
+
+        A line break inside a target starts a second command on a device CLI, whatever
+        the directive's rules allow.
+        """
+        for target in value if isinstance(value, list) else [value]:
+            if any(unicodedata.category(char) in ("Cc", "Cf", "Zl", "Zp") for char in target):
+                raise ValueError("Target must not contain control characters")
+        return value
 
     def __init__(self, **data) -> None:
         """Initialize the query with a UTC timestamp at initialization time."""

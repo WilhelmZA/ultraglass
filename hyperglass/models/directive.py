@@ -4,7 +4,7 @@
 import re
 import shlex
 import typing as t
-from ipaddress import IPv4Network, IPv6Network, ip_network
+from ipaddress import IPv4Network, IPv6Network, ip_address, ip_network
 
 # Third Party
 from pydantic import (
@@ -189,6 +189,9 @@ class Rule(HyperglassModel):
         )
 
 
+IPV6_ZONE_PATTERN = re.compile(r"[A-Za-z0-9-]+")
+
+
 class RuleWithIP(Rule):
     """Base IP-based rule."""
 
@@ -259,6 +262,15 @@ class RuleWithIP(Rule):
 
         except ValueError as err:
             raise InputValidationError(error=str(err), target=target) from err
+
+        # `ipaddress` accepts any character in an IPv6 zone, including a line break
+        # that would start a second command on the device (#243).
+        zone = getattr(valid_target.network_address, "scope_id", None)
+        if zone is not None and not IPV6_ZONE_PATTERN.fullmatch(zone):
+            self._passed = False
+            raise InputValidationError(
+                error="IPv6 zone may contain only letters, digits and hyphens", target=target
+            )
 
         if valid_target.version != self.condition.version:
             log.bind(target=str(target), condition=str(self.condition)).debug(
@@ -463,9 +475,11 @@ class Directive(HyperglassUniqueModel, unique_by=("id", "table_output")):
             return target
 
         def normalize(value: str) -> str:
-            if "/" not in value:
-                return value
+            # Return the parsed address, so the command is built from it and not from
+            # the text the client sent (#243).
             try:
+                if "/" not in value:
+                    return str(ip_address(value))
                 return ip_network(value, strict=False).with_prefixlen
             except ValueError:
                 return value

@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Security
+
+- Reject an IPv6 zone that contains anything other than letters, digits and hyphens in an IP target. Python's `ipaddress` accepts any character in a zone, so a line break in the zone of a ping or traceroute target reached the device and started a second command in the looking-glass session. A target that contains a control character or a line separator is now rejected for every directive, and an IP target is inserted into the command as the parsed address (#243).
+
 ### Added
 
 - Arrcus ArcOS exact-prefix BGP lookups over ConfD OpenConfig JSON (`show network-instance ... protocol BGP BGP | display json`), named network-instance VRF forms, and structured loc-rib parsing (#80). `confd_cli` runs as the SSH login user. Live validation remains pending.
