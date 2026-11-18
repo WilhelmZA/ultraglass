@@ -11,6 +11,7 @@ from pydantic import PrivateAttr
 # Project
 from hyperglass.util import parse_asn
 from hyperglass.models.data import BGPRouteTable
+from hyperglass.exceptions.private import ParsingError
 
 # Local
 from .._output import OutputPlugin
@@ -204,12 +205,17 @@ def _path(node: dict) -> dict:
 
 
 def parse_arcos(text: str, target: str, vrf: str = "default") -> BGPRouteTable:
-    """Keep incomplete or unfamiliar JSON as text by raising ValueError."""
+    """Extract only the exact target prefix; reject unfamiliar or incomplete data."""
     want = str(ip_network(target, strict=False))
+    tree = _json_payload(text)
+    if not isinstance(tree, (dict, list)) or not any(
+        isinstance(node.get("loc-rib"), dict) for node in _walk(tree)
+    ):
+        raise ValueError("Missing ArcOS loc-rib")
     routes = []
     seen: set[tuple] = set()
     incomplete = False
-    for node in _route_nodes(_json_payload(text)):
+    for node in _route_nodes(tree):
         prefix = _first_key(node, "prefix")
         try:
             if str(ip_network(str(prefix))) != want:
@@ -226,24 +232,43 @@ def parse_arcos(text: str, target: str, vrf: str = "default") -> BGPRouteTable:
             continue
         seen.add(key)
         routes.append(path)
-    if not routes and incomplete:
+    if incomplete:
         raise ValueError("Incomplete ArcOS path")
     return BGPRouteTable(vrf=vrf, count=len(routes), routes=routes, winning_weight="high")
 
 
 class BGPRoutePluginArcOS(OutputPlugin):
-    """Select the structured ArcOS prefix directive only."""
+    """Filter the full BGP instance for both ArcOS BGP Route directives."""
 
     _hyperglass_builtin: bool = PrivateAttr(True)
     platforms: t.Sequence[str] = ("arrcus_arcos",)
-    directives: t.Sequence[str] = ("__hyperglass_arrcus_arcos_bgp_route_table__",)
+    directives: t.Sequence[str] = (
+        "__hyperglass_arrcus_arcos_bgp_route__",
+        "__hyperglass_arrcus_arcos_bgp_route_table__",
+    )
 
     def process(self, *, output, query):
-        """Keep unknown responses available as text."""
-        if not query.device.structured_output:
-            return output
-        text = output if isinstance(output, str) else "\n".join(output)
+        """Return matching routes only, never raw instance data or parser failures."""
         try:
-            return parse_arcos(text, query.query_target, query.device.vrf or "default")
-        except (ValueError, KeyError, json.JSONDecodeError, TypeError):
-            return output
+            text = output if isinstance(output, str) else "\n".join(output)
+            table = parse_arcos(text, query.query_target, query.device.vrf or "default")
+        except (ValueError, KeyError, TypeError) as error:
+            raise ParsingError("Error parsing ArcOS response data") from error
+        if query.device.structured_output:
+            return table
+        if not table.routes:
+            return ("No route found.",)
+        # Render validated route fields only; never stringify the device JSON.
+        return tuple(
+            "\n".join(
+                (
+                    f"Prefix: {route.prefix}",
+                    f"Next hop: {route.next_hop}",
+                    f"AS path: {' '.join(str(asn) for asn in route.as_path)}",
+                    f"Local preference: {route.local_preference}",
+                    f"MED: {route.med}",
+                    f"Active: {route.active}",
+                )
+            )
+            for route in table.routes
+        )

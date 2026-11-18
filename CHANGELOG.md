@@ -2,11 +2,29 @@
 
 This is the changelog for [WilhelmZA/ultraglass](https://github.com/WilhelmZA/ultraglass), a **fork** of [thatmattlove/hyperglass](https://github.com/thatmattlove/hyperglass). It documents Ultraglass changes, not upstream's.
 
-The fork's own version line starts at **3.0.0** and is currently at **3.6.2**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
+The fork's own version line starts at **3.0.0** and is currently at **3.6.3**. It is based on **upstream hyperglass 2.0.4**, plus the upstream commits that had landed on upstream `main` after 2.0.4 but were never released by upstream. Upstream's version numbering is unrelated to this one; upstream's own history continues at [thatmattlove/hyperglass/blob/main/CHANGELOG.md](https://github.com/thatmattlove/hyperglass/blob/main/CHANGELOG.md).
 
 Everything from [2.0.4](#204---2024-06-30) downward is inherited upstream history, kept verbatim for reference.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 3.6.3 - 2026-11-19
+
+This patch ports the public lookup and ArcOS security corrections from Hyperglass.
+
+### Security
+
+- Disable `/api/dns` unless server DNS is explicitly selected. Resolve public names through a fixed public HTTPS resolver and reject non-public answers.
+- Ignore forwarding headers unless the connecting proxy is explicitly trusted. Share per-client and global lookup limits across workers through Redis.
+- Make `/api/aspath/enrich` opt-in. Bound request size, ASN count, lookup duration, concurrency and cache lifetime.
+- Filter ArcOS BGP replies to the exact requested prefix in text and structured modes. Reject malformed or incomplete data rather than returning the full BGP instance.
+
+### Upgrade requirements
+
+- Configure `web.client_ip.trusted_proxies` to preserve visitor addresses behind a proxy. Overwrite forwarding headers at the proxy and restrict direct application access.
+- Set `web.dns_provider.name: server` only when server-side public DNS is required. Internal DNS resolution is no longer available through this endpoint.
+- Set `web.aspath_enrichment: true` to enable on-demand AS-path enrichment.
+- Server My IP returns `null` for non-public client addresses. Use `web.my_ip: external` explicitly for browser-side address lookup.
 
 ## 3.6.2 - 2026-11-12
 

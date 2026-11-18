@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import 'reactflow/dist/style.css';
 import { useBreakpointValue, useColorValue, useFormState } from '~/hooks';
+import { useConfig } from '~/context';
 import { Chart } from './chart';
 import { PathButton } from './path-button';
 
@@ -19,6 +20,7 @@ interface PathProps {
 
 export const Path = (props: PathProps): JSX.Element => {
   const { device } = props;
+  const { web } = useConfig();
   const displayTarget = useFormState(s => s.target.display);
   const getResponse = useFormState(s => s.response);
   const { isOpen, onClose, onOpen } = useDisclosure();
@@ -35,6 +37,7 @@ export const Path = (props: PathProps): JSX.Element => {
           // if the response does not already contain ASN organization data.
           try {
             onOpen();
+            if (!web.aspathEnrichment) return;
             if (!response) return;
             const out = response.output;
             if (typeof out === 'string') return;
@@ -56,7 +59,7 @@ export const Path = (props: PathProps): JSX.Element => {
             const resp = await fetch('/api/aspath/enrich', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ as_path: asns }),
+              body: JSON.stringify({ as_path: asns.slice(0, 64) }),
             });
             if (!resp.ok) return;
             const j = await resp.json();

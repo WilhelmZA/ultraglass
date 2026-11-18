@@ -1,12 +1,10 @@
 """API Routes."""
 
 # Standard Library
-import re
+import asyncio
 import json
 import time
-import socket
 import ipaddress
-import asyncio
 import typing as t
 from uuid import uuid4
 from datetime import UTC, datetime
@@ -14,7 +12,6 @@ from datetime import UTC, datetime
 # Third Party
 from litestar import Request, Response, get, post
 from litestar.di import Provide
-from litestar.middleware.rate_limit import RateLimitConfig
 from litestar.background_tasks import BackgroundTask
 
 # Project
@@ -35,6 +32,7 @@ from .state import get_state, get_params, get_devices
 from .tasks import enrich_query_output, send_webhook
 from .client_address import client_address
 from .fake_output import fake_output
+from .auxiliary import ASPathRequest, lookup_guard, resolve_public_dns, enrich_public_asns
 
 __all__ = (
     "device",
@@ -128,62 +126,16 @@ async def _execute_query(data: "Query") -> t.Any:
     return output
 
 
-# Cap the number of ASNs accepted per enrichment request to bound outbound lookups.
-_MAX_ASPATH_ENRICH = 64
+@post("/api/aspath/enrich", guards=[lookup_guard], request_max_body_size=8192)
+async def aspath_enrich(data: ASPathRequest) -> dict:
+    """Enrich a bounded list of validated ASNs when explicitly enabled."""
+    return await enrich_public_asns(data.as_path)
 
 
-@post("/api/aspath/enrich")
-async def aspath_enrich(data: dict) -> dict:
-    """Enrich a list of ASNs with organization names on demand.
-
-    Expected JSON payload: { "as_path": [123, 456, ...] }
-    """
-    as_path = data.get("as_path", []) if isinstance(data, dict) else []
-    # Accept only numeric ASNs and bound the request size.
-    asns = [str(a) for a in as_path if str(a).isdigit()][:_MAX_ASPATH_ENRICH]
-    if not asns:
-        return {"success": False, "error": "No valid as_path provided"}
-
-    from hyperglass.external.ip_enrichment import lookup_asns_bulk
-
-    try:
-        results = await lookup_asns_bulk(asns)
-    except Exception:
-        # Log server-side; don't leak internal error detail to the client.
-        log.bind(as_path=asns).error("AS path enrichment lookup failed")
-        return {"success": False, "error": "Enrichment lookup failed"}
-
-    return {"success": True, "asn_organizations": results}
-
-
-# DNS record types in the DNS-over-HTTPS JSON format the UI already reads.
-_DNS_TYPES = {"A": (socket.AF_INET, 1), "AAAA": (socket.AF_INET6, 28)}
-_HOSTNAME = re.compile(
-    r"(?=.{1,253}\.?$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}\.?"
-)
-_DNS_RATE_LIMIT = RateLimitConfig(rate_limit=("minute", 120), identifier_for_request=client_address)
-
-
-@get("/api/dns", middleware=[_DNS_RATE_LIMIT.middleware], include_in_schema=False)
+@get("/api/dns", guards=[lookup_guard], include_in_schema=False)
 async def dns(name: str, type: str = "A") -> dict:
-    """Resolve a hostname on the server, returning DNS-over-HTTPS JSON."""
-    record_type = type.upper()
-    if record_type not in _DNS_TYPES or not _HOSTNAME.fullmatch(name):
-        return {"Status": 1, "Question": [{"name": name, "type": 0}], "Answer": []}
-
-    family, type_code = _DNS_TYPES[record_type]
-    question = [{"name": name, "type": type_code}]
-    try:
-        records = await asyncio.get_running_loop().getaddrinfo(
-            name, None, family=family, type=socket.SOCK_STREAM
-        )
-    except socket.gaierror as err:
-        not_found = err.errno in (socket.EAI_NONAME, getattr(socket, "EAI_NODATA", None))
-        return {"Status": 3 if not_found else 2, "Question": question, "Answer": []}
-
-    addresses = dict.fromkeys(record[4][0] for record in records)
-    answer = [{"name": name, "type": type_code, "TTL": 0, "data": a} for a in addresses]
-    return {"Status": 0, "Question": question, "Answer": answer}
+    """Resolve public hostnames through the fixed public DNS resolver."""
+    return await resolve_public_dns(name, type)
 
 
 @get("/api/myip", include_in_schema=False)
@@ -195,6 +147,8 @@ async def myip(request: Request, family: int = 4) -> dict:
         return {"ip": None}
     if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped is not None:
         address = address.ipv4_mapped
+    if not address.is_global or address.is_multicast or address.is_reserved:
+        return {"ip": None}
     return {"ip": str(address) if address.version == family else None}
 
 

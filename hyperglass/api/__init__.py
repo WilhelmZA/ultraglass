@@ -66,11 +66,14 @@ HANDLERS = [
     queries,
     info,
     query,
-    aspath_enrich,
     query_enrichment,
-    dns,
     myip,
 ]
+
+if STATE.params.web.dns_provider.name == "server":
+    HANDLERS.append(dns)
+if STATE.params.web.aspath_enrichment:
+    HANDLERS.append(aspath_enrich)
 
 if not STATE.settings.disable_ui:
     HANDLERS = [

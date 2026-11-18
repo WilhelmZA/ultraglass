@@ -47,6 +47,33 @@ Open http://localhost:8001. The first start builds the UI, which takes a few min
 
 ### Create a `systemd` service
 
+For host nginx, bind the published application port to loopback before exposing the site:
+
+```shell
+HYPERGLASS_BIND_ADDRESS=127.0.0.1 docker compose up -d hyperglass
+docker compose port hyperglass 8001
+```
+
+The published address must be `127.0.0.1:8001`. Keep `HYPERGLASS_HOST=0.0.0.0` inside the container. The nginx sample overwrites forwarding headers with the connecting client address.
+
+Find the Docker gateway that connects host nginx to the application:
+
+```shell
+docker inspect "$(docker compose ps -q hyperglass)" --format '{{range .NetworkSettings.Networks}}{{println .Gateway}}{{end}}'
+```
+
+Configure only that gateway as a trusted proxy. Replace the example address below with the actual gateway:
+
+```yaml
+web:
+    client_ip:
+        header: X-Real-IP
+        trusted_proxies:
+            - 172.18.0.1/32
+```
+
+Restart Ultraglass after changing the configuration. A forged forwarding header must not change the visitor address through nginx. Do not trust the whole bridge subnet or expose the application port directly when trusting its gateway.
+
 <Callout type="info">Before you create and start the Ultraglass service, verify whether you need to change any [environment variables](environment-variables.mdx).</Callout>
 
 ```shell copy
