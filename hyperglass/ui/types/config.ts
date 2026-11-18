@@ -100,6 +100,7 @@ interface _Web {
   theme: _ThemeConfig;
   location_display_mode: 'auto' | 'gallery' | 'dropdown' | string;
   my_ip: 'external' | 'server' | 'off';
+  aspath_enrichment: boolean;
   highlight: _Highlight[];
 }
 

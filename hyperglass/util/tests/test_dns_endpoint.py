@@ -1,30 +1,28 @@
 """Server-side DNS resolution endpoint (#48)."""
 
 # Standard Library
-import socket
 
 # Third Party
 import pytest
 from litestar.testing import create_test_client
 
 
-def _records(family, address):
-    return [(family, socket.SOCK_STREAM, 6, "", (address, 0))]
-
-
 @pytest.fixture
 def client(monkeypatch):
     # Project
     from hyperglass.api.routes import dns
+    from hyperglass.api import auxiliary
+    from hyperglass.state import use_state
+    from hyperglass.models.config.params import Params
 
-    def getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    async def lookup(host, record_type):
         if host == "missing.example.com":
-            raise socket.gaierror(socket.EAI_NONAME, "Name or service not known")
-        if family == socket.AF_INET6:
-            return _records(family, "2606:4700::1111") * 2
-        return _records(family, "1.1.1.1")
+            return {"Status": 3, "Answer": []}
+        code, address = (28, "2606:4700::1111") if record_type == "AAAA" else (1, "1.1.1.1")
+        return {"Status": 0, "Answer": [{"type": code, "data": address}] * 2}
 
-    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(auxiliary, "_dns_query", lookup)
+    use_state().redis.set("params", Params(web={"dns_provider": {"name": "server"}}))
     with create_test_client([dns]) as test_client:
         yield test_client
 
@@ -38,7 +36,7 @@ def test_dns_returns_doh_json(client, record, code, address):
     assert body == {
         "Status": 0,
         "Question": [{"name": "one.one.one.one", "type": code}],
-        "Answer": [{"name": "one.one.one.one", "type": code, "TTL": 0, "data": address}],
+        "Answer": [{"name": "one.one.one.one", "type": code, "TTL": 60, "data": address}],
     }
 
 
@@ -63,7 +61,7 @@ def test_dns_is_rate_limited(client):
     assert statuses[120] == 429
 
 
-def test_dns_rate_limit_is_per_forwarded_client(client):
+def test_untrusted_headers_cannot_reset_dns_limit(client):
     for _ in range(120):
         client.get(
             "/api/dns",
@@ -83,7 +81,7 @@ def test_dns_rate_limit_is_per_forwarded_client(client):
     )
 
     assert limited.status_code == 429
-    assert other.status_code == 200
+    assert other.status_code == 429
 
 
 def test_server_dns_provider():

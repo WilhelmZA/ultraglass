@@ -1,6 +1,8 @@
 """ArcOS command construction and OpenConfig loc-rib parsing."""
 
 # Standard Library
+import json
+from copy import deepcopy
 from types import SimpleNamespace
 from pathlib import Path
 
@@ -13,6 +15,7 @@ from hyperglass.plugins import OutputPluginManager
 from hyperglass.models.config.devices import Device
 from hyperglass.execution.drivers._construct import Construct
 from hyperglass.plugins._builtin.bgp_route_arcos import BGPRoutePluginArcOS, parse_arcos
+from hyperglass.exceptions.private import ParsingError
 
 FIXTURES = Path(__file__).parents[2] / "plugins/tests/fixtures/arcos-reference"
 SHOW = "echo 'show network-instance default protocol BGP BGP | display json' | confd_cli -C"
@@ -33,6 +36,19 @@ def query_for(router, kind, target):
     return SimpleNamespace(
         device=router, directive=directive, query_target=target, query_type=directive.id
     )
+
+
+@pytest.fixture
+def instance_output():
+    """Include another IPv4 prefix and private instance state in the reference fixture."""
+    tree = json.loads((FIXTURES / "route4.json").read_text())
+    bgp = tree["network-instance"][0]["protocol"][0]["bgp"]
+    routes = bgp["rib"]["afi-safi"][0]["ipv4-unicast"]["loc-rib"]["route"]
+    other = deepcopy(routes[0])
+    other["prefix"] = other["state"]["prefix"] = "10.1.0.0/16"
+    routes.append(other)
+    bgp["config"] = {"description": "private-instance-state"}
+    return json.dumps(tree)
 
 
 @pytest.mark.parametrize("structured", [False, True])
@@ -131,26 +147,85 @@ def test_synthetic_multipath_and_asdot():
         lambda s: s.replace("[65000, 13335]", '["bad"]'),
     ],
 )
-def test_incomplete_or_unknown_paths_stay_text(mutation):
-    text = mutation((FIXTURES / "route4.json").read_text())
-    router = device(structured_output=True)
-    output = (text,)
-    assert (
-        BGPRoutePluginArcOS().process(
-            output=output, query=query_for(router, "bgp_route", "10.0.0.0/16")
-        )
-        == output
-    )
-
-
 @pytest.mark.parametrize("structured", [False, True])
-def test_dispatch(structured):
+def test_incomplete_or_unknown_paths_raise(mutation, structured):
+    text = mutation((FIXTURES / "route4.json").read_text())
     router = device(structured_output=structured)
     manager = OutputPluginManager()
     manager.register(BGPRoutePluginArcOS)
-    output = ((FIXTURES / "route4.json").read_text(),)
-    result = manager.execute(output=output, query=query_for(router, "bgp_route", "10.0.0.0/16"))
+    with pytest.raises(ParsingError, match="Error parsing ArcOS response data") as error:
+        manager.execute(output=(text,), query=query_for(router, "bgp_route", "10.0.0.0/16"))
+    assert text not in str(error.value)
+
+
+@pytest.mark.parametrize("structured", [False, True])
+@pytest.mark.parametrize(
+    "target,other",
+    [
+        ("10.0.0.0/16", "2001:db8::/32"),
+        ("2001:db8::/32", "10.0.0.0/16"),
+    ],
+)
+def test_dispatch_filters_both_directives(structured, target, other, instance_output):
+    router = device(structured_output=structured)
+    manager = OutputPluginManager()
+    manager.register(BGPRoutePluginArcOS)
+    output = (instance_output,)
+    query = query_for(router, "bgp_route", target)
+    assert query.directive.id in BGPRoutePluginArcOS().directives
+    result = manager.execute(output=output, query=query)
     if structured:
-        assert result.routes and result.routes[0].prefix == "10.0.0.0/16"
+        assert [route.prefix for route in result.routes] == [target]
+        response = result.model_dump_json()
     else:
-        assert result == output
+        response = "\n\n".join(result)
+        assert f"Prefix: {target}" in response
+        assert "Next hop:" in response
+    assert other not in response
+    assert "10.1.0.0/16" not in response
+    assert "private-instance-state" not in response
+    assert "ESTABLISHED" not in response
+    assert "network-instance" not in response
+    assert "neighbor-address" not in response
+
+
+@pytest.mark.parametrize("structured", [False, True])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "secret device output: permission denied",
+        '{"network-instance": [secret device output',
+        "null",
+        "{}",
+        '["secret device output"]',
+    ],
+)
+def test_malformed_output_never_returns_device_text(structured, text):
+    from hyperglass.api.error_handlers import app_handler
+
+    router = device(structured_output=structured)
+    manager = OutputPluginManager()
+    manager.register(BGPRoutePluginArcOS)
+    with pytest.raises(ParsingError, match="Error parsing ArcOS response data") as error:
+        manager.execute(output=(text,), query=query_for(router, "bgp_route", "10.0.0.0/16"))
+    assert "secret device output" not in str(error.value)
+    response = app_handler(
+        SimpleNamespace(method="POST", url=SimpleNamespace(path="/api/query")), error.value
+    )
+    assert "secret device output" not in json.dumps(response.content)
+    assert response.content["output"] == "Error parsing ArcOS response data"
+
+
+@pytest.mark.parametrize("structured", [False, True])
+def test_dispatch_absent_target_never_returns_instance(structured, instance_output):
+    router = device(structured_output=structured)
+    manager = OutputPluginManager()
+    manager.register(BGPRoutePluginArcOS)
+    result = manager.execute(
+        output=(instance_output,),
+        query=query_for(router, "bgp_route", "203.0.113.0/24"),
+    )
+    if structured:
+        assert result.count == 0 and result.routes == []
+    else:
+        assert result == ("No route found.",)

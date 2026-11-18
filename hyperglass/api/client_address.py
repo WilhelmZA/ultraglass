@@ -44,17 +44,15 @@ def _forwarded_for(value: str, settings: "ClientIP") -> t.Optional[str]:
 
     Each proxy appends the address it received the request from, so only the entries
     that trusted proxies added are reliable. With trusted proxies, the client is the
-    last entry that is not itself a trusted proxy. Without them, it is the first entry.
+    last entry that is not itself a trusted proxy.
     """
     entries = [entry.strip() for entry in value.split(",") if entry.strip()]
-    if not settings.trusted_proxies:
-        entries = entries[:1]
     for entry in reversed(entries):
         address = _parse(entry)
         if address is None:
             return None
         if not _is_trusted(address, settings):
-            return entry
+            return str(address)
     return None
 
 
@@ -63,17 +61,18 @@ def resolve_client_address(
 ) -> t.Optional[str]:
     """Resolve the client address from request headers and the socket peer.
 
-    The order is the configured header, `X-Real-IP`, `X-Forwarded-For`, then the peer.
-    A header value that is not an IP address is skipped. When trusted proxies are
-    configured, headers are read only if the peer is one of them.
+    Read forwarding headers only from explicitly trusted socket peers. A configured
+    single-address header must be overwritten by the proxy. Otherwise, walk
+    X-Forwarded-For from the trusted end. Never fall back between header schemes.
     """
-    if settings.trusted_proxies and not _is_trusted(_parse(peer), settings):
+    address = _parse(peer)
+    peer = str(address) if address is not None else peer
+    if not _is_trusted(address, settings):
         return peer
 
-    for name in (settings.header, "x-real-ip"):
-        value = (headers.get(name) or "").strip() if name else ""
-        if _parse(value) is not None:
-            return value
+    if settings.header and settings.header != "x-forwarded-for":
+        forwarded = _parse(headers.get(settings.header))
+        return str(forwarded) if forwarded is not None else peer
 
     forwarded = _forwarded_for(headers.get("x-forwarded-for") or "", settings)
     if forwarded is not None:

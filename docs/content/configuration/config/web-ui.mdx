@@ -10,53 +10,107 @@ Ultraglass provides extensive customisation options for the look and feel of the
 | `web.location_display_mode` | String | auto          | Show the locations field as a `dropdown` or a `gallery`. `auto` uses `gallery` when there are fewer than 5 location groups and every group has fewer than 9 locations, and `dropdown` otherwise. |
 | `web.custom_javascript`     | String |               | Path to a JavaScript file that is loaded in the page head. The file must exist.                                                            |
 | `web.custom_html`           | String |               | Path to a custom HTML file that is rendered beneath the app. The file must exist.                                                          |
-| `web.my_ip` | String | server | How the My IP button finds the visitor's address. `server` returns the address Ultraglass received the request from (it reads `X-Real-IP` or `X-Forwarded-For` behind a proxy), so no third party is contacted; only the address family used for the request is shown. `external` is opt-in: it asks myip.wtf, which can return both IPv4 and IPv6, after showing `web.text.ip_lookup_notice` and waiting for the visitor to confirm. If the myip.wtf lookup for a family fails, the button falls back to the server address for that family. `off` hides the button. |
+| `web.my_ip` | String | server | `server` returns the public client address using explicit proxy trust. Non-public addresses return `null`. `external` asks myip.wtf after visitor confirmation and falls back to the server endpoint if lookup fails. `off` hides the button. |
 
 ### DNS over HTTPS
 
-By default, the browser resolves hostname targets using [DNS over HTTPS](https://www.rfc-editor.org/rfc/rfc8484). Set `web.dns_provider.name: server` to use the Ultraglass server's resolver instead.
+By default, the browser resolves hostname targets using [DNS over HTTPS](https://www.rfc-editor.org/rfc/rfc8484). Set `web.dns_provider.name: server` to use the bounded public DNS endpoint described below.
 
 | Parameter           | Type   | Default Value                          | Description                                                                 |
 | :------------------ | :----- | :------------------------------------- | :-------------------------------------------------------------------------- |
-| `web.dns_provider.name` | String | cloudflare                             | If `cloudflare` or `google` are provided, no URL is necessary. Use `server` to resolve hostnames on the Ultraglass server through `/api/dns` (A and AAAA, limited to 120 requests a minute per client), for networks that block public DNS-over-HTTPS. |
+| `web.dns_provider.name` | String | cloudflare | `cloudflare` and `google` use browser-side DNS. `server` enables `/api/dns`, which resolves public A and AAAA records through a fixed public HTTPS resolver. |
 | `web.dns_provider.url`  | String | `https://cloudflare-dns.com/dns-query` | Provide a custom DNS over HTTPS URL if you'd like to use your own resolver. A URL that is not a built-in provider URL sets the provider name to `custom`. |
 
 ```yaml filename="config.yaml" copy
 web:
     dns_provider:
         name: server
-    my_ip: external
+    my_ip: server
 ```
 
-This configuration resolves hostname targets through `/api/dns` and detects visitor addresses through `/api/myip`. These two features do not contact public DNS-over-HTTPS providers or myip.wtf. Font downloads and optional enrichment services have separate network requirements.
+This configuration resolves public hostname targets through `/api/dns` and detects visitor addresses through `/api/myip`. The server contacts the public DNS-over-HTTPS resolver. Server My IP makes no external lookup.
 
-Server DNS supports A and AAAA records. Its endpoint allows 120 requests per minute per client. Server My IP returns only the address family used for the request. Configure your reverse proxy to overwrite client-address headers with verified values; both endpoints use forwarded client addresses when present.
+Server DNS supports public A and AAAA records. Its endpoint allows 120 requests per minute per client and 600 globally. Forwarding headers require explicit proxy trust.
 
 ### Client Address
 
-Ultraglass needs the visitor's address for server My IP, for the `/api/dns` rate limit and for the webhook `source` field. By default it reads `X-Real-IP`, then the first `X-Forwarded-For` entry, then the address of the connection. A header value that is not an IP address is skipped.
+Ultraglass uses the connection address for server My IP, rate limits and webhook attribution. Forwarding headers are ignored unless the connecting peer is explicitly trusted.
 
 | Parameter | Type | Default Value | Description |
 | :-------- | :--- | :------------ | :---------- |
-| `web.client_ip.header` | String | | Request header that carries the visitor's address. Ultraglass reads it before `X-Real-IP` and `X-Forwarded-For`. The name is not case-sensitive. |
-| `web.client_ip.trusted_proxies` | List of networks | `[]` | IPv4 and IPv6 networks of the proxies that connect to Ultraglass. When set, Ultraglass reads client address headers only when the connection comes from one of these networks. Any other connection is treated as the client. |
+| `web.client_ip.header` | String | | Optional single-address header overwritten by a trusted proxy. Without this setting, Ultraglass uses the `X-Forwarded-For` chain. |
+| `web.client_ip.trusted_proxies` | List of networks | `[]` | Addresses of connecting proxies. An empty list ignores all forwarding headers. |
 
 Set `web.client_ip.header` when a CDN is in front of your reverse proxy. The reverse proxy then sees the CDN as its client, so `X-Real-IP` holds a CDN address. The CDN sends the visitor's address in its own header, such as `CF-Connecting-IP` (Cloudflare), `True-Client-IP` (Akamai) or `Fastly-Client-IP` (Fastly).
 
-Set `web.client_ip.trusted_proxies` when a client can reach Ultraglass without going through your proxy. Without it, such a client can send any address in these headers. List the networks that connect to Ultraglass directly, which is normally your reverse proxy and not the CDN. With trusted proxies set, Ultraglass also reads `X-Forwarded-For` from the right and uses the last entry that is not a trusted proxy, so an entry that the client added is ignored.
+Set `web.client_ip.trusted_proxies` to the proxy addresses that connect directly to Ultraglass. Without a custom header, Ultraglass reads `X-Forwarded-For` from right to left and stops at the first untrusted address.
 
 ```yaml filename="config.yaml" copy
 web:
     client_ip:
         header: CF-Connecting-IP
         trusted_proxies:
-            - 172.16.0.0/12
-            - fd00::/8
+            - 192.0.2.10/32
 ```
 
 <Callout type="warning">
 Your reverse proxy must pass the CDN header only for requests that come from the CDN. If the proxy also accepts requests from other sources, remove the header from those requests at the proxy.
 </Callout>
+
+### Optional server lookups
+
+The DNS and AS-path enrichment endpoints are disabled by default. Enable them explicitly in `config.yaml`, then restart Ultraglass:
+
+```yaml
+web:
+    dns_provider:
+        name: server
+    aspath_enrichment: true
+    client_ip:
+        trusted_proxies: ["192.0.2.10/32"]
+        # Set this only when the proxy overwrites this single-address header.
+        # header: X-Real-IP
+```
+
+Replace the example proxy address with the address that actually connects to Ultraglass. An empty `trusted_proxies` list ignores all forwarding headers. Without a custom `header`, Ultraglass reads `X-Forwarded-For` from right to left, stopping at the first untrusted address. A custom header has no fallback to other headers. Configure the proxy to overwrite that header and prevent direct access to the application port.
+
+The normal Ultraglass launcher disables Uvicorn's proxy-header rewriting so the application can verify the socket peer. When running Uvicorn directly, pass `--no-proxy-headers`. Otherwise, upstream rewriting can replace the peer before Ultraglass checks it.
+
+Server DNS uses Cloudflare's public HTTPS resolver at `https://1.1.1.1/dns-query`. It does not use operating-system DNS, search domains, environment proxies, or redirects. Only public A and AAAA answers are returned. Internal DNS resolution is not supported by this public endpoint. Browser DNS providers keep the server endpoint disabled.
+
+DNS permits 120 requests per client and 600 requests globally per 60-second window. AS-path enrichment permits 30 requests per client and 120 requests globally per window. Redis shares these limits across workers. Storage failures deny lookups. Both endpoints share eight outbound lookup slots and a five-second lookup deadline. The endpoints return HTTP 429 when request limits are reached and HTTP 503 when outbound capacity or required storage is unavailable.
+
+AS-path requests accept at most 64 ASNs and an 8 KiB body. ASNs must be decimal integers between 1 and 4294967295. Duplicate ASNs are removed before lookup. Results use shared caches: DNS answers for up to 60 seconds, negative DNS responses for 15 seconds, and ASN names for one hour. Disabling `web.aspath_enrichment` also stops the AS-path modal from requesting enrichment.
+
+### My IP and reverse-proxy upgrades
+
+`web.my_ip: server` uses the request address for the My IP button. Non-public addresses return `null`, leaving the input unchanged. This mode does not fall back to a public IP service. Set `web.my_ip: external` explicitly to use a public IP service from the browser. That setting does not change webhook attribution.
+
+**Upgrade requirement:** forwarding headers now require an explicitly trusted proxy. Existing nginx installations must configure `web.client_ip` to retain visitor addresses for My IP, webhook `source`, and per-client limits. An empty `trusted_proxies` list uses the socket peer, so webhooks report the proxy address until configured.
+
+For nginx on the same host, connecting to Ultraglass over loopback, add this to `config.yaml`:
+
+```yaml
+web:
+    my_ip: server
+    client_ip:
+        trusted_proxies: ["127.0.0.1/32", "::1/128"]
+        header: X-Real-IP
+```
+
+In the nginx location that proxies requests to Ultraglass, overwrite the forwarding headers:
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:8001;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+Use the configured Ultraglass port in `proxy_pass`. Keep Ultraglass bound to loopback for this setup. Restart Ultraglass and reload nginx after updating both configurations. For a container or remote proxy, trust its actual connecting address instead of loopback. Do not trust all networks. This example assumes visitors connect directly to nginx; a CDN or additional proxy requires its own explicit trust configuration in nginx.
 
 ### Logo
 

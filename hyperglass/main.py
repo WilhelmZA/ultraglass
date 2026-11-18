@@ -93,6 +93,8 @@ def start(*, log_level: t.Union[str, int], workers: int) -> None:
         host=str(Settings.host),
         port=Settings.port,
         workers=workers,
+        # Preserve the socket peer; application proxy trust uses web.client_ip.
+        proxy_headers=False,
         log_level=log_level,
         log_config={
             "version": 1,

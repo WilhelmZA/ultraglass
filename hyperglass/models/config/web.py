@@ -261,12 +261,10 @@ class HighlightPattern(HyperglassModel):
 class ClientIP(HyperglassModel):
     """How Ultraglass identifies the visitor behind reverse proxies or a CDN."""
 
-    # Request header that carries the visitor's address, read before `X-Real-IP` and
-    # `X-Forwarded-For`. For example `CF-Connecting-IP`, `True-Client-IP` or
-    # `Fastly-Client-IP`.
+    # Optional single-address header overwritten by a trusted proxy. Otherwise use
+    # the X-Forwarded-For chain. No fallback to other client-supplied headers.
     header: t.Optional[str] = None
-    # Networks of the proxies that connect to Ultraglass. When set, client address
-    # headers are read only from these peers; any other peer is itself the client.
+    # Empty means trust no forwarding headers. List only actual connecting proxies.
     trusted_proxies: t.List[IPvAnyNetwork] = []
 
     @field_validator("header")
@@ -303,6 +301,7 @@ class Web(HyperglassModel):
     # request to Ultraglass, and `off` hides the My IP button.
     my_ip: t.Literal["external", "server", "off"] = "server"
     client_ip: ClientIP = ClientIP()
+    aspath_enrichment: bool = False
     custom_javascript: t.Optional[FilePath] = None
     custom_html: t.Optional[FilePath] = None
     highlight: t.List[HighlightPattern] = []

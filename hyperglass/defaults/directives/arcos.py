@@ -13,7 +13,8 @@ NAME = "Arrcus ArcOS"
 PLATFORMS = ["arrcus_arcos"]
 
 # The documented ConfD show path returns the BGP protocol instance as OpenConfig JSON.
-# Prefix filtering happens in the structured parser. The vendor default instance name is BGP.
+# Both text and table directives require the ArcOS plugin's exact-prefix filter.
+# Never return this command's raw output. The vendor default instance name is BGP.
 _SHOW = "echo 'show network-instance default protocol BGP BGP | display json' | confd_cli -C"
 _SHOW_VRF = "echo 'show network-instance {vrf} protocol BGP BGP | display json' | confd_cli -C"
 
